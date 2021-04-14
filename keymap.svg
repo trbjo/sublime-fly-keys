@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<svg xmlns="http://www.w3.org/2000/svg" height="301" width="901" version="1.0" id="svg2" >
+<svg xmlns="http://www.w3.org/2000/svg" height="301" width="901" version="1.0" id="svg2" style="font-family:sans-serif;" >
     <g style="stroke:#000000;stroke-width:1">
     <g style="fill:#ffffff">
         <path d="m 0.5,0.5 60,0 0,60 -60,0 0,-60 z"/>
@@ -70,17 +70,17 @@
     </g>
     </g>
 
-    <text style="font-weight:bold;font-size:18px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:bold;font-size:18px;fill:#4B4B4B">
         <tspan x="8" y="210">⇧</tspan>
         <tspan x="870" y="210">⇧</tspan>
     </text>
 
-    <text style="font-weight:normal;font-size:20px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:normal;font-size:20px;fill:#4B4B4B">
         <tspan x="860" y="36">⌫</tspan>
         <tspan x="98" y="107">↵</tspan>
     </text>
 
-    <text style="font-weight:bold;font-size:16px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:bold;font-size:16px;fill:#4B4B4B">
         <tspan x="780" y="147">Command</tspan>
         <tspan x="780" y="166">Palette</tspan>
         <tspan x="8" y="147">Command</tspan>
@@ -89,11 +89,11 @@
         <tspan x="155" y="263">Ctrl</tspan>
     </text>
 
-    <text style="font-weight:bold;font-size:18px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:bold;font-size:18px;fill:#4B4B4B">
         <tspan x="357" y="279">Show Overlay</tspan>
     </text>
 
-    <text style="font-weight:bold;font-size:21px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:bold;font-size:21px;fill:#4B4B4B">
         <tspan x="704" y="85">?</tspan>
         <tspan x="704" y="111">/</tspan>
         <tspan x="720" y="146">_</tspan>
@@ -104,7 +104,7 @@
         <tspan x="761" y="111">=</tspan>
     </text>
 
-    <text style="font-weight:normal;font-size:15px;font-family:sans-serif;fill:#FF9800;fill-opacity:1">
+    <text style="font-weight:normal;font-size:15px;fill:#FF9800">
         <tspan x="111" y="167">|← ↖</tspan>
         <tspan x="177" y="167">←</tspan>
         <tspan x="537" y="167">↓</tspan>
@@ -115,7 +115,7 @@
         <tspan x="237" y="167">⌦</tspan>
         <tspan x="293" y="167">→</tspan>
     </text>
-    <text style="font-weight:bold;font-size:20px;font-family:sans-serif;fill:#FF9800;fill-opacity:1">
+    <text style="font-weight:bold;font-size:20px;fill:#FF9800">
         <tspan x="112" y="145">A</tspan>
         <tspan x="171" y="144">O</tspan>
         <tspan x="236" y="144">E</tspan>
@@ -125,7 +125,7 @@
         <tspan x="594" y="144">N</tspan>
         <tspan x="655" y="144">S</tspan>
     </text>
-    <text style="font-weight:normal;font-size:15px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:normal;font-size:15px;fill:#4B4B4B">
         <tspan x="531" y="99">↑</tspan>
         <tspan x="411" y="158">Select</tspan>
         <tspan x="411" y="173">Smart</tspan>
@@ -171,7 +171,7 @@
         <tspan x="663" y="40">Git add</tspan>
         <tspan x="663" y="55">hunk</tspan>
     </text>
-    <text style="font-weight:bold;font-size:20px;font-family:sans-serif;fill:#4B4B4B;fill-opacity:1">
+    <text style="font-weight:bold;font-size:20px;fill:#4B4B4B">
         <tspan x="68" y="23">1</tspan>
         <tspan x="132" y="23">2</tspan>
         <tspan x="189" y="23">3</tspan>
