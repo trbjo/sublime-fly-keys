@@ -105,13 +105,13 @@
     </text>
 
     <text style="font-weight:normal;font-size:15px;fill:#FF9800">
-        <tspan x="111" y="167">|← ↖</tspan>
+        <tspan x="111" y="167">|← ↖&#xFE0E;</tspan>
         <tspan x="177" y="167">←</tspan>
         <tspan x="537" y="167">↓</tspan>
         <tspan x="588" y="160">Expand</tspan>
         <tspan x="588" y="175">Under C.</tspan>
         <tspan x="470" y="167">Insert</tspan>
-        <tspan x="655" y="167">→| ↘</tspan>
+        <tspan x="655" y="167">→| ↘&#xFE0E;</tspan>
         <tspan x="237" y="167">⌦</tspan>
         <tspan x="293" y="167">→</tspan>
     </text>
