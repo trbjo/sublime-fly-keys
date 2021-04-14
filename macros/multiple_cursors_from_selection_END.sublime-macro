@@ -1,0 +1,8 @@
+[
+    {"command": "move", "args": {"by": "characters", "forward": false, "extend": true}},
+    {"command": "move_to", "args": {"to": "eol", "extend": false, "extend": true}},
+    {"command": "split_selection_into_lines"},
+    {"command": "move", "args": {"by": "characters", "forward": true, "extend": false}},
+    {"command": "move_to", "args": {"to": "hardeol", "extend": false}},
+    // {"command": "move_to", "args": {"to": "bol", "extend": false }},
+]

@@ -1,0 +1,6 @@
+[
+    {"command": "expand_selection", "args": {"to": "indentation"} },
+    {"command": "split_selection_into_lines"},
+    {"command": "move_to", "args": {"to": "hardbol", "extend": false}},
+    {"command": "move_to", "args": {"to": "bol", "extend": false }},
+]

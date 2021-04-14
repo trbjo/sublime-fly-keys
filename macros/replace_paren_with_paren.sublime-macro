@@ -1,0 +1,7 @@
+[
+    // we make sure to remove the selection first
+    {"command": "copy"},
+    {"command": "expand_selection", "args": {"to": "brackets"}},
+    {"command": "insert_snippet", "args": {"contents": "(${0:$SELECTION})"}},
+    {"command": "paste"},
+]

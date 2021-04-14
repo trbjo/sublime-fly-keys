@@ -1,0 +1,9 @@
+[
+    {"command": "copy"},
+    {"command": "right_delete" },
+    {"command": "right_delete" },
+    {"command": "left_delete" },
+    {"command": "insert", "args": {"characters": "\"\""}},
+    { "command": "move", "args": {"by": "characters", "forward": false} },
+    {"command": "paste"},
+]

@@ -1,0 +1,6 @@
+[
+    { "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "forward": false} },
+    { "command": "move", "args": {"by": "stops", "empty_line": true, "forward": false}},
+    { "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "forward": true} },
+    // { "command": "show_at_center"}
+]

@@ -1,0 +1,4 @@
+[
+    { "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true} },
+    { "command": "right_delete" },
+]

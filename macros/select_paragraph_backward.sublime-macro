@@ -1,0 +1,5 @@
+[
+    {"command": "move", "args": {"by": "stops", "empty_line": true, "forward": true}},
+    {"command": "move", "args": {"by": "stops", "empty_line": true, "forward": false, "extend": true}},
+    // { "command": "show_at_center" },
+]

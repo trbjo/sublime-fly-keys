@@ -1,0 +1,12 @@
+[
+    {"command": "move_to", "args": {"to": "hardbol", "extend": false} },
+    {"command": "move", "args": {"by": "word_ends", "forward": true} },
+    {"command": "move", "args": {"by": "characters", "forward": true} },
+    {"command": "move", "args": {"by": "characters", "forward": true} },
+    {"command": "move_to", "args": {"to": "hardeol", "extend": true} },
+    {"command": "move", "args": {"by": "characters", "forward": true, "extend": true} },
+    {"command": "copy" },
+    {"command": "move", "args": {"by": "characters", "forward": false, "extend": true} },
+    {"command": "move", "args": {"by": "characters", "forward": false} },
+
+]
