@@ -77,6 +77,7 @@
 
     <text style="font-weight:normal;font-size:20px;font-family:Sans;fill:#4B4B4B;fill-opacity:1">
         <tspan x="860" y="36">⌫</tspan>
+        <tspan x="98" y="107">↵</tspan>
     </text>
 
     <text style="font-weight:bold;font-size:16px;font-family:Sans;fill:#4B4B4B;fill-opacity:1">
@@ -104,15 +105,15 @@
     </text>
 
     <text style="font-weight:normal;font-size:15px;font-family:Sans;fill:#FF9800;fill-opacity:1">
-        <tspan x="111" y="165">⇤↖</tspan>
-        <tspan x="177" y="165">←</tspan>
-        <tspan x="537" y="165">↓</tspan>
-        <tspan x="590" y="165">finduexp</tspan>
-        <tspan x="470" y="165">Insert</tspan>
-        <tspan x="659" y="165">⇥↘</tspan>
-        <tspan x="237" y="165">⌦</tspan>
-        <tspan x="293" y="165">→</tspan>
-        <tspan x="227" y="165"/>
+        <tspan x="111" y="167">|← ↖</tspan>
+        <tspan x="177" y="167">←</tspan>
+        <tspan x="537" y="167">↓</tspan>
+        <tspan x="588" y="160">Expand</tspan>
+        <tspan x="588" y="175">Under C.</tspan>
+        <tspan x="470" y="167">Insert</tspan>
+        <tspan x="655" y="167">→| ↘</tspan>
+        <tspan x="237" y="167">⌦</tspan>
+        <tspan x="293" y="167">→</tspan>
     </text>
     <text style="font-weight:bold;font-size:20px;font-family:Sans;fill:#FF9800;fill-opacity:1">
         <tspan x="112" y="145">A</tspan>
@@ -125,43 +126,50 @@
         <tspan x="655" y="144">S</tspan>
     </text>
     <text style="font-weight:normal;font-size:15px;font-family:Sans;fill:#4B4B4B;fill-opacity:1">
-        <tspan x="438" y="227">Select¶</tspan>
         <tspan x="531" y="99">↑</tspan>
         <tspan x="411" y="158">Select</tspan>
-        <tspan x="411" y="173">to EOL</tspan>
-        <tspan x="395" y="105">smart</tspan>
-        <tspan x="395" y="117">select</tspan>
-        <tspan x="458" y="107">⌫word</tspan>
-        <tspan x="577" y="106">⌦word</tspan>
+        <tspan x="411" y="173">Smart</tspan>
+        <tspan x="395" y="105">Select</tspan>
+        <tspan x="395" y="117">Bracket</tspan>
         <tspan x="635" y="104">␣insert</tspan>
         <tspan x="349" y="158">Select</tspan>
         <tspan x="349" y="173">→|</tspan>
-        <tspan x="339" y="106">undo</tspan>
-        <tspan x="280" y="107">→bow</tspan>
-        <tspan x="218" y="108">→eow</tspan>
-        <tspan x="158" y="107">←bow</tspan>
-        <tspan x="302" y="47">Unsplit w</tspan>
-        <tspan x="89" y="95">↩</tspan><tspan x="89" y="114">↩</tspan>
-        <tspan x="322" y="229">Paste</tspan>
-        <tspan x="375" y="229">Duplicate</tspan>
-        <tspan x="212" y="227">Cut</tspan>
+        <tspan x="339" y="107">Undo</tspan>
+        <tspan x="153" y="107">Word |←</tspan>
+        <tspan x="214" y="107">Word→|</tspan>
+        <tspan x="275" y="107">→|Word</tspan>
+        <tspan x="454" y="107">⌫Word</tspan>
+        <tspan x="574" y="107">⌦Word</tspan>
+        <tspan x="145" y="228">Cmt</tspan>
+        <tspan x="212" y="228">Cut</tspan>
         <tspan x="268" y="228">Copy</tspan>
-        <tspan x="136" y="227">Comment</tspan>
-        <tspan x="504" y="224">Search</tspan>
-        <tspan x="623" y="225">Next W</tspan>
-        <tspan x="680" y="223">Find @</tspan>
-        <tspan x="558" y="218">Add</tspan><tspan x="558" y="236">Cursor</tspan>
-        <tspan x="204" y="52"/>
-        <tspan x="243" y="47">Goto def</tspan>
-        <tspan x="64" y="38">Next</tspan><tspan x="64" y="55">bmark</tspan>
-        <tspan x="123" y="38">Toggle</tspan><tspan x="123" y="55">bmark</tspan>
-        <tspan x="183" y="38">Save</tspan><tspan x="183" y="56">win</tspan>
-        <tspan x="365" y="49">Split V</tspan>
-        <tspan x="424" y="39">select</tspan><tspan x="424" y="58">bracket</tspan>
-        <tspan x="483" y="38">Next</tspan><tspan x="483" y="56">mod</tspan>
-        <tspan x="542" y="38">Toggle</tspan><tspan x="542" y="55">inline diff</tspan>
-        <tspan x="604" y="38">Revert</tspan><tspan x="604" y="55">Mod</tspan>
-        <tspan x="663" y="38">Git add</tspan><tspan x="663" y="55">hunk</tspan>
+        <tspan x="322" y="228">Paste</tspan>
+        <tspan x="380" y="228">Duplct.</tspan>
+        <tspan x="438" y="228">Select¶</tspan>
+        <tspan x="504" y="228">Search</tspan>
+        <tspan x="623" y="228">Next W</tspan>
+        <tspan x="680" y="228">Find @</tspan>
+        <tspan x="558" y="220">Add C.</tspan>
+        <tspan x="558" y="235">Below</tspan>
+        <tspan x="242" y="47">Goto def</tspan>
+        <tspan x="304" y="47">Unsplit</tspan>
+        <tspan x="365" y="47">Split |</tspan>
+        <tspan x="64" y="40">Next</tspan>
+        <tspan x="64" y="55">bmark</tspan>
+        <tspan x="123" y="40">Toggle</tspan>
+        <tspan x="123" y="55">bmark</tspan>
+        <tspan x="183" y="40">Save</tspan>
+        <tspan x="183" y="55">win</tspan>
+        <tspan x="424" y="39">Select</tspan>
+        <tspan x="424" y="55">bracket</tspan>
+        <tspan x="483" y="40">Next</tspan>
+        <tspan x="483" y="55">mod</tspan>
+        <tspan x="542" y="40">Toggle</tspan>
+        <tspan x="542" y="55">inline diff</tspan>
+        <tspan x="604" y="40">Revert</tspan>
+        <tspan x="604" y="55">Mod</tspan>
+        <tspan x="663" y="40">Git add</tspan>
+        <tspan x="663" y="55">hunk</tspan>
     </text>
     <text style="font-weight:bold;font-size:20px;font-family:Sans;fill:#4B4B4B;fill-opacity:1">
         <tspan x="68" y="23">1</tspan>
