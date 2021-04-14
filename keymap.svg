@@ -104,15 +104,15 @@
     </text>
 
     <text style="font-weight:normal;font-size:15px;font-family:Sans;fill:#FF9800;fill-opacity:1">
-        <tspan x="111" y="169">⇤↖</tspan>
-        <tspan x="177" y="171">←</tspan>
-        <tspan x="537" y="167">↓</tspan>
-        <tspan x="590" y="168">finduexp</tspan>
-        <tspan x="470" y="168">Insert</tspan>
-        <tspan x="659" y="164">⇥↘</tspan>
-        <tspan x="237" y="166">⌦</tspan>
+        <tspan x="111" y="165">⇤↖</tspan>
+        <tspan x="177" y="165">←</tspan>
+        <tspan x="537" y="165">↓</tspan>
+        <tspan x="590" y="165">finduexp</tspan>
+        <tspan x="470" y="165">Insert</tspan>
+        <tspan x="659" y="165">⇥↘</tspan>
+        <tspan x="237" y="165">⌦</tspan>
         <tspan x="293" y="165">→</tspan>
-        <tspan x="227" y="86"/>
+        <tspan x="227" y="165"/>
     </text>
     <text style="font-weight:bold;font-size:20px;font-family:Sans;fill:#FF9800;fill-opacity:1">
         <tspan x="112" y="145">A</tspan>
@@ -134,8 +134,8 @@
         <tspan x="458" y="107">⌫word</tspan>
         <tspan x="577" y="106">⌦word</tspan>
         <tspan x="635" y="104">␣insert</tspan>
-        <tspan x="349" y="158">Cmd</tspan>
-        <tspan x="349" y="173">Palette</tspan>
+        <tspan x="349" y="158">Select</tspan>
+        <tspan x="349" y="173">→|</tspan>
         <tspan x="339" y="106">undo</tspan>
         <tspan x="280" y="107">→bow</tspan>
         <tspan x="218" y="108">→eow</tspan>
