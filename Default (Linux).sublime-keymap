@@ -708,13 +708,6 @@
 },
 
 
-{"keys": ["d"], "command": "expand_selection", "args": {"to": "tag"}, "context":
-[
-    {"key": "setting.block_caret"},
-    {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" },
-]
-},
-
 
 {"keys": ["ctrl+i"], "command": "move_to", "args": {"to": "bol", "extend": true}, "context":
 [
@@ -1040,20 +1033,29 @@
 ]
 },
 
-{"keys": ["f"], "command": "expand_selection", "args": {"to": "scope"}, "context":
+{"keys": ["7"], "command": "expand_selection", "args": {"to": "tag"}, "context":
+[
+    {"key": "setting.block_caret"},
+    {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" },
+]
+},
+
+
+{"keys": ["d"], "command": "expand_selection", "args": {"to": "scope"}, "context":
 [
     {"key": "setting.block_caret"},
 ]
 },
 
-{"keys": ["f"], "command": "expand_selection", "args": {"to": "smart"}, "context":
+{"keys": ["d"], "command": "expand_selection", "args": {"to": "smart"}, "context":
 [
     {"key": "setting.block_caret"},
     {"key": "selector", "operand": "string"},
 ]
 },
 
-{"keys": ["ctrl+o"], "command": "expand_selection", "args": {"to": "indentation"}, "context":
+
+{"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "indentation"}, "context":
 [
     {"key": "setting.block_caret"},
 ]
