@@ -62,11 +62,8 @@
 /////////////////// Right: ///////////////////
 //////////////////////////////////////////////
 
-{"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true}, "context":
-[
-    {"key": "setting.block_caret"},
-]
-},
+{"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+u"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
 
 {"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context":
 [
@@ -81,22 +78,30 @@
 ]
 },
 
+{"keys": ["ctrl+u"], "command": "move", "args": {"by": "subwords", "forward": true, "extend": true}, "context":
+[
+    {"key": "setting.block_caret"},
+    {"key": "selection_empty", "operator": "equal", "operand": false},
+    {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
+    {"key": "last_command", "operator": "not_equal", "operand": "insert_snippet" },
+    {"key": "last_command", "operator": "not_equal", "operand": "copy" },
+    {"key": "last_command", "operator": "not_equal", "operand": "next_modification" },
+    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+    {"key": "last_command", "operator": "not_equal", "operand": "" },
+]
+},
 
 
-{"keys": ["ctrl+u"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
 
-{"keys": ["ctrl+shift+u"], "command": "move", "args": {"by": "subwords", "forward": true, "extend": true}, "context": [{"key": "setting.block_caret"}, ] },
+
 
 
 //////////////////////////////////////////////
 /////////////////// Left: ////////////////////
 //////////////////////////////////////////////
 
-{"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false}, "context":
-[
-    {"key": "setting.block_caret"},
-]
-},
+{"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false}, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+o"], "command": "move", "args": {"by": "subwords", "forward": false}, "context": [{"key": "setting.block_caret"}, ] },
 
 {"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
 [
@@ -111,10 +116,21 @@
 ]
 },
 
+{"keys": ["o"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": true}, "context":
+[
+    {"key": "setting.block_caret"},
+    {"key": "selection_empty", "operator": "equal", "operand": false},
+    {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
+    {"key": "last_command", "operator": "not_equal", "operand": "insert_snippet" },
+    {"key": "last_command", "operator": "not_equal", "operand": "copy" },
+    {"key": "last_command", "operator": "not_equal", "operand": "next_modification" },
+    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+    {"key": "last_command", "operator": "not_equal", "operand": "" },
+]
+},
 
-{"keys": ["ctrl+o"], "command": "move", "args": {"by": "subwords", "forward": false}, "context": [{"key": "setting.block_caret"}, ] },
 
-{"keys": ["ctrl+shift+o"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": true}, "context": [{"key": "setting.block_caret"}, ] },
+
 
 
 //////////////////////////////////////////////
