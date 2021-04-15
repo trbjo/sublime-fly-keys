@@ -81,6 +81,13 @@
 ]
 },
 
+
+
+{"keys": ["ctrl+u"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
+
+{"keys": ["ctrl+shift+u"], "command": "move", "args": {"by": "subwords", "forward": true, "extend": true}, "context": [{"key": "setting.block_caret"}, ] },
+
+
 //////////////////////////////////////////////
 /////////////////// Left: ////////////////////
 //////////////////////////////////////////////
@@ -103,6 +110,12 @@
     {"key": "last_command", "operator": "not_equal", "operand": "" },
 ]
 },
+
+
+{"keys": ["ctrl+o"], "command": "move", "args": {"by": "subwords", "forward": false}, "context": [{"key": "setting.block_caret"}, ] },
+
+{"keys": ["ctrl+shift+o"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": true}, "context": [{"key": "setting.block_caret"}, ] },
+
 
 //////////////////////////////////////////////
 /////////////////// By words: ////////////////
@@ -141,16 +154,7 @@
 ]
 },
 
-
-{"keys": ["P"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
-
-{"keys": ["ctrl+shift+p"], "command": "move", "args": {"by": "subwords", "forward": true, "extend": true} },
-
-
 // word ends
-
-
-
 
 {"keys": ["."], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": true, "forward": true, "extend": false },
 "context": [{"key": "setting.block_caret"}]
