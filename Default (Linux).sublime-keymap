@@ -91,11 +91,6 @@
 ]
 },
 
-
-
-
-
-
 //////////////////////////////////////////////
 /////////////////// Left: ////////////////////
 //////////////////////////////////////////////
@@ -525,7 +520,8 @@
 {"keys": ["r"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_end_of_selection.sublime-macro"}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "text", "operator": "regex_contains", "operand": "\n$"}, ] },
 
 {"keys": ["e"], "command": "right_delete", "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["ctrl+e"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Delete Line.sublime-macro"} , "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+backspace"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/delete_subword_backward.sublime-macro"}, "context": [{ "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }, {"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+e"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/delete_subword_forward.sublime-macro"}, "context": [{ "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }, {"key": "setting.block_caret"}, ] },
 
 
 {"keys": ["i"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context":
@@ -1052,6 +1048,8 @@
     { "key": "following_text", "operator": "regex_contains", "operand": "^`", "match_all": true },
 ]
 },
+
+
 {"keys": ["backspace"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Delete Left Right.sublime-macro"}, "context":
 [
     { "key": "setting.auto_match_enabled", "operator": "equal", "operand": true },
