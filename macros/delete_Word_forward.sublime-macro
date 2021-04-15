@@ -1,4 +1,4 @@
 [
-    {"command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": true, "extend": true }},
+    {"command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": true, "forward": true, "extend": true }},
     { "command": "right_delete" },
 ]
