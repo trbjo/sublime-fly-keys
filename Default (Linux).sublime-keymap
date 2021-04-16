@@ -529,37 +529,6 @@
 {"keys": ["ctrl+e"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_subword_forward.sublime-macro"}, "context": [{ "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }, {"key": "setting.block_caret"}, ] },
 
 
-{"keys": ["i"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context":
-[
-    {"key": "setting.block_caret"},
-]
-},
-
-
-
-{"keys": ["i"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/multiple_cursors_from_indentation.sublime-macro"}, "context":
-[
-    {"key": "setting.block_caret"},
-    // {"key": "selection_empty", "operator": "equal", "operand": true},
-    {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": false},
-]
-},
-
-// {"keys": ["i"], "command": "join_lines", "context":
-//     [
-//         {"key": "setting.block_caret"},
-//         {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": false},
-//     ]
-// },
-
-
-
-{"keys": ["ctrl+i"], "command": "move_to", "args": {"to": "bol", "extend": true}, "context":
-[
-    {"key": "setting.block_caret"}
-]
-},
-
 /////////////////////////////////////////////////////
 /////////////////// UNDO REDO: //////////////////////
 /////////////////////////////////////////////////////
