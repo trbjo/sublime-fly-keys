@@ -15,6 +15,7 @@ Also quantifiers are orthogonal to selections.
 
 Sublime fly keys operate with three modalities. That is _normal mode_, _visual mode_ when there is an active selection, and _insert mode_. In insert mode the keybindings the only active keybinding is `escape`, so  in insert mode there should be no discernible difference between whether or not these keybindings are installed.
 
+It is implemented under the hood by observing and toggling the boolean setting `block_caret`. If true, we are in _normal mode_, and if false, i.e. the cursor looks like a beam ("i-beam"), we are in _insert mode_.
 
 The api is not stable yet, expect changes!
 ![](keymap.svg)
