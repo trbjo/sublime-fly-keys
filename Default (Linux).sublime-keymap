@@ -588,12 +588,12 @@
 /////////////////// DUPLICATE: //////////////////////
 ///////////////////////////////////////////////////
 
-{"keys": ["x"], "command": "duplicate_line", "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "" }, {"key": "setting.block_caret"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "find_next" }, {"key": "setting.block_caret"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "hide_panel" }, {"key": "setting.block_caret"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_with_multiple_cursors.sublime-macro"},"context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_line_and_uncomment.sublime-macro"},"context": [{"key": "setting.block_caret"}, {"key": "selector","operator": "equal", "operand": "comment"} ] },
+{"keys": ["z"], "command": "duplicate_line", "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["z"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "" }, {"key": "setting.block_caret"}, ] },
+{"keys": ["z"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "find_next" }, {"key": "setting.block_caret"}, ] },
+{"keys": ["z"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "hide_panel" }, {"key": "setting.block_caret"}, ] },
+{"keys": ["z"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_with_multiple_cursors.sublime-macro"},"context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
+{"keys": ["z"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_line_and_uncomment.sublime-macro"},"context": [{"key": "setting.block_caret"}, {"key": "selector","operator": "equal", "operand": "comment"} ] },
 
 /////////////////////////////////////////////////////
 /////////////////// SELECTIONS: /////////////////////
@@ -676,14 +676,14 @@
 {"keys": ["ctrl+shift+r"], "command": "lsp_symbol_references" , "context": [{"key": "setting.block_caret"}, {"key": "setting.lsp_active"}, ] },
 {"keys": ["ctrl+shift+i"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "setting.lsp_active"}, ] },
 {"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename" , "context": [{"key": "setting.block_caret"}, {"key": "setting.lsp_active"}, ] },
-{"keys": ["z"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context":
+{"keys": ["x"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context":
 [
     {"key": "setting.block_caret"},
 ]
 },
 
 
-// {"keys": ["z"], "command": "lsp_document_symbols", "context":
+// {"keys": ["x"], "command": "lsp_document_symbols", "context":
 //     [
 //         {"key": "setting.block_caret"},
 //         {"key": "lsp.session_with_capability", "operator": "equal", "operand": "documentSymbolProvider"}
