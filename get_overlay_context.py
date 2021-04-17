@@ -1,3 +1,6 @@
+import sublime
+import sublime_plugin
+
 class SampleListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
         if key in ("goto_anything:input", "command_palette:input"):
