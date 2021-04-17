@@ -947,12 +947,6 @@
 
 {"keys": ["h"], "command": "noop", "context":
     [
-        {  "key": "selector","operator": "equal", "operand": "text.find-in-files"}
-    ]
-},
-
-{"keys": ["h"], "command": "noop", "context":
-    [
         {"key": "panel", "operand": "output.exec"},
         {"key": "panel_has_focus", "operator": "equal", "operand": true },
     ]
