@@ -411,8 +411,6 @@
 
 {"keys": ["ctrl+enter"], "command": "find_under_expand_skip", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.block_caret"} ] },
 
-{"keys": ["enter"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
-
 {"keys": ["shift+enter"], "command": "find_prev", "context": [{"key": "setting.block_caret"} ] },
 
 {"keys": ["shift+enter"], "command": "jump_back", "context": [{"key": "setting.block_caret"}, {"key": "num_selections", "operator": "not_equal", "operand": 1 } ] },
@@ -802,19 +800,9 @@
 /////////////////// Miscellaneous: /////////////////////
 ////////////////////////////////////////////////////////
 
-{"keys": ["h"], "command": "set_setting", "args": {"setting": "block_caret", "value": false }, "context":
-[
-    {"key": "panel_has_focus", "operator": "equal", "operand": false },
-    {"key": "setting.block_caret"},
-]
-},
-
-{"keys": ["h"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/multiple_cursors_from_selection.sublime-macro"}, "context":
-[
-    {"key": "text", "operator": "regex_contains", "operand": "\n"},
-    {"key": "setting.block_caret"},
-]
-},
+{"keys": ["h"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+{"keys": ["h"], "command": "set_setting", "args": {"setting": "block_caret", "value": false }, "context": [{"key": "panel_has_focus", "operator": "equal", "operand": false }, {"key": "setting.block_caret"}, ] },
+{"keys": ["h"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/multiple_cursors_from_selection.sublime-macro"}, "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.block_caret"}, ] },
 
 {"keys": ["n"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/multiple_cursors_from_selection_END.sublime-macro"}, "context":
 [
