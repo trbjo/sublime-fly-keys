@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<svg xmlns="http://www.w3.org/2000/svg" height="301" width="901" version="1.0" id="svg2" style="font-family:sans-serif;font-weight:normal;font-size:15px;fill:#4B4B4B" >
+<svg xmlns="http://www.w3.org/2000/svg" height="301" width="901" version="1.0" style="font-family:sans-serif;font-weight:normal;font-size:15px;fill:#4B4B4B" >
     <g style="stroke:#000000;stroke-width:1">
         <path d="m 105.5,120.5 60,0 0,60 -60,0 0,-60 z"/>
         <path d="m 165.5,120.5 60,0 0,60 -60,0 0,-60 z"/>
@@ -75,30 +75,32 @@
             <tspan x="537" y="167">↓</tspan>
             <tspan x="588" y="160">Expand</tspan>
             <tspan x="588" y="175">Under C.</tspan>
-            <tspan x="470" y="167">Insert</tspan>
+            <tspan x="470" y="160">Insert</tspan>
+            <tspan x="470" y="175">Mode</tspan>
             <tspan x="655" y="167">→| ↘&#xFE0E;</tspan>
             <tspan x="237" y="167">⌦</tspan>
             <tspan x="293" y="167">→</tspan>
         </text>
 
         <text style="font-weight:bold;font-size:20px">
-            <tspan x="112" y="145">A</tspan>
-            <tspan x="171" y="144">O</tspan>
-            <tspan x="236" y="144">E</tspan>
-            <tspan x="288" y="144">U</tspan>
-            <tspan x="474" y="144">H</tspan>
-            <tspan x="535" y="144">T</tspan>
-            <tspan x="594" y="144">N</tspan>
-            <tspan x="655" y="144">S</tspan>
+            <tspan x="112" y="141">A</tspan>
+            <tspan x="172" y="141">O</tspan>
+            <tspan x="232" y="141">E</tspan>
+            <tspan x="292" y="141">U</tspan>
+            <tspan x="472" y="141">H</tspan>
+            <tspan x="532" y="141">T</tspan>
+            <tspan x="592" y="141">N</tspan>
+            <tspan x="652" y="141">S</tspan>
         </text>
     </g>
 
     <text>
         <tspan x="531" y="99">↑</tspan>
-        <tspan x="411" y="158">Select</tspan>
-        <tspan x="411" y="173">Smart</tspan>
-        <tspan x="395" y="105">Select</tspan>
-        <tspan x="395" y="117">Bracket</tspan>
+        <tspan x="411" y="167">Select¶</tspan>
+        <tspan x="395" y="101">Select</tspan>
+        <tspan x="772" y="167">Cmd Palette</tspan>
+        <tspan x="8" y="167">Normal mode</tspan>
+        <tspan x="395" y="116">Smart</tspan>
         <tspan x="635" y="104">␣insert</tspan>
         <tspan x="349" y="158">Select</tspan>
         <tspan x="349" y="173">→|</tspan>
@@ -113,7 +115,8 @@
         <tspan x="268" y="228">Copy</tspan>
         <tspan x="322" y="228">Paste</tspan>
         <tspan x="380" y="228">Duplct.</tspan>
-        <tspan x="438" y="228">Select¶</tspan>
+        <tspan x="438" y="220">Select</tspan>
+        <tspan x="438" y="235">Bracket</tspan>
         <tspan x="504" y="228">Search</tspan>
         <tspan x="623" y="228">Next W</tspan>
         <tspan x="680" y="228">Find @</tspan>
@@ -129,7 +132,7 @@
         <tspan x="183" y="40">Save</tspan>
         <tspan x="183" y="55">Buffer</tspan>
         <tspan x="424" y="39">Select</tspan>
-        <tspan x="424" y="55">bracket</tspan>
+        <tspan x="424" y="55">Tag/Ind</tspan>
         <tspan x="483" y="40">Next</tspan>
         <tspan x="483" y="55">mod</tspan>
         <tspan x="542" y="40">Toggle</tspan>
@@ -146,31 +149,38 @@
     </text>
 
     <text style="font-weight:bold;font-size:16px">
-        <tspan x="780" y="147">Command</tspan>
-        <tspan x="780" y="166">Palette</tspan>
-        <tspan x="8" y="147">Command</tspan>
-        <tspan x="8" y="166">Mode</tspan>
+        <tspan x="780" y="166"></tspan>
+        <tspan x="8" y="141">Esc</tspan>
+        <tspan x="772" y="141">↵</tspan>
         <tspan x="8" y="90">↹</tspan>
         <tspan x="155" y="263">Ctrl</tspan>
         <tspan x="360" y="277">Show Overlay</tspan>
     </text>
 
     <text style="font-weight:bold;font-size:20px">
+        <tspan x="97" y="81">'</tspan>
+        <tspan x="157" y="81">,</tspan>
+        <tspan x="217" y="81">.</tspan>
+        <tspan x="277" y="81">P</tspan>
+        <tspan x="337" y="81">Y</tspan>
+        <tspan x="397" y="81">F</tspan>
+        <tspan x="457" y="81">G</tspan>
+        <tspan x="517" y="81">C</tspan>
+        <tspan x="577" y="81">R</tspan>
+        <tspan x="637" y="81">L</tspan>
         <tspan x="8" y="210">⇧</tspan>
         <tspan x="870" y="210">⇧</tspan>
-        <tspan x="68" y="23">1</tspan>
-        <tspan x="132" y="23">2</tspan>
-        <tspan x="189" y="23">3</tspan>
-        <tspan x="248" y="23">4</tspan>
-        <tspan x="308" y="23">5</tspan>
-        <tspan x="366" y="23">6</tspan>
-        <tspan x="428" y="23">7</tspan>
-        <tspan x="485" y="23">8</tspan>
-        <tspan x="545" y="23">9</tspan>
-        <tspan x="605" y="23">0</tspan>
-        <tspan x="663" y="23">[</tspan>
-        <tspan x="352" y="144">I</tspan>
-        <tspan x="413" y="144">D</tspan>
+        <tspan x="66" y="21">1</tspan>
+        <tspan x="126" y="21">2</tspan>
+        <tspan x="186" y="21">3</tspan>
+        <tspan x="246" y="21">4</tspan>
+        <tspan x="306" y="21">5</tspan>
+        <tspan x="366" y="21">6</tspan>
+        <tspan x="426" y="21">7</tspan>
+        <tspan x="486" y="21">8</tspan>
+        <tspan x="546" y="21">9</tspan>
+        <tspan x="606" y="21">0</tspan>
+        <tspan x="666" y="21">[</tspan>
         <tspan x="704" y="85">?</tspan>
         <tspan x="704" y="111">/</tspan>
         <tspan x="720" y="146">_</tspan>
@@ -179,6 +189,18 @@
         <tspan x="822" y="112">\</tspan>
         <tspan x="761" y="85">+</tspan>
         <tspan x="761" y="111">=</tspan>
+        <tspan x="352" y="141">I</tspan>
+        <tspan x="412" y="141">D</tspan>
+        <tspan x="143" y="201">;</tspan>
+        <tspan x="203" y="201">Q</tspan>
+        <tspan x="263" y="201">J</tspan>
+        <tspan x="323" y="201">K</tspan>
+        <tspan x="383" y="201">X</tspan>
+        <tspan x="443" y="201">B</tspan>
+        <tspan x="503" y="201">M</tspan>
+        <tspan x="563" y="201">W</tspan>
+        <tspan x="623" y="201">V</tspan>
+        <tspan x="683" y="201">Z</tspan>
     </text>
 
 </svg>
