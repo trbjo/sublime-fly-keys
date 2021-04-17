@@ -3,6 +3,11 @@ import sublime
 import sublime_plugin
 import re
 
+class SetReadOnly(sublime_plugin.EventListener):
+    def on_new_async(self, view):
+        if view.name() == 'Find Results':
+            view.set_read_only(True)
+
 class FindInFilesGotoCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
