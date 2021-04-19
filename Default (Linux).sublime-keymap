@@ -505,7 +505,7 @@
 
 {"keys": ["ctrl+c"], "command": "swap_line_up", "context": [{"key": "setting.block_caret"}, ] },
 {"keys": ["ctrl+t"], "command": "swap_line_down", "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["ctrl+alt+t"], "command": "transpose" },
+{"keys": ["ctrl+super+t"], "command": "transpose" },
 
 ////////////////////////////////////////////////////////////////
 /////////////////// Delete left/right: //////////////////////
@@ -660,8 +660,8 @@
     ]
 },
 
-{"keys" : ["alt"], "command" : "noop"},
-{"keys": ["alt"], "command": "lsp_hover", "context":
+{"keys" : ["super"], "command" : "noop"},
+{"keys": ["super"], "command": "lsp_hover", "context":
     [
         {"key": "setting.lsp_active"},
     ]
@@ -746,8 +746,8 @@
 {"keys": ["escape"], "command": "set_setting", "args": {"setting": "block_caret", "value": true }, "context": [{"key": "overlay_visible", "operator": "equal", "operand": false }, {"key" : "panel_has_focus", "operator": "equal", "operand": false }, {"key": "setting.block_caret", "operator": "equal", "operand": false } ] },
 {"keys": ["escape"], "command": "focus_neighboring_group", "context": [{"key": "panel", "operand": "console"}, {"key": "panel_has_focus"} ] },
 
-{"keys": ["ctrl+alt+4"], "command": "set_setting", "args": {"setting": "tab_size", "value": 4 } },
-{"keys": ["ctrl+alt+2"], "command": "set_setting", "args": {"setting": "tab_size", "value": 2 } },
+{"keys": ["ctrl+super+4"], "command": "set_setting", "args": {"setting": "tab_size", "value": 4 } },
+{"keys": ["ctrl+super+2"], "command": "set_setting", "args": {"setting": "tab_size", "value": 2 } },
 
 //////////////////////////////////////////////////////////
 /////////////////// Tab-keybindings: /////////////////////
@@ -1054,8 +1054,8 @@
 {"keys": ["ctrl++"], "command": "noop" },
 {"keys": ["ctrl+="], "command": "noop" },
 {"keys": ["ctrl+-"], "command": "noop" },
-{"keys": ["alt+c"], "command": "move", "args": {"by": "pages", "forward": false} },
-{"keys": ["alt+t"], "command": "move", "args": {"by": "pages", "forward": true} },
+{"keys": ["super+c"], "command": "move", "args": {"by": "pages", "forward": false} },
+{"keys": ["super+t"], "command": "move", "args": {"by": "pages", "forward": true} },
 {"keys": ["ctrl+shift+c"], "command": "increment"},
 {"keys": ["ctrl+shift+c"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/increment_number_under_cursor.sublime-macro"}, "context": [{"key": "selection_empty", "operator": "equal", "operand": true} ] },
 {"keys": ["ctrl+shift+t"], "command": "decrement"},
