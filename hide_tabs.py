@@ -1,3 +1,6 @@
+import sublime
+import sublime_plugin
+
 class ViewTabs(sublime_plugin.EventListener):
 
     def on_activated_async(self, view):
