@@ -1,7 +1,5 @@
 # Sublime Fly keys
 
-## This is only a draft
-
 This is a set of modal keybindings for Sublime Text. It is inspired by and pays homage to [Xah Fly Keys](https://github.com/xahlee/xah-fly-keys), a set of modal keybindings for Emacs. It does not try to replicate that but rather tries to take Sublime Text's strengths into account. That means multiple cucrsors and text selections have been given prominent keybindings.
 
 What Vim got right was the modality, not the composability. Especially the verb-[quantifier]-object notation seems antiquated. I get it, that model arose because of teletypes and sending data over the network was expensive, but today that is a non-issue, and we should leverage that to create instant feedback to the programmer.
