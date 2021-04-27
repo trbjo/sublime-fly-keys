@@ -16,4 +16,3 @@ It is implemented under the hood by observing and toggling the boolean setting `
 
 The api is not stable yet, expect changes!
 ![](keymap.svg)
-
