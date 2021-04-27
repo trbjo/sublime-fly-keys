@@ -14,6 +14,5 @@ Sublime fly keys operate with three modalities. That is _normal mode_, _visual m
 
 It is implemented under the hood by observing and toggling the boolean setting `block_caret`. If true, we are in _normal mode_, and if false, i.e. the cursor looks like a beam ("i-beam"), we are in _insert mode_.
 
-
 The api is not stable yet, expect changes!
 ![](keymap.svg)
