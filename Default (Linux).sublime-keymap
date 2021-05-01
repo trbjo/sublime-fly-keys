@@ -481,24 +481,6 @@
 {"keys": ["ctrl+l"], "command": "insert_snippet", "args": {"contents": "${0} "}, "context": [{"key": "selection_empty", "operator": "equal", "operand": true}, {"key": "setting.block_caret"}, ]},
 {"keys": ["l"], "command": "insert", "args": {"characters": " "}, "context": [{"key": "selection_empty", "operator": "equal", "operand": true}, {"key": "setting.block_caret"}, ] },
 
-{"keys": ["'"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/replace_double_with_single.sublime-macro"},"context":
-[
-    {"key": "selection_empty", "operator": "equal", "operand": false},
-    {"key": "preceding_text", "operator": "not_regex_contains", "operand": "\"$", "match_all": true},
-    {"key": "following_text", "operator": "not_regex_contains", "operand": "^\"", "match_all": true},
-    {"key": "setting.block_caret"},
-]
-},
-
-{"keys": ["\""], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/replace_single_with_double.sublime-macro"},"context":
-[
-    {"key": "selection_empty", "operator": "equal", "operand": false},
-    {"key": "preceding_text", "operator": "not_regex_contains", "operand": "'$", "match_all": true},
-    {"key": "following_text", "operator": "not_regex_contains", "operand": "^'", "match_all": true},
-    {"key": "setting.block_caret"},
-]
-},
-
 /////////////////////////////////////////////////////
 /////////////////// SWAP LINES: /////////////////////
 /////////////////////////////////////////////////////
