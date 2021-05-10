@@ -138,41 +138,41 @@
 //////////////////////////////////////////////
 
 
-{"keys": ["ctrl+p"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": true, "extend": false }, "context": [{"key": "setting.block_caret"}] },
-{"keys": ["ctrl+p"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": true, "extend": true }, "context": [
-    {"key": "setting.block_caret"},
-    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
-    {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
-    {"key": "last_command", "operator": "not_equal", "operand": "insert_snippet" },
-    {"key": "last_command", "operator": "not_equal", "operand": "copy" },
-    {"key": "last_command", "operator": "not_equal", "operand": "next_modification" },
-    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
-    {"key": "last_command", "operator": "not_equal", "operand": "" },
-] },
+// {"keys": ["ctrl+p"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": true, "extend": false }, "context": [{"key": "setting.block_caret"}] },
+// {"keys": ["ctrl+p"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": true, "extend": true }, "context": [
+//     {"key": "setting.block_caret"},
+//     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
+//     {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "insert_snippet" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "copy" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "next_modification" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "" },
+// ] },
 
-{"keys": ["p"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": true, "extend": false },
-"context": [{"key": "setting.block_caret"}]
-},
+// {"keys": ["p"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": true, "extend": false },
+// "context": [{"key": "setting.block_caret"}]
+// },
 
-{"keys": ["p"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": true, "extend": true }, "context": [
-    {"key": "setting.block_caret"},
-    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
-    {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
-    {"key": "last_command", "operator": "not_equal", "operand": "insert_snippet" },
-    {"key": "last_command", "operator": "not_equal", "operand": "copy" },
-    {"key": "last_command", "operator": "not_equal", "operand": "next_modification" },
-    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
-    {"key": "last_command", "operator": "not_equal", "operand": "" },
-]
-},
+// {"keys": ["p"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": true, "extend": true }, "context": [
+//     {"key": "setting.block_caret"},
+//     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
+//     {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "insert_snippet" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "copy" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "next_modification" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+//     {"key": "last_command", "operator": "not_equal", "operand": "" },
+// ]
+// },
 
 // word ends
 
-{"keys": ["."], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": true, "forward": true, "extend": false },
+{"keys": ["r"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": true, "forward": true, "extend": false },
 "context": [{"key": "setting.block_caret"}]
 },
 
-{"keys": ["."], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": true, "forward": true, "extend": true }, "context": [
+{"keys": ["r"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": true, "forward": true, "extend": true }, "context": [
     {"key": "setting.block_caret"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
     {"key": "last_command", "operator": "not_equal", "operand": "duplicate_line" },
@@ -184,11 +184,11 @@
 ]
 },
 
-{"keys": ["ctrl+."], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": false },
+{"keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": false },
 "context": [{"key": "setting.block_caret"}]
 },
 
-{"keys": ["ctrl+."], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true },
+{"keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true },
 "context": [
     {"key": "setting.block_caret"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
@@ -202,8 +202,8 @@
 },
 
 
-{"keys": [">"], "command": "move", "args": {"by": "subword_ends", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["ctrl+shift+"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true} },
+{"keys": ["R"], "command": "move", "args": {"by": "subword_ends", "forward": true}, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+shift+r"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true} },
 
 //////////////////////////////////////////////
 /////////////////// Left word: ///////////////
@@ -212,14 +212,14 @@
 {"keys": ["ctrl+shift+g"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": true} },
 
 
-{"keys": [","], "command": "move", "args": {"by": "word_ends","forward": false}, "context":
+{"keys": ["g"], "command": "move", "args": {"by": "word_ends","forward": false}, "context":
 [
     {"key": "setting.block_caret"},
 ]
 },
 
 
-{"keys": [","], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/move_to_paren_begin.sublime-macro"}, "context":
+{"keys": ["g"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/move_to_paren_begin.sublime-macro"}, "context":
 
 [
     // {"key": "last_command", "operator": "equal", "operand": "insert_snippet" },
@@ -228,9 +228,9 @@
 ]
 },
 
-{"keys": ["<"], "command": "move", "args": {"by": "subword_ends", "forward": false}, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["G"], "command": "move", "args": {"by": "subword_ends", "forward": false}, "context": [{"key": "setting.block_caret"}, ] },
 
-{"keys": [","], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/mark_word_backward_init.sublime-macro"}, "context":
+{"keys": ["g"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/mark_word_backward_init.sublime-macro"}, "context":
 [
     {"key": "setting.block_caret"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
@@ -238,11 +238,11 @@
 ]
 },
 
-{"keys": [","], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": false, "extend": false },
+{"keys": ["g"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": false, "extend": false },
 "context": [{"key": "setting.block_caret"}]
 },
 
-{"keys": [","], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": false, "extend": true },
+{"keys": ["g"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": true, "forward": false, "extend": true },
 "context": [
     {"key": "setting.block_caret"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
@@ -255,11 +255,11 @@
 ]
 },
 
-{"keys": ["ctrl+,"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": false },
+{"keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": false },
 "context": [{"key": "setting.block_caret"}]
 },
 
-{"keys": ["ctrl+,"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": true },
+{"keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": true },
 "context": [
     {"key": "setting.block_caret"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
@@ -452,7 +452,7 @@
 /////////////////// insert line: ////////////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["'"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
+{"keys": ["."], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
 [
     {"key": "selection_empty", "operator": "equal", "operand": true},
     {"key": "setting.block_caret"},
@@ -460,14 +460,14 @@
 },
 
 // same for org mode
-{"keys": ["'"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/org-mode-add-line.sublime-macro"},"context":
+{"keys": ["."], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/org-mode-add-line.sublime-macro"},"context":
 [
     {"key": "setting.block_caret"},
     {"key": "selector", "operator": "equal", "operand": "text.org markup.heading", "match_all": true },
 ]
 },
 
-{"keys": ["ctrl+'"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line Before.sublime-macro"}, "context":
+{"keys": ["ctrl+."], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line Before.sublime-macro"}, "context":
 [
     {"key": "setting.block_caret"},
 ]
@@ -490,15 +490,15 @@
 /////////////////// Delete left/right: //////////////////////
 ////////////////////////////////////////////////////////////////
 
-{"keys": ["g"], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["ctrl+g"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_Word_backward.sublime-macro"}, "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["g"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_opposite_end_of_selection.sublime-macro"}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
-{"keys": ["g"],  "command": "move", "args": {"by": "characters", "forward": false}, "context": [{"key": "setting.block_caret"}, {"key": "text", "operator": "regex_match", "operand": "^\\S+.*"}, ] },
+{"keys": [","], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+,"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_Word_backward.sublime-macro"}, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": [","], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_opposite_end_of_selection.sublime-macro"}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
+{"keys": [","],  "command": "move", "args": {"by": "characters", "forward": false}, "context": [{"key": "setting.block_caret"}, {"key": "text", "operator": "regex_match", "operand": "^\\S+.*"}, ] },
 
-{"keys": ["r"], "command": "delete_word", "args": { "forward": true }, "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["ctrl+r"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_Word_forward.sublime-macro"}, "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["r"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
-{"keys": ["r"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_end_of_selection.sublime-macro"}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "text", "operator": "regex_contains", "operand": "\n$"}, ] },
+{"keys": ["p"], "command": "delete_word", "args": { "forward": true }, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["ctrl+p"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_Word_forward.sublime-macro"}, "context": [{"key": "setting.block_caret"}, ] },
+{"keys": ["p"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
+{"keys": ["p"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_end_of_selection.sublime-macro"}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "text", "operator": "regex_contains", "operand": "\n$"}, ] },
 
 {"keys": ["e"], "command": "right_delete", "context": [{"key": "setting.block_caret"}, ] },
 {"keys": ["e"], "command": "join_lines", "context": [{"key": "setting.block_caret"}, {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": false} ] },
