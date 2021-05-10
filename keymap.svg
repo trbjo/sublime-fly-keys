@@ -160,49 +160,49 @@
     </text>
 
     <text style="font-weight:bold;font-size:20px">
-        <tspan x="97" y="81">'</tspan>
-        <tspan x="157" y="81">,</tspan>
-        <tspan x="217" y="81">.</tspan>
-        <tspan x="277" y="81">P</tspan>
-        <tspan x="337" y="81">Y</tspan>
-        <tspan x="397" y="81">F</tspan>
-        <tspan x="457" y="81">G</tspan>
-        <tspan x="517" y="81">C</tspan>
-        <tspan x="577" y="81">R</tspan>
-        <tspan x="637" y="81">L</tspan>
         <tspan x="8" y="210">⇧</tspan>
-        <tspan x="870" y="210">⇧</tspan>
         <tspan x="66" y="21">1</tspan>
+        <tspan x="97" y="81">'</tspan>
         <tspan x="126" y="21">2</tspan>
+        <tspan x="143" y="201">;</tspan>
+        <tspan x="157" y="81">,</tspan>
         <tspan x="186" y="21">3</tspan>
+        <tspan x="203" y="201">Q</tspan>
+        <tspan x="217" y="81">.</tspan>
         <tspan x="246" y="21">4</tspan>
+        <tspan x="263" y="201">J</tspan>
+        <tspan x="277" y="81">P</tspan>
         <tspan x="306" y="21">5</tspan>
+        <tspan x="323" y="201">K</tspan>
+        <tspan x="337" y="81">Y</tspan>
+        <tspan x="352" y="141">I</tspan>
         <tspan x="366" y="21">6</tspan>
+        <tspan x="383" y="201">X</tspan>
+        <tspan x="397" y="81">F</tspan>
+        <tspan x="412" y="141">D</tspan>
         <tspan x="426" y="21">7</tspan>
+        <tspan x="443" y="201">B</tspan>
+        <tspan x="457" y="81">G</tspan>
         <tspan x="486" y="21">8</tspan>
+        <tspan x="503" y="201">M</tspan>
+        <tspan x="517" y="81">C</tspan>
         <tspan x="546" y="21">9</tspan>
+        <tspan x="563" y="201">W</tspan>
+        <tspan x="577" y="81">R</tspan>
         <tspan x="606" y="21">0</tspan>
+        <tspan x="623" y="201">V</tspan>
+        <tspan x="637" y="81">L</tspan>
         <tspan x="666" y="21">[</tspan>
-        <tspan x="704" y="85">?</tspan>
+        <tspan x="683" y="201">Z</tspan>
         <tspan x="704" y="111">/</tspan>
+        <tspan x="704" y="85">?</tspan>
         <tspan x="720" y="146">_</tspan>
         <tspan x="720" y="174">-</tspan>
-        <tspan x="822" y="85">|</tspan>
-        <tspan x="822" y="112">\</tspan>
-        <tspan x="761" y="85">+</tspan>
         <tspan x="761" y="111">=</tspan>
-        <tspan x="352" y="141">I</tspan>
-        <tspan x="412" y="141">D</tspan>
-        <tspan x="143" y="201">;</tspan>
-        <tspan x="203" y="201">Q</tspan>
-        <tspan x="263" y="201">J</tspan>
-        <tspan x="323" y="201">K</tspan>
-        <tspan x="383" y="201">X</tspan>
-        <tspan x="443" y="201">B</tspan>
-        <tspan x="503" y="201">M</tspan>
-        <tspan x="563" y="201">W</tspan>
-        <tspan x="623" y="201">V</tspan>
-        <tspan x="683" y="201">Z</tspan>
+        <tspan x="761" y="85">+</tspan>
+        <tspan x="822" y="112">\</tspan>
+        <tspan x="822" y="85">|</tspan>
+        <tspan x="870" y="210">⇧</tspan>
     </text>
 
 </svg>
