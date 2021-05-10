@@ -649,8 +649,8 @@
 
 
 
-{"keys": ["ctrl+shift+r"], "command": "goto_reference" , "context": [{"key": "setting.block_caret"}, ] },
-{"keys": ["ctrl+shift+r"], "command": "lsp_symbol_references" , "context": [{"key": "setting.block_caret"}, {"key": "setting.lsp_active"}, ] },
+// {"keys": ["ctrl+shift+r"], "command": "goto_reference" , "context": [{"key": "setting.block_caret"}, ] },
+// {"keys": ["ctrl+shift+r"], "command": "lsp_symbol_references" , "context": [{"key": "setting.block_caret"}, {"key": "setting.lsp_active"}, ] },
 {"keys": ["ctrl+shift+i"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "setting.lsp_active"}, ] },
 {"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename" , "context": [{"key": "setting.block_caret"}, {"key": "setting.lsp_active"}, ] },
 {"keys": ["x"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context":
