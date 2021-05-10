@@ -147,10 +147,13 @@
         <tspan x="860" y="36">⌫</tspan>
     </text>
 
+    <text style="font-size:28px">
+        <tspan x="772" y="145">↵</tspan>
+    </text>
+
     <text style="font-weight:bold;font-size:16px">
         <tspan x="780" y="166"></tspan>
         <tspan x="8" y="141">Esc</tspan>
-        <tspan x="772" y="141">↵</tspan>
         <tspan x="8" y="90">↹</tspan>
         <tspan x="155" y="263">Ctrl</tspan>
         <tspan x="360" y="277">Show Overlay</tspan>
