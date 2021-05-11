@@ -582,8 +582,8 @@
 {"keys": ["7"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.block_caret"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
 {"keys": ["ctrl+i"], "command": "move_to", "args": {"to": "bol", "extend": true}, "context": [{"key": "setting.block_caret"} ] },
 
-{"keys": ["i"], "command": "join_lines", "context": [{"key": "setting.block_caret"}, {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": false} ] },
-{"keys": ["i"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context": [{"key": "setting.block_caret"}, {"key": "following_text", "operator": "not_regex_contains", "operand": "\n$"},] },
+{"keys": ["i"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context": [{"key": "setting.block_caret"}] },
+{"keys": ["i"], "command": "join_lines", "context": [{"key": "setting.block_caret"}, {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": false},{"key": "selection_empty", "operator": "equal", "operand": false } ] },
 // {"keys": ["i"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/multiple_cursors_from_indentation.sublime-macro"}, "context": [{"key": "setting.block_caret"}, {"key": "selection_empty", "operator": "equal", "operand": true}, {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": false}, ] },
 
 // expand selection to paragraph
