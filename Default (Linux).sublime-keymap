@@ -277,6 +277,16 @@
 /////////////////// Beginning of line: //////////////
 /////////////////////////////////////////////////////
 
+{"keys": ["a"], "command": "move_to", "args": { "to": "hardbol" }, "context":
+[
+    {"key": "last_command", "operator": "equal", "operand": "move_to" },
+    {"key": "setting.block_caret"},
+    {"key": "following_text", "operator": "regex_contains", "operand": "^$|^\\S", "match_all": true},
+    {"key": "preceding_text", "operator": "regex_match", "operand": "^\\s*$", "match_all": true},
+    {"key": "num_selections", "operator": "not_equal", "operand": 1 },
+]
+},
+
 {"keys": ["a"], "command": "move_to", "args": { "to": "bol" }, "context":
 [
     {"key": "setting.block_caret"},
