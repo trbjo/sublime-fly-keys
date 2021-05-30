@@ -712,7 +712,7 @@
 /////////////////// ESCAPE: /////////////////////
 /////////////////////////////////////////////////
 
-{"keys": ["escape"], "command": "show_panel", "args": {"panel": "output.diagnostics", "toggle": true}},
+{"keys": ["escape"], "command": "show_panel", "args": {"panel": "output.diagnostics", "toggle": true}, "context": [{"key": "setting.lsp_active"}]},
 {"keys": ["escape"], "command": "hide_panel", "context": [{"key": "panel", "operand": "output.diagnostics"}, {"key": "panel_visible", "operator": "equal", "operand": true } ] },
 {"keys": ["escape"], "command": "hide_auto_complete", "context": [{ "key": "auto_complete_visible", "operator": "equal", "operand": true } ] },
 {"keys": ["escape"], "command": "set_setting", "args": {"setting": "block_caret", "value": true }, "context": [{"key": "setting.block_caret", "operator": "equal", "operand": false } ] },
