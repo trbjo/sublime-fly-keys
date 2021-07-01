@@ -674,6 +674,12 @@
 ]
 },
 
+{"keys": ["z"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context":
+[
+    {"key": "setting.block_caret"},
+]
+},
+
 
 // {"keys": ["x"], "command": "lsp_document_symbols", "context":
 //     [
