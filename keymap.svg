@@ -112,7 +112,7 @@
         <tspan x="349" y="158">Select</tspan>
         <tspan x="349" y="173">→|</tspan>
         <tspan x="365" y="47">Split |</tspan>
-        <tspan x="383" y="228">Find @</tspan>
+        <tspan x="383" y="228">Duplct.</tspan>
         <tspan x="395" y="101">Select</tspan>
         <tspan x="395" y="116">Smart</tspan>
         <tspan x="411" y="167">Select¶</tspan>
@@ -130,15 +130,16 @@
         <tspan x="563" y="220">Add C.</tspan>
         <tspan x="563" y="235">Below</tspan>
         <tspan x="574" y="107">Word→|</tspan>
+        <tspan x="634" y="107">→|Word</tspan>
         <tspan x="604" y="40">Revert</tspan>
         <tspan x="604" y="55">Mod</tspan>
         <tspan x="623" y="228">Next W</tspan>
-        <tspan x="635" y="104">␣insert</tspan>
+        <tspan x="710" y="167">␣insert</tspan>
         <tspan x="64" y="40">Next</tspan>
         <tspan x="64" y="55">Bmark</tspan>
         <tspan x="663" y="40">Git add</tspan>
         <tspan x="663" y="55">hunk</tspan>
-        <tspan x="683" y="228">Duplct.</tspan>
+        <tspan x="683" y="228">Find @</tspan>
         <tspan x="772" y="167">Cmd Palette</tspan>
         <tspan x="8" y="167">Normal mode</tspan>
     </text>
@@ -196,8 +197,8 @@
         <tspan x="683" y="201">Z</tspan>
         <tspan x="704" y="111">/</tspan>
         <tspan x="704" y="85">?</tspan>
-        <tspan x="720" y="146">_</tspan>
-        <tspan x="720" y="174">-</tspan>
+        <!-- <tspan x="720" y="146">_</tspan> -->
+        <tspan x="712" y="140">–</tspan>
         <tspan x="761" y="111">=</tspan>
         <tspan x="761" y="85">+</tspan>
         <tspan x="822" y="112">\</tspan>
