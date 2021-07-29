@@ -694,13 +694,13 @@
 // { "keys": ["alt+keypad_minus"], "command": "jump_back" },
 // { "keys": ["alt+shift+keypad_minus"], "command": "jump_forward" },
 
-{"keys": ["z"], "command": "jump_forward", "context":
+{"keys": ["ctrl+s"], "command": "jump_forward", "context":
     [
         {"key": "setting.block_caret"},
     ]
 },
 
-{"keys": ["<"], "command": "jump_back", "context":
+{"keys": ["ctrl+h"], "command": "jump_back", "context":
     [
         {"key": "setting.block_caret"},
     ]
