@@ -18,9 +18,9 @@ class PromptGitCommand(sublime_plugin.WindowCommand):
 
     def run(self):
         git_actions_pretty = [
-        '1: Commit and Push',
-        '2: Commit only',
-        '3: Commit, Rebase and Push'
+        '1: Commit, Rebase and Push',
+        '2: Commit and Push',
+        '3: Commit only'
         ]
 
         self.window.show_quick_panel(
@@ -34,16 +34,15 @@ class PromptGitCommand(sublime_plugin.WindowCommand):
             return
         self.last_selected = i
 
-        git_action = {
-            0: ['git', 'push'],
-            1: [''],
-            2: ['git', 'pull', '--rebase', '&&', 'git', 'push']
-        }
         sublime.active_window().run_command('save')
         sublime.active_window().run_command('close')
-        if i != 1:
-            pwd = self.window.active_view().file_name().rsplit('/', 1)[0]
-            Popen(git_action[i], cwd=pwd, shell=False)
+
+        if i >= 2:
+            return
+        pwd = self.window.active_view().file_name().rsplit('/', 1)[0]
+        Popen(['git', 'push'], cwd=pwd, shell=False)
+        if i == 0:
+            Popen(['git', 'pull', '--rebase', '&&', 'git', 'push'], cwd=pwd, shell=False)
 
 
 
