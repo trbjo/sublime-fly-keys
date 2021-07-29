@@ -33,6 +33,7 @@ class PromptGitCommand(sublime_plugin.WindowCommand):
         if i == -1:
             return
         self.last_selected = i
+
         git_action = {
             0: ['git', 'push'],
             1: [''],
