@@ -39,6 +39,7 @@ class PromptGitCommand(sublime_plugin.WindowCommand):
 
         if i >= 2:
             return
+
         pwd = self.window.active_view().file_name().rsplit('/', 1)[0]
         Popen(['git', 'push'], cwd=pwd, shell=False)
         if i == 0:
