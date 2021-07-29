@@ -34,9 +34,9 @@ class PromptGitCommand(sublime_plugin.WindowCommand):
             return
         self.last_selected = i
         git_action = {
-        '0': ['git', 'push'],
-        '1': [''],
-        '2': ['git', 'pull', '--rebase', '&&', 'git', 'push']
+            0: ['git', 'push'],
+            1: [''],
+            2: ['git', 'pull', '--rebase', '&&', 'git', 'push']
         }
         sublime.active_window().run_command('save')
         sublime.active_window().run_command('close')
