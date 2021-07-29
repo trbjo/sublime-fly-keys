@@ -42,9 +42,10 @@ class PromptGitCommand(sublime_plugin.WindowCommand):
 
         pwd = self.window.active_view().file_name().rsplit('/', 1)[0]
         if i == 0:
-            Popen(['git', 'pull', '--rebase', '-C', pwd], shell=False).wait()
+            Popen(['git', '-C', pwd, 'pull', '--rebase'], shell=False).wait()
 
-        Popen(['git', 'push', '-C', pwd], shell=False)
+        Popen(['git', '-C', pwd, 'push'], shell=False)
+
 
 
 
@@ -63,7 +64,7 @@ class GitCommitNewCommand(sublime_plugin.WindowCommand):
     def run(self):
         pwd = self.window.active_view().file_name().rsplit('/', 1)[0]
         try:
-            Popen(['git', 'commit', '-v', '-C', pwd])
+            Popen(['git', '-C', pwd, 'commit', '-v'])
         except:
             sublime.status_message('Nothing to commit')
         # if sp.returncode != 0:
