@@ -18,12 +18,12 @@ class NumberCommand(sublime_plugin.TextCommand):
             to_the_right = line_length - column
             to_the_left = line_length - (line_length - column) + 1
 
-            if cur_line[column].isdigit():
+            if cur_line[column].isdigit() or (cur_line[column] == '-' and cur_line[column + 1].isdigit()):
                 first_char_is_digit = True
             else:
                 first_char_is_digit = False
 
-            for i in range(1, to_the_right):
+            for i in range(to_the_right):
                 if cur_line[column + i].isdigit() or (cur_line[column + i] == '-' and cur_line[column + i + 1].isdigit()):
 
                     if not start_pos and first_char_is_digit == False:
@@ -39,7 +39,7 @@ class NumberCommand(sublime_plugin.TextCommand):
 
             if not start_pos:
                 for j in range(to_the_left):
-                    if cur_line[column - j].isdigit() or (cur_line[column - j] == '-' and cur_line[column - j - 1].isdigit()):
+                    if cur_line[column - j].isdigit() or (cur_line[column - j] == '-' and cur_line[column - j + 1].isdigit()):
 
                         if not end_pos:
                             end_pos = column - j + 1
