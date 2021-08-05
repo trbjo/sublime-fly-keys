@@ -30,7 +30,7 @@ class NumberCommand(sublime_plugin.TextCommand):
                         start_pos = column + i
 
                     if not end_pos:
-                        end_pos = column + i + 1
+                        end_pos = column + i
                     else:
                         end_pos += 1
 
@@ -42,7 +42,7 @@ class NumberCommand(sublime_plugin.TextCommand):
                     if cur_line[column - j].isdigit() or (cur_line[column - j] == '-' and cur_line[column - j + 1].isdigit()):
 
                         if not end_pos:
-                            end_pos = column - j + 1
+                            end_pos = column - j
 
                         if not start_pos:
                             start_pos = column - j
@@ -53,8 +53,8 @@ class NumberCommand(sublime_plugin.TextCommand):
                         break
 
             if start_pos is not None and end_pos is not None:
-                buf.sel().subtract(region)
-                buf.sel().add(sublime.Region(buf.text_point(line, start_pos), buf.text_point(line, end_pos)))
+                selection.subtract(region)
+                selection.add(sublime.Region(buf.text_point(line, start_pos), buf.text_point(line, end_pos + 1)))
 
         for region in selection:
             try:
