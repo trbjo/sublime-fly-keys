@@ -24,30 +24,26 @@ class NumberCommand(sublime_plugin.TextCommand):
                 first_char_is_digit = False
 
             for i in range(to_the_right):
-                if cur_line[column + i].isdigit() or (cur_line[column + i] == '-' and cur_line[column + i + 1].isdigit()):
+                i_pointer = column + i
+                if cur_line[i_pointer].isdigit() or (not end_pos and cur_line[i_pointer] == '-' and cur_line[i_pointer + 1].isdigit()):
 
                     if not start_pos and first_char_is_digit == False:
-                        start_pos = column + i
+                        start_pos = i_pointer
 
-                    if not end_pos:
-                        end_pos = column + i
-                    else:
-                        end_pos += 1
+                    end_pos = i_pointer
 
                 elif end_pos:
                     break
 
             if not start_pos:
                 for j in range(to_the_left):
-                    if cur_line[column - j].isdigit() or (cur_line[column - j] == '-' and cur_line[column - j + 1].isdigit()):
+                    j_pointer = column - j
+                    if cur_line[j_pointer].isdigit() or (cur_line[j_pointer] == '-' and cur_line[j_pointer + 1].isdigit()):
 
                         if not end_pos:
-                            end_pos = column - j
+                            end_pos = j_pointer
 
-                        if not start_pos:
-                            start_pos = column - j
-                        else:
-                            start_pos -= 1
+                        start_pos = j_pointer
 
                     elif start_pos:
                         break
