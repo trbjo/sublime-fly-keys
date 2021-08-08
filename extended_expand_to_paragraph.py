@@ -13,7 +13,7 @@ class ExtendedExpandSelectionToParagraphCommand(sublime_plugin.TextCommand):
                 if buffer_rev is None:
                     buffer_rev = buf.substr(sublime.Region(-1, buf.sel()[-1].begin() + 1))[::-1]
                 for m in re.finditer(r'\S *\n\n', buffer_rev):
-                    beginning = region.begin() - m.start()
+                    beginning = region.begin() - m.start() - 1
                     break
                 else:
                     beginning = -1
