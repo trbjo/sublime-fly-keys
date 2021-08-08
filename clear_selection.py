@@ -6,4 +6,7 @@ class ClearSelectionCommand(sublime_plugin.TextCommand):
         buf = self.view
         for region in buf.sel():
             buf.sel().subtract(region)
-            buf.sel().add(region.end() - 1)
+            if region.a > region.b:
+                buf.sel().add(region.b)
+            else:
+                buf.sel().add(region.b - 1)
