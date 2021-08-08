@@ -1,33 +1,51 @@
 import sublime
 import sublime_plugin
+import bisect
+import itertools
 
 import re
 
-class ExtendedExpandSelectionToParagraphCommand(sublime_plugin.TextCommand):
+class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         buf = self.view
-        buffer_rev = None
+        whitespaces = None
+        regs_dict = {}
         for region in buf.sel():
+
             if region.empty():
-                # selection is empty, we need to look behind:
-                if buffer_rev is None:
-                    buffer_rev = buf.substr(sublime.Region(-1, buf.sel()[-1].begin() + 1))[::-1]
-                for m in re.finditer(r'\S *\n\n', buffer_rev):
-                    beginning = region.begin() - m.end() + 2
-                    break
+                if whitespaces is None:
+                    whitespaces = buf.find_all(r'\n\n *')
+                    first, last = zip(*whitespaces)
+
+                bisect_end = bisect.bisect(first, region.end())
+                if bisect_end >= len(whitespaces):
+                    sel_end = buf.size() + 1
                 else:
+                    sel_end, _ = whitespaces[bisect_end]
+                    sel_end += 2
+
+                bisect_begin = bisect.bisect(whitespaces, region) - 1
+                if bisect_begin == -1:
                     beginning = -1
-                _, next_res = buf.find(r'\S\n\n', region.end() - 2)
+                else:
+                    beginning, _ = whitespaces[bisect_begin]
+                    beginning += 1
+
             else:
+
                 beginning = region.begin()
-                _, next_res = buf.find(r'\S\n\n', region.end() - 1)
+                if whitespaces is None:
+                    _, sel_end = buf.find(r'\S\n\n', region.end() - 1)
+                    if sel_end == -1:
+                        sel_end = buf.size() + 1
+                else:
+                    if bisect_end >= len(whitespaces) - 1:
+                        sel_end = buf.size() + 1
+                    else:
+                        sel_end, _ = whitespaces[bisect_end + 1]
+                        sel_end += 2
 
-            if next_res == -1:
-                next_res = buf.size() + 1
+            regs_dict[beginning] = sel_end
 
-            reg = sublime.Region(beginning, next_res - 1)
-            buf.sel().add(reg)
-        try:
-            buf.show(reg, False)
-        except UnboundLocalError:
-            pass
+        buf.sel().add_all([sublime.Region(begin,end -1) for begin,end in regs_dict.items()])
+        buf.show(buf.sel()[-1], False)
