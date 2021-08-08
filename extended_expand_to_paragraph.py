@@ -1,40 +1,31 @@
 import sublime
 import sublime_plugin
 
-import itertools
-import bisect
+import re
+
 
 class ExtendedExpandSelectionToParagraphCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         buf = self.view
-        regions = buf.find_all('\n\n\\s*')
-        first, last = zip(*regions)
+        buffer_prev = None
         for region in buf.sel():
             if region.empty():
-                bisect_result = bisect.bisect(last, region.end())
-                if bisect_result == 0:
-                    reg_beg = 0
-                    reg_end, _  = regions[bisect_result]
-                elif bisect_result < len(regions):
-                    _, reg_beg  = regions[bisect_result -1 ]
-                    reg_end, _  = regions[bisect_result]
-                elif bisect_result == len(regions):
-                    _, reg_beg  = regions[bisect_result - 1]
-                    reg_end = buf.size()
-                reg = sublime.Region(reg_beg - 1, reg_end + 1)
-                buf.sel().subtract(region)
-                buf.sel().add(reg)
+                # selection is empty, we need to look behind:
+                if buffer_prev is None:
+                    buffer_rev = buf.substr(sublime.Region(-1, buf.sel()[-1].begin() + 1))[::-1]
+                for m in re.finditer(r'\S *\n\n', buffer_rev):
+                    beginning = region.begin() - m.start()
+                    break
+                else:
+                    beginning = -1
             else:
-                bisect_result = bisect.bisect(last, region.end() - 1) + 1
-                if bisect_result < len(regions):
-                    reg_end, _  = regions[bisect_result]
-                    reg = sublime.Region(region.end() - 1, reg_end + 1)
-                    buf.sel().add(reg)
-                elif bisect_result == len(regions):
-                    reg_end = buf.size()
-                    reg = sublime.Region(region.end() - 1, reg_end + 1)
-                    buf.sel().add(reg)
+                beginning = region.begin()
+            _, next_res = buf.find(r'\S\n\n', region.end() - 1)
+            if next_res == -1:
+                next_res = buf.size()
+            reg = sublime.Region(beginning, next_res -1)
+            buf.sel().add(reg)
         try:
-            buf.show(reg_end, False)
+            buf.show(reg, False)
         except UnboundLocalError:
             pass
