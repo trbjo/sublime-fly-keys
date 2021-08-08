@@ -7,7 +7,7 @@ class NumberCommand(sublime_plugin.TextCommand):
         buf = self.view
         selection = buf.sel()
         for region in selection:
-            if region.begin() != region.end():
+            if region.empty() == False:
                 continue
 
             line, column = buf.rowcol(region.begin())
