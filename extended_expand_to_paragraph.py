@@ -17,7 +17,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                     whitespaces = buf.find_all(r'\n\n *')
                     first, last = zip(*whitespaces)
 
-                bisect_end = bisect.bisect(first, region.end())
+                bisect_end = bisect.bisect(first, region.end() -1)
                 if bisect_end >= len(whitespaces):
                     sel_end = buf.size() + 1
                 else:
