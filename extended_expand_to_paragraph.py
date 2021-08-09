@@ -26,7 +26,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                     sel_end += 3
 
                 bisect_begin = bisect.bisect(first, region.begin() -2 )
-                if bisect_begin == 0:
+                if bisect_begin <= 1:
                     sel_begin = -1
                 else:
                     sel_begin, _ = whitespaces[bisect_begin -1 ]
