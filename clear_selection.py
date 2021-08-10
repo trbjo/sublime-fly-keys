@@ -14,3 +14,4 @@ class ClearSelectionCommand(sublime_plugin.TextCommand):
             else:
                 reg = region.begin()
             buf.sel().add(reg)
+            buf.show(reg, False)
