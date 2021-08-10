@@ -1,7 +1,6 @@
 import sublime
 import sublime_plugin
 
-import re
 import datetime
 import bisect
 
@@ -27,7 +26,12 @@ def build_or_rebuild_ws_for_view(view, immediate: bool):
 
 class HejSampleListener(sublime_plugin.EventListener):
     def on_modified_async(self, view):
+        global interesting_regions
         if view.element() is None:
+            try:
+                del interesting_regions[view]
+            except KeyError:
+                pass
             sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
     def on_activated_async(self, view):
@@ -36,18 +40,16 @@ class HejSampleListener(sublime_plugin.EventListener):
             build_or_rebuild_ws_for_view(view, immediate=False)
 
 class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _):
         buf = self.view
         region = buf.sel()[-1].begin()
         try:
             myregs = interesting_regions[buf]['last']
-            bisect_res = bisect.bisect(myregs, region)
-            sel_end = myregs[bisect_res]
         except KeyError:
             build_or_rebuild_ws_for_view(buf, immediate=True)
-            _, sel_end = buf.find(r'\n\n\s*', region)
-            if sel_end == -1:
-                sel_end = buf.size()
+            myregs = interesting_regions[buf]['last']
+        bisect_res = bisect.bisect(myregs, region)
+        sel_end = myregs[bisect_res]
         reg = sublime.Region(sel_end)
         buf.sel().clear()
         buf.sel().add(reg)
@@ -55,22 +57,17 @@ class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
 
 
 class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _):
         global interesting_regions
         buf = self.view
         region = buf.sel()[0].begin()
         try:
             myregs = interesting_regions[buf]['last']
-            bisect_res = bisect.bisect(myregs, region - 1)
-            sel_end = myregs[bisect_res -1 ]
         except KeyError:
             build_or_rebuild_ws_for_view(buf, immediate=True)
-            buffer_rev = buf.substr(sublime.Region(-1, region - 1))[::-1]
-            for m in re.finditer(r'\S *\n\n', buffer_rev):
-                sel_end = region - m.start() - 2
-                break
-            else:
-                sel_end = -1
+            myregs = interesting_regions[buf]['last']
+        bisect_res = bisect.bisect(myregs, region - 1)
+        sel_end = myregs[bisect_res -1 ]
         reg = sublime.Region(sel_end, sel_end)
         buf.sel().clear()
         buf.sel().add(reg)
@@ -78,9 +75,8 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
 
 
 class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _):
         buf = self.view
-        myregs = None
         regs_dict = {}
         for region in buf.sel():
             try:
@@ -99,5 +95,4 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
             regs_dict[sel_begin] = sel_end
 
         buf.sel().add_all([sublime.Region(begin,end -1) for begin,end in regs_dict.items()])
-
         buf.show(buf.sel()[-1], False)
