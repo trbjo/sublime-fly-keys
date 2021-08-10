@@ -15,6 +15,6 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
                 reg_begin -= 1
             else:
                 reg_list.append(-1)
-            reg_list += [m.end() + reg_begin for m in re.finditer(r'\n *\S', buffer)]
+            reg_list += [sublime.Region(m.end() + reg_begin) for m in re.finditer(r'\n *\S', buffer)]
         buf.sel().clear()
-        buf.sel().add_all([sublime.Region(i) for i in reg_list])
+        buf.sel().add_all(reg_list)
