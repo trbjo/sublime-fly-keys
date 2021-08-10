@@ -85,57 +85,19 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
         for region in buf.sel():
             try:
                 first = interesting_regions[buf]['first']
-                if region.empty():
-                    bisect_begin = bisect.bisect(first, region.begin() -2)
-                    sel_begin = first[bisect_begin -1 ] + 2
-                else:
-                    sel_begin = region.begin()
-                bisect_end = bisect.bisect(first, region.end() -1)
-                sel_end = first[bisect_end] + 3
             except KeyError:
                 build_or_rebuild_ws_for_view(buf, immediate=True)
-                if region.empty():
-                    if myregs is None:
-                        myregs = buf.find_all(r'\n\n *\S')
-                        try:
-                            first, last = zip(*myregs)
-                        except ValueError:
-                            first, last = [2], [0]
-
-                    bisect_end = bisect.bisect(first, region.end() - 2)
-                    if bisect_end >= len(myregs):
-                        sel_end = buf.size() + 1
-                    else:
-                        sel_end, _ = myregs[bisect_end]
-                        sel_end += 3
-
-                    bisect_begin = bisect.bisect(first, region.begin() -2 )
-                    if bisect_begin == 0:
-                        sel_begin = -1
-                    else:
-                        sel_begin, _ = myregs[bisect_begin -1 ]
-                        sel_begin += 2
-
-                else:
-
-                    sel_begin = region.begin()
-
-                    if myregs is None:
-                        sel_end, _ = buf.find(r'\n\n *\S', region.end() + 2)
-                        if sel_end == -1:
-                            sel_end = buf.size()
-
-                    else:
-
-                        bisect_end = bisect.bisect(first, region.end() - 2)
-                        if bisect_end >= len(myregs):
-                            sel_end = buf.size()
-                        else:
-                            sel_end, _ = myregs[bisect_end]
-
-                    sel_end += 3
+                first = interesting_regions[buf]['first']
+            if region.empty():
+                bisect_begin = bisect.bisect(first, region.begin() -2)
+                sel_begin = first[bisect_begin -1 ] + 2
+            else:
+                sel_begin = region.begin()
+            bisect_end = bisect.bisect(first, region.end() -1)
+            sel_end = first[bisect_end] + 3
 
             regs_dict[sel_begin] = sel_end
 
         buf.sel().add_all([sublime.Region(begin,end -1) for begin,end in regs_dict.items()])
+
         buf.show(buf.sel()[-1], False)
