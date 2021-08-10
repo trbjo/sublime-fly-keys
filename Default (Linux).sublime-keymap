@@ -668,12 +668,12 @@
 },
 
 
-// {"keys": ["x"], "command": "lsp_document_symbols", "context":
-//     [
-//         {"key": "setting.block_caret"},
-//         {"key": "lsp.session_with_capability", "operator": "equal", "operand": "documentSymbolProvider"}
-//     ]
-// },
+{"keys": ["z"], "command": "lsp_document_symbols", "context":
+    [
+        {"key": "setting.block_caret"},
+        {"key": "lsp.session_with_capability", "operator": "equal", "operand": "documentSymbolProvider"}
+    ]
+},
 
 
 // {"keys": ["ctrl+shift+h"], "command": "move_to_neighboring_group", "args": {"forward": false}, "context":
