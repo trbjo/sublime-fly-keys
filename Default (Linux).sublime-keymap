@@ -814,7 +814,7 @@
 /////////////////// Miscellaneous: /////////////////////
 ////////////////////////////////////////////////////////
 
-{"keys": ["h"], "command": "set_setting", "args": {"setting": "block_caret", "value": false }, "context": [{"key": "panel_has_focus", "operator": "equal", "operand": false }, {"key": "setting.block_caret"}, ] },
+{"keys": ["h"], "command": "delete_selection_and_insert", "context": [{"key": "setting.block_caret"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.block_caret"}, ] },
 {"keys": ["h"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 
