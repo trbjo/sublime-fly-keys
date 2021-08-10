@@ -34,7 +34,7 @@ class HejSampleListener(sublime_plugin.EventListener):
                 pass
             sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
-    def on_activated_async(self, view):
+    def on_load_async(self, view):
         global interesting_regions
         if view not in interesting_regions and view.element() is None:
             build_or_rebuild_ws_for_view(view, immediate=False)
