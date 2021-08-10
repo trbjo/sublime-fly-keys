@@ -1,13 +1,16 @@
-import sublime
 import sublime_plugin
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _, forward):
         buf = self.view
         for region in buf.sel():
             buf.sel().subtract(region)
-            line, col = buf.rowcol(region.end())
-            if col == 0:
-                buf.sel().add(region.b - 1)
+            if forward == True:
+                _, col = buf.rowcol(region.end())
+                if col == 0:
+                    reg = region.end() - 1
+                else:
+                    reg = region.end()
             else:
-                buf.sel().add(region.b)
+                reg = region.begin()
+            buf.sel().add(reg)
