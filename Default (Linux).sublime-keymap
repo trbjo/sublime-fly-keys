@@ -632,6 +632,16 @@
 {"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename" , "context": [{"key": "setting.block_caret"}, {"key": "setting.lsp_active"}, ] },
 
 
+{"keys": ["shift"], "command": "soft_undo", "context":
+    [
+        {"key": "selection_empty", "operator": "equal", "operand": false },
+        {"key": "last_command", "operator": "not_equal", "operand": "jump_back" },
+        {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+        {"key": "last_command", "operator": "not_equal", "operand": "" },
+        {"key": "setting.block_caret"},
+    ]
+},
+
 {"keys": ["shift"], "command": "lsp_code_actions", "context":
     [
         {"key": "setting.block_caret"},
@@ -725,17 +735,6 @@
         {"key": "setting.block_caret"},
     ]
 },
-
-{"keys": ["ctrl+escape"], "command": "soft_undo", "context":
-    [
-        {"key": "selection_empty", "operator": "equal", "operand": false },
-        {"key": "last_command", "operator": "not_equal", "operand": "jump_back" },
-        {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
-        {"key": "last_command", "operator": "not_equal", "operand": "" },
-        {"key": "setting.block_caret"},
-    ]
-},
-
 
 {"keys": ["escape"], "command": "show_at_center", "context": [{"key": "setting.block_caret"}, ] ,},
 {"keys": ["escape"], "command": "hide_auto_complete", "context": [{ "key": "auto_complete_visible", "operator": "equal", "operand": true } ] },
