@@ -89,7 +89,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 sel_begin = first[bisect_begin -1 ] + 2
             else:
                 sel_begin = region.begin()
-            bisect_end = bisect.bisect(first, region.end() -1)
+            bisect_end = bisect.bisect(first, region.end() -2)
             sel_end = first[bisect_end] + 3
 
             regs_dict[sel_begin] = sel_end
