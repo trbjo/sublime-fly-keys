@@ -301,8 +301,9 @@
 
 {"keys": ["shift+enter"], "command": "find_prev", "context": [{"key": "setting.block_caret"} ] },
 
-{"keys": ["ctrl"], "command": "find_next", "context": [{"key": "setting.block_caret"} ] },
-{"keys": ["ctrl"], "command": "find_under_expand_skip", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.block_caret"} ] },
+{"keys" : ["alt"], "command" : "noop"},
+{"keys": ["alt"], "command": "find_next", "context": [{"key": "setting.block_caret"} ] },
+{"keys": ["alt"], "command": "find_under_expand_skip", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.block_caret"} ] },
 
 // { "keys": ["enter"], "command": "redo_or_repeat", "context": [
 //     {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
@@ -344,7 +345,6 @@
 
 {"keys": ["."], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
 [
-    {"key": "selection_empty", "operator": "equal", "operand": true},
     {"key": "setting.block_caret"},
 ]
 },
@@ -643,8 +643,7 @@
     ]
 },
 
-{"keys" : ["alt"], "command" : "noop"},
-{"keys": ["alt"], "command": "lsp_hover", "context": [{"key": "setting.lsp_active"}, ] },
+{"keys": ["ctrl"], "command": "lsp_hover", "context": [{"key": "setting.lsp_active"}, ] },
 
 
 
@@ -1124,5 +1123,7 @@
     {"key": "setting.is_widget", "operator": "equal", "operand": false}
 ]
 },
+
+{ "keys": ["ctrl+n"], "command": "align_cursors" },
 
 ]
