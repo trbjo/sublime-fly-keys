@@ -9,8 +9,7 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
         reg_list = []
         for region in buf.sel():
             reg_begin = region.begin() - 1
-            reg_end = region.end()
-            buffer = buf.substr(sublime.Region(reg_begin, reg_end))
+            buffer = buf.substr(sublime.Region(reg_begin, region.end()))
             if reg_begin <= 1:
                 reg_begin += 1
                 reg_list.append(-2)
