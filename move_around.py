@@ -10,8 +10,7 @@ interesting_regions = {}
 def build_or_rebuild_ws_for_view(view, immediate: bool):
     global interesting_regions
     global timeout
-    res = (datetime.datetime.now()-timeout).total_seconds()
-    if res > 2 or immediate == True:
+    if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
         interesting_regions[view] = {}
         try:
             whitespaces = view.find_all(r'\n\n *\S')
@@ -26,18 +25,17 @@ def build_or_rebuild_ws_for_view(view, immediate: bool):
 
 class HejSampleListener(sublime_plugin.EventListener):
     def on_modified_async(self, view):
-        global interesting_regions
         if view.element() is None:
             try:
+                global interesting_regions
                 del interesting_regions[view]
             except KeyError:
                 pass
             sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
     def on_load_async(self, view):
-        global interesting_regions
         if view not in interesting_regions and view.element() is None:
-            build_or_rebuild_ws_for_view(view, immediate=False)
+            build_or_rebuild_ws_for_view(view, immediate=True)
 
 class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
     def run(self, _):
@@ -58,7 +56,6 @@ class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
 
 class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
     def run(self, _):
-        global interesting_regions
         buf = self.view
         region = buf.sel()[0].begin()
         try:
@@ -68,7 +65,7 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
             myregs = interesting_regions[buf]['last']
         bisect_res = bisect.bisect(myregs, region - 1)
         sel_end = myregs[bisect_res -1 ]
-        reg = sublime.Region(sel_end, sel_end)
+        reg = sublime.Region(sel_end)
         buf.sel().clear()
         buf.sel().add(reg)
         buf.show(reg, False)
@@ -90,6 +87,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 bisect_res = bisect.bisect(first, region.b)
                 sel_begin = region.a
                 sel_end = first[bisect_res] + 2
+
             elif region.a > region.b:
                 bisect_res = bisect.bisect(first, region.b)
                 sel_end = first[bisect_res] + 2
@@ -99,6 +97,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 else:
                     sel_begin = region.a
                     buf.sel().subtract(region)
+
             elif region.a == region.b:
                 bisect_res = bisect.bisect(first, region.b -2)
                 sel_begin = first[bisect_res -1] + 2
@@ -131,6 +130,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                 else:
                     sel_begin = region.a
                     buf.sel().subtract(region)
+
             elif region.a > region.b:
                 sel_begin = region.a
                 bisect_end = bisect.bisect(first, region.b - 3)
@@ -138,6 +138,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                     sel_end = -1
                 else:
                     sel_end = first[bisect_end -1] + 2
+
             elif region.b == region.a:
                 bisect_end = bisect.bisect(first, region.b - 2)
                 sel_end = first[bisect_end -1] + 2
@@ -147,5 +148,3 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
 
         buf.sel().add_all([sublime.Region(begin, end) for begin,end in regs_dict.items()])
         buf.show(buf.sel()[0], False)
-
-
