@@ -86,25 +86,23 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 build_or_rebuild_ws_for_view(buf, immediate=True)
                 first = interesting_regions[buf]['first']
 
-            not_cursor, cursor = region.to_tuple()
-            if cursor > not_cursor:
-                bisect_res = bisect.bisect(first, cursor)
-                sel_begin = not_cursor
+            if region.b > region.a:
+                bisect_res = bisect.bisect(first, region.b)
+                sel_begin = region.a
                 sel_end = first[bisect_res] + 2
-            elif not_cursor > cursor:
-                bisect_res = bisect.bisect(first, cursor)
-                sel_begin = not_cursor
+            elif region.a > region.b:
+                bisect_res = bisect.bisect(first, region.b)
                 sel_end = first[bisect_res] + 2
-                if sel_begin == sel_end or sel_end - 3 == sel_begin:
-                    sel_end = not_cursor
-                    sel_begin = cursor
+                if region.a == sel_end or sel_end - 3 == region.a:
+                    sel_end = region.a
+                    sel_begin = region.b
                 else:
+                    sel_begin = region.a
                     buf.sel().subtract(region)
-            elif not_cursor == cursor:
-                bisect_res = bisect.bisect(first, cursor -2)
+            elif region.a == region.b:
+                bisect_res = bisect.bisect(first, region.b -2)
                 sel_begin = first[bisect_res -1] + 2
                 sel_end = first[bisect_res] + 2
-                pass
 
             regs_dict[sel_begin] = sel_end
 
@@ -124,27 +122,27 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                 build_or_rebuild_ws_for_view(buf, immediate=True)
                 first = interesting_regions[buf]['first']
 
-            not_cursor, cursor = region.to_tuple()
-            if cursor > not_cursor:
-                sel_begin = not_cursor
-                bisect_end = bisect.bisect(first, cursor - 3)
+            if region.b > region.a:
+                bisect_end = bisect.bisect(first, region.b - 3)
                 sel_end = first[bisect_end -1] + 2
-                if sel_begin == sel_end:
-                    sel_end = not_cursor
-                    sel_begin = cursor
+                if region.a == sel_end:
+                    sel_end = region.a
+                    sel_begin = region.b
                 else:
+                    sel_begin = region.a
                     buf.sel().subtract(region)
-            elif not_cursor > cursor:
-                sel_begin = not_cursor
-                bisect_end = bisect.bisect(first, cursor - 3)
+            elif region.a > region.b:
+                sel_begin = region.a
+                bisect_end = bisect.bisect(first, region.b - 3)
                 if bisect_end == 0:
                     sel_end = -1
                 else:
                     sel_end = first[bisect_end -1] + 2
-            elif cursor == not_cursor:
-                bisect_end = bisect.bisect(first, cursor - 2)
+            elif region.b == region.a:
+                bisect_end = bisect.bisect(first, region.b - 2)
                 sel_end = first[bisect_end -1] + 2
                 sel_begin = first[bisect_end] + 2
+
             regs_dict[sel_begin] = sel_end
 
         buf.sel().add_all([sublime.Region(begin, end) for begin,end in regs_dict.items()])
