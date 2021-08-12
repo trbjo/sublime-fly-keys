@@ -79,20 +79,75 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
         buf = self.view
         regs_dict = {}
         for region in buf.sel():
+
             try:
                 first = interesting_regions[buf]['first']
             except KeyError:
                 build_or_rebuild_ws_for_view(buf, immediate=True)
                 first = interesting_regions[buf]['first']
-            if region.empty():
-                bisect_begin = bisect.bisect(first, region.begin() -2)
-                sel_begin = first[bisect_begin -1 ] + 2
-            else:
-                sel_begin = region.begin()
-            bisect_end = bisect.bisect(first, region.end() -2)
-            sel_end = first[bisect_end] + 3
+
+            not_cursor, cursor = region.to_tuple()
+            if cursor > not_cursor:
+                bisect_res = bisect.bisect(first, cursor)
+                sel_begin = not_cursor
+                sel_end = first[bisect_res] + 2
+            elif not_cursor > cursor:
+                bisect_res = bisect.bisect(first, cursor)
+                sel_begin = not_cursor
+                sel_end = first[bisect_res] + 2
+                if sel_begin == sel_end or sel_end - 3 == sel_begin:
+                    sel_end = not_cursor
+                    sel_begin = cursor
+                else:
+                    buf.sel().subtract(region)
+            elif not_cursor == cursor:
+                bisect_res = bisect.bisect(first, cursor -2)
+                sel_begin = first[bisect_res -1] + 2
+                sel_end = first[bisect_res] + 2
+                pass
 
             regs_dict[sel_begin] = sel_end
 
-        buf.sel().add_all([sublime.Region(begin,end -1) for begin,end in regs_dict.items()])
+        buf.sel().add_all([sublime.Region(begin,end) for begin,end in regs_dict.items()])
         buf.show(buf.sel()[-1], False)
+
+
+class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextCommand):
+    def run(self, _):
+        buf = self.view
+        regs_dict = {}
+        for region in buf.sel():
+
+            try:
+                first = interesting_regions[buf]['first']
+            except KeyError:
+                build_or_rebuild_ws_for_view(buf, immediate=True)
+                first = interesting_regions[buf]['first']
+
+            not_cursor, cursor = region.to_tuple()
+            if cursor > not_cursor:
+                sel_begin = not_cursor
+                bisect_end = bisect.bisect(first, cursor - 3)
+                sel_end = first[bisect_end -1] + 2
+                if sel_begin == sel_end:
+                    sel_end = not_cursor
+                    sel_begin = cursor
+                else:
+                    buf.sel().subtract(region)
+            elif not_cursor > cursor:
+                sel_begin = not_cursor
+                bisect_end = bisect.bisect(first, cursor - 3)
+                if bisect_end == 0:
+                    sel_end = -1
+                else:
+                    sel_end = first[bisect_end -1] + 2
+            elif cursor == not_cursor:
+                bisect_end = bisect.bisect(first, cursor - 2)
+                sel_end = first[bisect_end -1] + 2
+                sel_begin = first[bisect_end] + 2
+            regs_dict[sel_begin] = sel_end
+
+        buf.sel().add_all([sublime.Region(begin, end) for begin,end in regs_dict.items()])
+        buf.show(buf.sel()[0], False)
+
+
