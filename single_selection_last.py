@@ -1,4 +1,3 @@
-import sublime
 import sublime_plugin
 
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
