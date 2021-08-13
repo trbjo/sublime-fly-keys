@@ -1,9 +1,6 @@
 import sublime
 import sublime_plugin
 
-
-# hej
-
 class DeleteSmartCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         buf = self.view
