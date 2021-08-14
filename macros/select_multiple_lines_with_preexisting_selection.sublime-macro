@@ -1,4 +1,0 @@
-[
-    {"command": "move", "args": {"by": "characters", "forward": true, "extend": false}},
-    {"command": "select_lines", "args": {"forward": true}},
-]
