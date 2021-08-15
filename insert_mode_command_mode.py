@@ -25,7 +25,9 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
         for region in selections:
 
             if region.empty():
-                continue
+                if len(selections) == 1:
+                    return
+                selections.subtract(region)
 
             if after == True:
                 reg = region.end() + 1
