@@ -4,7 +4,7 @@ import sublime_plugin
 import re
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _):
         buf = self.view
         reg_list = []
         for region in buf.sel():
