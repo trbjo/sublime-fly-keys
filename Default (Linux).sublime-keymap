@@ -290,11 +290,10 @@
 
 {"keys": [","], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+,"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_Word_backward.sublime-macro"}, "context": [{"key": "setting.command_mode"}, ] },
-// {"keys": [","], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_end_of_selection.sublime-macro"}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
 
 {"keys": [","], "command": "insert_before_or_after", "args": {"after": false}, "context":
 [
-    // {"key": "last_command", "operator": "equal", "operand": "insert_snippet" },
+    {"key": "last_command", "operator": "equal", "operand": "insert_snippet" },
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
     {"key": "setting.command_mode"},
 ]
@@ -303,7 +302,6 @@
 
 {"keys": ["p"], "command": "delete_word", "args": { "forward": true }, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+p"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_Word_forward.sublime-macro"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["p"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/goto_end_of_selection.sublime-macro"}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "text", "operator": "regex_contains", "operand": "\n$"}, ] },
 
 {"keys": ["p"], "command": "insert_before_or_after", "args": {"after": true}, "context":
 [
