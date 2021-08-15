@@ -18,8 +18,7 @@ def build_or_rebuild_ws_for_view(view, immediate: bool):
             interesting_regions[view]['first'] = first
             interesting_regions[view]['last'] = last
         except ValueError:
-            interesting_regions[view]['first'] = []
-            interesting_regions[view]['last'] = []
+            pass
     timeout = datetime.datetime.now()
 
 
