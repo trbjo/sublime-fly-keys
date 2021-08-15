@@ -1,4 +1,0 @@
-[
-    {"command": "copy"},
-    {"command": "move", "args": {"by": "characters", "forward": true}},
-]
