@@ -1,4 +1,0 @@
-[
-    { "command": "move_to", "args": {"to": "bol", "extend": false} },
-    { "command": "find_under_expand" },
-]
