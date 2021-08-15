@@ -6,3 +6,4 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
         reg = buf.sel()[-1]
         buf.sel().clear()
         buf.sel().add(reg)
+        buf.show(reg, True)
