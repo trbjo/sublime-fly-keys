@@ -20,11 +20,7 @@
 [ {"key": "control", "operand": "sidebar_tree"} ] },
 
 ////////////////// Up:
-{"keys": ["c"], "command": "move", "args": {"by": "lines", "forward": false}, "context":
-[
-    {"key": "setting.command_mode"},
-]
-},
+{"keys": ["c"], "command": "move", "args": {"by": "lines", "forward": false}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["c"], "command": "move", "args": {"by": "lines", "forward": false, "extend": true}, "context":
 [
     {"key": "setting.command_mode"},
@@ -39,11 +35,7 @@
 },
 
 ////////////////// Down:
-{"keys": ["t"], "command": "move", "args": {"by": "lines", "forward": true}, "context":
-[
-    {"key": "setting.command_mode"},
-]
-},
+{"keys": ["t"], "command": "move", "args": {"by": "lines", "forward": true}, "context": [ {"key": "setting.command_mode"}, ] },
 {"keys": ["t"], "command": "move", "args": {"by": "lines", "forward": true, "extend": true}, "context":
 [
     {"key": "setting.command_mode"},
@@ -204,14 +196,6 @@
 {"keys": ["M"], "command": "show_panel", "args": {"panel": "replace"}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+m"], "command": "show_panel", "args": {"panel": "find_in_files"}, "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["tab"], "command": "toggle_regex", "context": [
-    {"key": "panel_has_focus", "operator": "equal", "operand": true },
-    {"key": "setting.is_widget", "operator": "equal", "operand": true}
-] },
-{"keys": ["tab"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [
-    {"key": "selection_empty", "operator": "equal", "operand": false },
-    {"key": "panel", "operand": "find"}, {"key": "panel_has_focus"},
-] },
 {"keys": ["ctrl+d"], "command": "toggle_regex", "context":
     [
         {"key": "panel_has_focus", "operator": "equal", "operand": true },
@@ -231,24 +215,27 @@
     ]
 },
 
-///////////////////////////////////////////////////////
-////////////////////// ENTER: ////////////////////////
-//////////////////////////////////////////////////////
+////////////////////////////////////////////////
+////////////// Find and select ////////////////
+//////////////////////////////////////////////
 
-{ "keys": ["ctrl+enter"], "command": "insert_snippet", "args": {"contents": "\n${0:$SELECTION}"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+shift+enter"], "command": "insert_snippet", "args": {"contents": "$0\n"}, "context": [{"key": "setting.command_mode"}, ] },
+
 {"keys": ["ctrl+shift+enter"], "command": "insert_snippet", "args": {"contents": "\n${0:$SELECTION}\n"}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode"}, ]},
-{"keys": ["ctrl+enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-{"keys": ["ctrl+enter"], "command": "find_next", "args": {"close_panel": true}, "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
 {"keys": ["ctrl+shift+enter"], "command": "find_all", "args": {"close_panel": true}, "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
 {"keys": ["ctrl+shift+enter"], "command": "replace_all", "args": {"close_panel": true}, "context": [{"key": "panel", "operand": "replace"}, {"key": "panel_has_focus"} ] },
-{"keys": ["enter"], "command": "insert_snippet", "args": {"contents": "\n${0:$SELECTION}\n"}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false}, {"key" : "panel_has_focus", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": false } ] },
+
+{"keys": ["ctrl+enter"], "command": "insert", "args": {"characters": "\n"} },
 {"keys": ["ctrl+enter"], "command": "replace_next", "context": [{"key": "panel_visible", "operator": "equal", "operand": true}, {"key": "setting.command_mode"} ] },
-{"keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
-{"keys": ["enter"], "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode"} ] },
-
-
 {"keys": ["shift+enter"], "command": "find_prev", "context": [{"key": "setting.command_mode"} ] },
+
+// because we use enter as fallback we must include all the default keybindings as well
+{"keys": ["enter"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
+{"keys": ["enter"], "command": "select", "context": [{"key": "control", "operand": "sidebar_tree"}] },
+{"keys": ["enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
+{"keys": ["enter"], "command": "find_next", "context": [{"key": "panel_has_focus"}] },
+{"keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
+{ "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
 {"keys": ["alt"], "command" : "noop"},
 {"keys": ["alt"], "command": "find_next", "context": [{"key": "setting.command_mode"} ] },
@@ -318,17 +305,13 @@
 
 {"keys": ["y"], "command": "undo", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+y"], "command": "redo", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+y"], "command": "undo", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 ///////////////////////////////////////////////////
 /////////////////// COMMENT: //////////////////////
 ///////////////////////////////////////////////////
 
 {"keys": [";"], "command": "toggle_comment", "args": { "block": false },"context": [{"key": "setting.command_mode"}, ] },
-// {"keys": [";"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/toggle_comment.sublime-macro"},"context": [{"key": "selection_empty", "operator": "equal", "operand": false}, {"key": "setting.command_mode"}, ] },
-{"keys": [";"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/line_end_semicolon.sublime-macro"},"context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "preceding_text", "operator": "not_regex_contains", "operand": "for\\s?\\(", "match_all": true}, {"key": "selector", "operator": "equal", "operand": "source.cs, source.tsx"}, ] },
-{"keys": [";"], "command": "move_to", "args": {"to": "hardeol", "extend": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "following_text", "operator": "regex_contains", "operand": ";$", "match_all": true}, {"key": "selector", "operator": "equal", "operand": "source.cs, source.tsx"}, ] },
-{"keys": [";"], "command": "set_setting", "args": {"setting": "command_mode", "value": true }, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "preceding_text", "operator": "regex_contains", "operand": ";$", "match_all": true}, {"key": "following_text", "operator": "regex_match", "operand": "^$", "match_all": true}, {"key": "selector", "operator": "equal", "operand": "source"}, ] },
+{"keys": [";"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/toggle_comment.sublime-macro"},"context": [{"key": "selection_empty", "operator": "equal", "operand": false}, {"key": "setting.command_mode"}, ] },
 {"keys": [";"], "command": "toggle_comment", "args": { "block": false }, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^\\s*$", "match_all": true}, {"key": "following_text", "operator": "regex_match", "operand": "^$|^[a-z\\-_\\.\\(\\),]+$", "match_all": true}, {"key": "setting.command_mode"}, ] }, {"keys": [";"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/toggle_comment_when_has_selection.sublime-macro"},"context": [{"key": "text", "operator": "not_regex_contains", "operand": "\n"}, {"key": "selection_empty", "operator": "equal", "operand": false}, {"key": "setting.command_mode"}, ] },
 
 /////////////////////////////////////////////////
@@ -344,13 +327,67 @@
 /////////////////// COPY: //////////////////////
 //////////////////////////////////////////////////
 
-{"keys": ["j"], "command": "copy", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["j"], "command": "noop", "context": [{"key": "setting.command_mode"}, {"key": "following_text", "operator": "regex_match", "operand": "^\\s*$"}, {"key": "preceding_text", "operator": "regex_match", "operand": "^\\s*$"}, ] },
-{"keys": ["j"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/copy_and_unselect.sublime-macro"}, "context": [{"key": "last_command", "operator": "not_equal", "operand": "expand_selection" }, {"key": "last_command", "operator": "not_equal", "operand": "find_under_expand" }, {"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode"}, ] },
-{"keys": ["j"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/copy_and_unselect_multiple_cursors.sublime-macro"}, "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "setting.command_mode"}, ] },
-{"keys": ["j"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/copy_line_and_unselect.sublime-macro"}, "context": [{"key": "setting.command_mode"}, {"key": "last_command", "operator": "equal", "operand": "" }, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
-{"keys": ["j"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/copy_line_and_unselect.sublime-macro"}, "context": [{"key": "setting.command_mode"}, {"key": "last_command", "operator": "equal", "operand": "find_next" }, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
-{"keys": ["j"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/copy_in_find_in_files.sublime-macro"}, "context": [{"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "preceding_text", "operator": "not_regex_contains", "operand": "^/"}, {"key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+// this command is intended to be run after a search to copy the whole line
+{ "keys": ["j"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "clear_selection", "args": {"forward": true}},
+                {"command": "copy"},
+            ]},
+        "context": [
+            { "key": "setting.command_mode" },
+     ]
+},
+
+{"keys": ["j"], "command": "copy", "context": [
+    {"key": "setting.command_mode"},
+    {"key": "last_command", "operator": "not_equal", "operand": "" },
+    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+] },
+
+{"keys": ["j"], "command": "noop", "context": [
+    {"key": "setting.command_mode"},
+    {"key": "following_text", "operator": "regex_match", "operand": "^\\s*$"},
+    {"key": "preceding_text", "operator": "regex_match", "operand": "^\\s*$"},
+] },
+
+// this command is intended to be run after a search to copy the whole line
+{ "keys": ["j"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "copy"},
+                {"command": "clear_selection", "args": {"forward": true}},
+            ]},
+        "context": [
+            {"key": "last_command", "operator": "not_equal", "operand": "expand_selection" },
+            {"key": "last_command", "operator": "not_equal", "operand": "find_under_expand" },
+            {"key": "last_command", "operator": "not_equal", "operand": "" },
+            {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+            {"key": "selection_empty", "operator": "equal", "operand": false },
+            {"key": "setting.command_mode"},
+     ]
+},
+
+// this command is intended to be run after a search to copy the whole line
+{ "keys": ["j"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "create_region_from_selections"},
+                {"command": "copy"},
+                {"command": "move", "args": {"by": "characters", "forward": true}},
+            ]},
+        "context": [
+            {"key": "num_selections", "operator": "not_equal", "operand": 1 },
+            {"key": "selection_empty", "operator": "equal", "operand": true },
+            {"key": "setting.command_mode"},
+     ]
+},
+
+{"keys": ["j"], "command": "copy_in_find_in_files", "context": [
+    {"key": "setting.command_mode"},
+    {"key": "selection_empty", "operator": "equal", "operand": true },
+    {"key": "selector","operator": "equal", "operand": "text.find-in-files"}
+] },
 
 //////////////////////////////////////////////////
 /////////////////// PASTE: //////////////////////
@@ -363,25 +400,42 @@
 /////////////////// DUPLICATE: //////////////////////
 ///////////////////////////////////////////////////
 
-{"keys": ["x"], "command": "duplicate_line", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "" }, {"key": "setting.command_mode"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "find_next" }, {"key": "setting.command_mode"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_after_search.sublime-macro"},"context": [{"key": "last_command", "operator": "equal", "operand": "hide_panel" }, {"key": "setting.command_mode"}, ] },
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_with_multiple_cursors.sublime-macro"},"context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": true }, {"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
-// {"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_line_and_uncomment.sublime-macro"},"context": [{"key": "setting.command_mode"}, {"key": "selector","operator": "equal", "operand": "comment"} ] },
-{"keys": ["ctrl+x"], "command": "duplicate_line", "context": [{"key": "setting.command_mode"} ] },
+// this command is intended to be run after a search to mark the whole word
+{ "keys": ["x"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "clear_selection", "args": {"forward": false}},
+                {"command": "duplicate_line"},
+            ]},
+        "context": [
+            { "key": "setting.command_mode" },
+     ]
+},
+
+{"keys": ["x"], "command": "duplicate_line", "context": [
+    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+    {"key": "last_command", "operator": "not_equal", "operand": "" },
+    {"key": "setting.command_mode"},
+ ] },
+
+
+{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_with_multiple_cursors.sublime-macro"},"context":
+    [
+    {"key": "setting.command_mode"},
+    {"key": "selection_empty", "operator": "equal", "operand": true },
+    {"key": "num_selections", "operator": "not_equal", "operand": 1 },
+    ]
+},
 
 /////////////////////////////////////////////////////
 /////////////////// SELECTIONS: /////////////////////
 /////////////////////////////////////////////////////
 
-
-
 {"keys": ["b"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+b"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["7"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["7"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
+{"keys": ["4"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["4"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
 
 
 
@@ -393,7 +447,24 @@
 
 // expand selection to paragraph
 
-{"keys": ["d"], "command": "extended_expand_selection_to_paragraph_forward", "context": [{"key": "setting.command_mode"} ] },
+// this command is intended to be run after a search to mark the whole paragraph
+{ "keys": ["d"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "clear_selection", "args": {"forward": false}},
+                {"command": "extended_expand_selection_to_paragraph_forward"},
+            ]},
+        "context": [
+            { "key": "setting.command_mode" },
+     ]
+},
+
+{"keys": ["d"], "command": "extended_expand_selection_to_paragraph_forward", "context": [
+    {"key": "setting.command_mode"},
+    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+    {"key": "last_command", "operator": "not_equal", "operand": "" },
+] },
+
 
 {"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "scope"}, "context": [{"key": "setting.command_mode"}, {"key": "text", "operator": "not_regex_contains", "operand": "\n"},] },
 {"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "smart"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operand": "string"} ] },
@@ -413,93 +484,45 @@
 {"keys": ["ctrl+shift+n"], "command": "subtract_first_selection", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["ctrl+n"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context": [
+    {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": true},
 ] },
 
 {"keys": ["ctrl+n"], "command": "undo_find_under_expand", "context": [
-    {"key": "selection_empty", "operator": "equal", "operand": false},
-] },
-
-{"keys": ["n"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context":
-[
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-] },
-
-{"keys": ["n"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
-[
-    {"key": "setting.command_mode"},
-    {"key": "following_text", "operator": "regex_match", "operand": "^$"},
-    {"key": "preceding_text", "operator": "not_regex_match", "operand": "^$"},
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-] },
-
-
-{"keys": ["n"], "command": "find_under_expand", "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false},
 ] },
 
+// this command is intended to be run after a search to mark the whole word
+{ "keys": ["n"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "clear_selection", "args": {"forward": false}},
+                {"command": "find_under_expand"},
+            ]},
+        "context": [
+            { "key": "setting.command_mode" },
+     ]
+},
 
 {"keys": ["n"], "command": "find_under_expand", "context": [
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-    {"key": "following_text", "operator": "regex_contains", "operand": "^\\w"},
-] },
-
-{"keys": ["n"], "command": "find_under_expand", "context": [
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-    {"key": "preceding_text", "operator": "regex_contains", "operand": "\\w$"},
-    {"key": "following_text", "operator": "regex_contains", "operand": "^\\s"},
-] },
-
-// {"keys": ["n"], "command": "find_under_expand", "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": true}, {"key": "following_text", "operator": "regex_contains", "operand": "^$"}, ] },
-
-{"keys": ["n"], "command": "find_under_expand", "context": [
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-    {"key": "preceding_text", "operator": "regex_contains", "operand": "\\w$"},
-] },
-
-{"keys": ["n"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context": [
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-    {"key": "preceding_text", "operator": "regex_contains", "operand": " $"},
-    {"key": "following_text", "operator": "regex_contains", "operand": "^\\W"},
+    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+    {"key": "last_command", "operator": "not_equal", "operand": "" },
     {"key": "setting.command_mode"},
 ] },
+
 
 { "keys": ["n"], "command": "chain",
         "args": {
             "commands": [
-                {"command": "move_to", "args": { "to": "bol" }},
+                {"command": "smart_find_word"},
                 {"command": "find_under_expand"},
             ]},
         "context": [
-            {"key": "preceding_text", "operator": "regex_match", "operand": "^\\s*$", "match_all": true},
-            {"key": "following_text", "operator": "regex_contains", "operand": "^\\s+", "match_all": false},
-            {"key": "setting.command_mode"},
+            { "key": "setting.command_mode" },
+            { "key": "selection_empty", "operator": "equal", "operand": true },
      ]
 },
-
-// this command is intended to be run after a search to mark the whole word
-{"keys": ["n"], "command": "expand_selection", "args": {"to": "word"}, "context": [
-    {"key": "selection_empty", "operator": "equal", "operand": false },
-    {"key": "last_command", "operator": "equal", "operand": "find_next" },
-    {"key": "last_command", "operator": "not_equal", "operand": "expand_selection" },
-    {"key": "text", "operator": "regex_match", "operand": "\\w+"},
-    {"key": "setting.command_mode"},
-] },
-
-// this command is intended to be run after a search to mark the whole word
-{"keys": ["n"], "command": "expand_selection", "args": {"to": "word"}, "context": [
-    {"key": "selection_empty", "operator": "equal", "operand": false },
-    {"key": "last_command", "operator": "equal", "operand": "" },
-    {"key": "last_command", "operator": "not_equal", "operand": "expand_selection" },
-    {"key": "text", "operator": "regex_match", "operand": "\\w+"},
-    {"key": "setting.command_mode"},
-] },
-
 
 //////////////////////////////////////////////
 ///////////// EXPAND WITH CONTROL: ///////////
@@ -545,6 +568,8 @@
 
 {"keys": ["shift+space"], "command": "auto_complete"},
 
+{"keys": ["/"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
 
 
 
@@ -573,6 +598,7 @@
 },
 
 {"keys": ["ctrl"], "command": "lsp_hover", "context": [{"key": "setting.lsp_active"}, ] },
+{"keys": ["ctrl"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 {"keys": ["z"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["z"], "command": "lsp_document_symbols", "context": [{"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "documentSymbolProvider"} ] },
@@ -590,19 +616,19 @@
 {"keys": ["ctrl+escape"], "command": "single_selection_last", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
 
 {"keys": ["escape"], "command": "show_at_center", "context": [{"key": "setting.command_mode"}, ] ,},
-{"keys": ["escape"], "command": "hide_auto_complete", "context": [{ "key": "auto_complete_visible", "operator": "equal", "operand": true } ] },
-{"keys": ["escape"], "command": "command_mode", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false } ] },
 {"keys": ["escape"], "command": "single_selection", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
+{"keys": ["escape"], "command": "hide_popup", "context": [{"key": "popup_visible", "operator": "equal", "operand": true} ] },
+// {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{ "key": "panel_visible", "operator": "equal", "operand": true } ] },
+{ "keys": ["escape"], "command": "hide_overlay", "context":
+ [
+  { "key": "overlay_visible", "operator": "equal", "operand": true },
+  { "key": "panel_has_focus", "operator": "equal", "operand": false }
+ ]
+},
+
+{"keys": ["escape"], "command": "command_mode", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "setting.is_widget", "operator": "equal", "operand": false} ] },
 {"keys": ["escape"], "command": "clear_fields", "context": [{"key": "has_next_field", "operator": "equal", "operand": true} ] },
 {"keys": ["escape"], "command": "clear_fields", "context": [{"key": "has_prev_field", "operator": "equal", "operand": true} ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{"key": "panel", "operand": "replace"}, { "key": "panel_visible", "operator": "equal", "operand": true } ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{"key": "panel", "operand": "find_in_files"}, { "key": "panel_visible", "operator": "equal", "operand": true } ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{"key": "panel", "operand": "find"}, { "key": "panel_visible", "operator": "equal", "operand": true } ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{"key": "panel", "operand": "incremental_find"}, { "key": "panel_visible", "operator": "equal", "operand": true } ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{"key": "panel", "operand": "output.exec"}, { "key": "panel_visible", "operator": "equal", "operand": true } ] },
-{"keys": ["escape"], "command": "hide_overlay", "context": [{"key": "overlay_visible", "operator": "equal", "operand": true} ] },
-{"keys": ["escape"], "command": "hide_popup", "context": [{"key": "popup_visible", "operator": "equal", "operand": true} ] },
-{"keys": ["escape"], "command": "command_mode", "context": [{"key": "overlay_visible", "operator": "equal", "operand": false }, {"key" : "panel_has_focus", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "setting.is_widget", "operator": "equal", "operand": true} ] },
 {"keys": ["escape"], "command": "focus_neighboring_group", "context": [{"key": "panel", "operand": "console"}, {"key": "panel_has_focus"} ] },
 
 //////////////////////////////////////////////////////////
@@ -644,15 +670,17 @@
 
 {"keys": ["ctrl+h"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"} },
 
-{"keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}, "context": [{"key": "setting.command_mode"}, ] ,},
+{"keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}},
 {"keys": [" "], "command": "insert", "args": {"characters": " "}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-{"keys": [" "], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "overlay_visible", "operator": "equal", "operand": true }, {"key": "preceding_text", "operator": "regex_contains", "operand": "@"}, ] },
+
+
 {"keys": [" "], "command": "insert", "args": {"characters": "@"}, "context": [{"key": "preceding_text", "operator": "not_regex_contains", "operand": "@$|#$"}, {"key": "goto_anything:input" }, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
+{"keys": [" "], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "overlay_visible", "operator": "equal", "operand": true }, {"key": "preceding_text", "operator": "regex_contains", "operand": "@|:$"}, ] },
 {"keys": [" "], "command": "insert", "args": {"characters": ":"}, "context": [{"key": "preceding_text", "operator": "regex_contains", "operand": ":[0-9]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
 
-////////////////////////////////////////////////////////
-/////////////////// Miscellaneous: /////////////////////
-////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+/////////////////// Insert Mode: /////////////////////
+/////////////////////////////////////////////////////
 
 {"keys": ["h"], "command": "insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.command_mode"}, ] },
@@ -664,21 +692,28 @@
     ]
 },
 
+
+///////////////////////////////////////////////////////
+////////////// Focus neighbor groups: ////////////////
+/////////////////////////////////////////////////////
+
 {"keys": ["v"], "command": "focus_neighboring_group", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+v"], "command": "focus_neighboring_group", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["/"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////// THe number row is not used in command mode, so we can use it for all sorts off cool stuff //////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{"keys": ["#"], "command": "close", "context": [{"key": "setting.command_mode"} ] },
+{"keys": ["#"], "command": "close"},
+{"keys": ["#"], "command": "insert", "args": {"characters": "#"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
 {"keys": ["3"], "command": "save", "args": { "async": true }, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["3"], "command": "lsp_save", "context": [{"key": "setting.lsp_active"}, {"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "textDocumentSync.willSave | textDocumentSync.willSaveWaitUntil | codeActionProvider.codeActionKinds | documentFormattingProvider | documentRangeFormattingProvider"} ] },
-{"keys": ["8"], "command": "prompt_git", "context": [{"key": "selector", "operator": "equal", "operand": "text.git.commit"}, {"key": "setting.command_mode"}, ] },
+{"keys": ["3"], "command": "prompt_git", "context": [{"key": "selector", "operator": "equal", "operand": "text.git.commit"}, {"key": "setting.command_mode"}, ] },
+
 {"keys": ["5"], "command": "close_pane", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["6"], "command": "new_pane", "args": {"move": true}, "context": [{"key": "setting.command_mode"}, ] },
+
 {"keys": ["7"], "command": "revert_hunk", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["7"], "command": "revert_modification", "context": [{"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }, {"key": "setting.command_mode"}, ] },
 {"keys": ["8"], "command": "next_modification", "context": [{"key": "setting.command_mode"}, ] },
@@ -697,7 +732,5 @@
 {"keys": ["8"], "command": "insert", "args": {"characters": ":8"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
 {"keys": ["9"], "command": "insert", "args": {"characters": ":9"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
 {"keys": ["0"], "command": "insert", "args": {"characters": ":0"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-
-{"keys": ["`"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{ "key": "auto_complete_visible", "operator": "equal", "operand": true }, {"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 ]
