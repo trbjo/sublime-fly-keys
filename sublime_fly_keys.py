@@ -11,6 +11,40 @@ interesting_regions = {}
 timeout = datetime.datetime.now()
 WORDCHARS = r'[-\._\w]+'
 
+class AddLineCommand(sublime_plugin.TextCommand):
+    def run(self, edit, forward):
+        buf = self.view
+        selections = buf.sel()
+        for region in reversed(selections):
+            if not region.empty():
+                continue
+
+            cur_line_num = buf.full_line(region.begin())
+
+            if forward == True:
+                # target_line = buf.full_line(region.begin())
+                target_line = buf.full_line(cur_line_num.end() + 1)
+                target_line_offset = cur_line_num.end()
+            else:
+                target_line = buf.full_line(region.begin())
+                target_line_offset = cur_line_num.begin()
+
+            # we find the indent level
+            indent = 0
+            for i in range(target_line.begin(), target_line.end()):
+                if buf.substr(i) != ' ':
+                    break
+                indent+=1
+
+            selections.subtract(region)
+            buf.insert(edit, target_line_offset, ' ' * indent + '\n')
+            selections.add(target_line_offset + indent)
+
+        buf.settings().set(key="block_caret", value=False)
+        buf.settings().set(key="command_mode", value=False)
+
+
+
 class ClearSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _, forward):
         buf = self.view

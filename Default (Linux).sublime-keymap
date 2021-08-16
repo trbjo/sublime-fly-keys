@@ -245,8 +245,8 @@
 /////////////////// insert line: ////////////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["."], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+."], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line Before.sublime-macro"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["."], "command": "add_line", "args": {"forward": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+."], "command": "add_line", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, ] },
 
 /////////////////////////////////////////////////////
 ////////////////// insert space: ////////////////////
