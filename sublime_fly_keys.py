@@ -22,11 +22,16 @@ class AddLineCommand(sublime_plugin.TextCommand):
             cur_line_num = buf.full_line(region.begin())
 
             if forward == True:
-                # target_line = buf.full_line(region.begin())
-                target_line = buf.full_line(cur_line_num.end() + 1)
+                target_line = buf.line(cur_line_num.end() + 1)
+                while target_line.end() - target_line.begin() < 1 and target_line.end() < buf.size():
+                    target_line = buf.line(target_line.end() + 1)
+
                 target_line_offset = cur_line_num.end()
             else:
-                target_line = buf.full_line(region.begin())
+                target_line = buf.line(region.begin())
+                while target_line.end() - target_line.begin() < 1 and target_line.begin() > 1:
+                    target_line = buf.line(target_line.end() + 1)
+
                 target_line_offset = cur_line_num.begin()
 
             # we find the indent level
