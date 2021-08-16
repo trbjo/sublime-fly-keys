@@ -30,7 +30,7 @@ class AddLineCommand(sublime_plugin.TextCommand):
             else:
                 target_line = buf.line(region.begin())
                 while target_line.end() - target_line.begin() < 1 and target_line.begin() > 1:
-                    target_line = buf.line(target_line.end() + 1)
+                    target_line = buf.line(target_line.begin() - 1)
 
                 target_line_offset = cur_line_num.begin()
 
