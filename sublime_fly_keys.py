@@ -17,19 +17,19 @@ class AddLineCommand(sublime_plugin.TextCommand):
         selections = buf.sel()
         for region in reversed(selections):
 
-            cur_line_num = buf.full_line(region.begin())
+            cur_line_num = buf.line(region.begin())
             cur_line = buf.substr(cur_line_num)
             cur_indent = len(cur_line) - len(cur_line.lstrip())
 
             if forward == True:
-                target_line_offset = cur_line_num.end()
-                target_line = buf.line(cur_line_num.end() + 1)
+                target_line_offset = cur_line_num.b + 1
+                target_line = buf.line(target_line_offset)
                 while target_line.b - target_line.a < 1 and target_line.b < buf.size():
                     target_line = buf.line(target_line.b + 1)
 
             else:
-                target_line_offset = cur_line_num.begin()
-                target_line = buf.line(cur_line_num.begin() - 1)
+                target_line_offset = cur_line_num.a
+                target_line = buf.line(target_line_offset - 1)
                 while target_line.b - target_line.a < 1 and target_line.a > 1:
                     target_line = buf.line(target_line.a - 1)
 
