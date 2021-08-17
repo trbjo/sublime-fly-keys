@@ -539,58 +539,62 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
 class SmartFindWordCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view
-        reg = buf.sel()[-1]
-        if not reg.empty():
-            return
+        sel = buf.sel()
+        positions = []
+        for reg in sel:
+            if not reg.empty():
+                end_pos = reg.end()
+                sel.subtract(reg)
+                sel.add(end_pos)
 
-        cur_line_in_points_beg, cur_line_in_points_end = buf.line(reg)
+            cur_line_in_points_beg, cur_line_in_points_end = buf.line(reg)
 
-        str_after_cur = buf.substr(reg.begin())
-        if str_after_cur.isalpha():
-            return
-
-        str_before_cur = buf.substr(reg.begin() -1)
-        if str_before_cur.isalpha():
-            return
-
-        rev_reg = sublime.Region(cur_line_in_points_beg, reg.begin())
-        rev_reg_str = buf.substr(rev_reg)
-        i = 0
-        rev_beg = -1
-        for char in reversed(rev_reg_str):
-            if rev_beg == -1:
-                if (char.isalnum() or char == '_'):
-                    rev_beg = i
-                    break
-            i += 1
-
-        forw_reg_str = ''
-        if rev_beg > 1 or rev_beg == -1:
-            forw_reg = sublime.Region(cur_line_in_points_end, reg.begin())
-            forw_reg_str = buf.substr(forw_reg)
-        if len(forw_reg_str) > 0:
-            j = 0
-            forw_beg = -1
-            for char in forw_reg_str:
-                if forw_beg == -1:
-                    if (char.isalnum() or char == '_'):
-                        forw_beg = j
-                        break
-                j += 1
-
-            if forw_beg != -1 and rev_beg == -1:
-                pos = reg.a + forw_beg
-            elif forw_beg < rev_beg:
-                pos = reg.a + forw_beg
-            elif rev_beg != -1:
-                pos = reg.a - rev_beg
-            else:
+            str_after_cur = buf.substr(reg.begin())
+            if str_after_cur.isalpha():
                 return
-        else:
-            pos = reg.a - rev_beg
 
-        buf.sel().subtract(buf.sel()[-1])
-        buf.sel().add(sublime.Region(pos))
+            str_before_cur = buf.substr(reg.begin() -1)
+            if str_before_cur.isalpha():
+                return
+
+            rev_reg = sublime.Region(cur_line_in_points_beg, reg.begin())
+            rev_reg_str = buf.substr(rev_reg)
+            i = 0
+            rev_beg = -1
+            for char in reversed(rev_reg_str):
+                if rev_beg == -1:
+                    if (char.isalnum() or char == '_'):
+                        rev_beg = i
+                        break
+                i += 1
+
+            forw_reg_str = ''
+            if rev_beg > 1 or rev_beg == -1:
+                forw_reg = sublime.Region(cur_line_in_points_end, reg.begin())
+                forw_reg_str = buf.substr(forw_reg)
+            if len(forw_reg_str) > 0:
+                j = 0
+                forw_beg = -1
+                for char in forw_reg_str:
+                    if forw_beg == -1:
+                        if (char.isalnum() or char == '_'):
+                            forw_beg = j
+                            break
+                    j += 1
+
+                if forw_beg != -1 and rev_beg == -1:
+                    positions.append(reg.a + forw_beg)
+                elif forw_beg < rev_beg:
+                    positions.append(reg.a + forw_beg)
+                elif rev_beg != -1:
+                    positions.append(reg.a - rev_beg)
+                else:
+                    return
+            else:
+                positions.append(reg.a - rev_beg)
+
+        sel.clear()
+        buf.sel().add_all([sublime.Region(pos) for pos in positions])
 
 
 

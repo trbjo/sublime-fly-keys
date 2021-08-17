@@ -497,7 +497,7 @@
 { "keys": ["n"], "command": "chain",
         "args": {
             "commands": [
-                {"command": "clear_selection", "args": {"forward": false}},
+                {"command": "smart_find_word"},
                 {"command": "find_under_expand"},
             ]},
         "context": [
@@ -508,21 +508,10 @@
 {"keys": ["n"], "command": "find_under_expand", "context": [
     {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
     {"key": "last_command", "operator": "not_equal", "operand": "" },
+    {"key": "selection_empty", "operator": "equal", "operand": false},
     {"key": "setting.command_mode"},
 ] },
 
-
-{ "keys": ["n"], "command": "chain",
-        "args": {
-            "commands": [
-                {"command": "smart_find_word"},
-                {"command": "find_under_expand"},
-            ]},
-        "context": [
-            { "key": "setting.command_mode" },
-            { "key": "selection_empty", "operator": "equal", "operand": true },
-     ]
-},
 
 //////////////////////////////////////////////
 ///////////// EXPAND WITH CONTROL: ///////////
