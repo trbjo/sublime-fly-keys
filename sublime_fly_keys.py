@@ -16,35 +16,25 @@ class AddLineCommand(sublime_plugin.TextCommand):
         buf = self.view
         selections = buf.sel()
         for region in reversed(selections):
-            if not region.empty():
-                continue
 
             cur_line_num = buf.full_line(region.begin())
-            # we find the indent level of the current line
-            cur_indent = 0
-            for i in range(cur_line_num.begin(), cur_line_num.end()):
-                if buf.substr(i) != ' ':
-                    break
-                cur_indent+=1
+            cur_line = buf.substr(cur_line_num)
+            cur_indent = len(cur_line) - len(cur_line.lstrip())
 
             if forward == True:
-                target_line = buf.line(cur_line_num.end() + 1)
-                while target_line.end() - target_line.begin() < 1 and target_line.end() < buf.size():
-                    target_line = buf.line(target_line.end() + 1)
                 target_line_offset = cur_line_num.end()
+                target_line = buf.line(cur_line_num.end() + 1)
+                while target_line.b - target_line.a < 1 and target_line.b < buf.size():
+                    target_line = buf.line(target_line.b + 1)
 
             else:
-                target_line = buf.line(cur_line_num.begin() - 1)
-                while target_line.end() - target_line.begin() < 1 and target_line.begin() > 1:
-                    target_line = buf.line(target_line.begin() - 1)
                 target_line_offset = cur_line_num.begin()
+                target_line = buf.line(cur_line_num.begin() - 1)
+                while target_line.b - target_line.a < 1 and target_line.a > 1:
+                    target_line = buf.line(target_line.a - 1)
 
-            # we find the indent level of the target
-            target_indent = 0
-            for i in range(target_line.begin(), target_line.end()):
-                if buf.substr(i) != ' ':
-                    break
-                target_indent+=1
+            target_line = buf.substr(target_line)
+            target_indent = len(target_line) - len(target_line.lstrip())
 
             if target_indent > cur_indent:
                 indent = target_indent
