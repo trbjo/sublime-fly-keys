@@ -263,10 +263,11 @@ class NumberCommand(sublime_plugin.TextCommand):
                 mystr = buf.substr(region)
                 if mystr.isdigit() or mystr.startswith('-') and mystr[1:].isdigit():
                     continue
-                selection.subtract(region)
                 reg_list = [sublime.Region(m.start() + region.begin(), m.end() + region.begin()) for m in re.finditer(r'-?\d+', buf.substr(region))]
-                for maybe_digit in reg_list:
-                    selection.add(maybe_digit)
+                if reg_list != []:
+                    selection.subtract(region)
+                    for maybe_digit in reg_list:
+                        selection.add(maybe_digit)
             else:
                 line, column = buf.rowcol(region.begin())
                 cur_line = buf.substr(buf.full_line(buf.text_point(line,-1)))
