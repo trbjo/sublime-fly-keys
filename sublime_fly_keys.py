@@ -404,6 +404,24 @@ class InsertModeCommand(sublime_plugin.TextCommand):
         buf.settings().set(key="command_mode", value=False)
 
 
+class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        buf = self.view
+        if buf.is_read_only() == True:
+            sublime.status_message('Buffer is read only')
+            return
+
+        rev_sel: reversed[List[sublime.Region]] = reversed(buf.sel())
+        for reg in rev_sel:
+            if reg.empty():
+                line = buf.line(reg.begin())
+                buf.erase(edit, sublime.Region(reg.begin(), line.end()))
+            else:
+                buf.erase(edit, region)
+        buf.settings().set(key="block_caret", value=False)
+        buf.settings().set(key="command_mode", value=False)
+
+
 class CommandModeCommand(sublime_plugin.WindowCommand):
     def run(self):
         buf = sublime.active_window().active_view()
