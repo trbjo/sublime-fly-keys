@@ -556,7 +556,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
 
             regs_dict[sel_begin] = sel_end
 
-        buf.sel().add_all([sublime.Region(begin,end) for begin,end in regs_dict.items()])
+        buf.sel().add_all(sublime.Region(begin,end) for begin,end in regs_dict.items())
         buf.show(buf.sel()[-1], False)
 
 
@@ -597,7 +597,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
 
             regs_dict[sel_begin] = sel_end
 
-        buf.sel().add_all([sublime.Region(begin, end) for begin,end in regs_dict.items()])
+        buf.sel().add_all(sublime.Region(begin, end) for begin,end in regs_dict.items())
         buf.show(buf.sel()[0], False)
 
 
@@ -682,7 +682,7 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
                 positions.append(reg.a - rev_beg)
 
         sel.clear()
-        buf.sel().add_all([sublime.Region(pos) for pos in positions])
+        buf.sel().add_all(positions)
 
 
 
