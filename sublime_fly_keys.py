@@ -882,6 +882,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
 class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _):
         selections = self.view.sel()
-        selections.subtract(selections[0])
-        self.view.show(selections[0], True)
+        if len(selections) > 1:
+            selections.subtract(selections[0])
+            self.view.show(selections[0], True)
 
