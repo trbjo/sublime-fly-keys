@@ -392,6 +392,10 @@ class DecrementCommand(NumberCommand):
 class InsertModeCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         buf = self.view
+        if buf.is_read_only() == True:
+            sublime.status_message('Buffer is read only')
+            return
+
         for region in reversed(buf.sel()):
             if region.empty():
                 continue
