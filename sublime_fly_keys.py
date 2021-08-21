@@ -262,18 +262,6 @@ should_change_to_bol = False
 
 
 
-class Halla(sublime_plugin.EventListener):
-    def on_new_async(self, view):
-        print('hhhhhhhhhhhhhhhhhhhhhhhhh')
-        if view.element() == "exec:output":
-            print('hhhhhhhhhhhhhhhhhhhhhhhhh')
-        if view.element() == "output:output":
-            print('hhhhhhhhhhhhhhhhhhhhhhhhh')
-        if view.element() == "console:input":
-            print('hhhhhhhhhhhhhhhhhhhhhhhhh')
-        if view.element() == "goto_anything:input":
-            print('hhhhhhhhhhhhhhhhhhhhhhhhh')
-
 class SampleListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, _, operand, __):
         global allow_extend
