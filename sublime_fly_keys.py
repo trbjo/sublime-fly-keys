@@ -628,7 +628,7 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view
         sel = buf.sel()
-        positions = []
+        positions: List[int] = []
         for reg in sel:
             if not reg.empty():
                 end_pos = reg.end()
