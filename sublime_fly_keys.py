@@ -432,7 +432,11 @@ class CommandModeCommand(sublime_plugin.WindowCommand):
 
 
 class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
-    def run(self, _, after=False):
+    def run(self, _, after=False, plusone=False):
+        if plusone == True:
+            offset = 1
+        else:
+            offset = 0
         buf = self.view
         selections = buf.sel()
         for region in selections:
@@ -443,9 +447,9 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
                 selections.subtract(region)
 
             if after == True:
-                reg = region.end() + 1
+                reg = region.end() + offset
             else:
-                reg = region.begin() - 1
+                reg = region.begin() - offset
 
             selections.subtract(region)
             selections.add(reg)
