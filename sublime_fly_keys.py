@@ -96,7 +96,7 @@ class AddLineCommand(sublime_plugin.TextCommand):
                 if forward == True:
                     target_line_offset = cur_line_num.b + 1
 
-                    target_line = buf.full_line(target_line_offset)
+                    target_line = buf.line(target_line_offset)
                     while target_line.b - target_line.a < 1 and target_line.b < buf.size():
                         target_line = buf.line(target_line.b + 1)
 
