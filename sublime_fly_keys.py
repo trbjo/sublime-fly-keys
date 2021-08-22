@@ -635,15 +635,23 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
                 sel.subtract(reg)
                 sel.add(end_pos)
 
-            cur_line_in_points_beg, cur_line_in_points_end = buf.line(reg)
-
             str_after_cur = buf.substr(reg.begin())
-            if str_after_cur.isalpha():
-                return
+            if str_after_cur.isalnum() or str_after_cur == '_':
+                if len(sel) > 1:
+                    positions.append(reg.a)
+                    continue
+                else:
+                    return
 
             str_before_cur = buf.substr(reg.begin() -1)
-            if str_before_cur.isalpha():
-                return
+            if str_before_cur.isalnum() or str_before_cur == '_':
+                if len(sel) > 1:
+                    positions.append(reg.a)
+                    continue
+                else:
+                    return
+
+            cur_line_in_points_beg, cur_line_in_points_end = buf.line(reg)
 
             rev_reg = sublime.Region(cur_line_in_points_beg, reg.begin())
             rev_reg_str = buf.substr(rev_reg)
@@ -677,7 +685,8 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
                 elif rev_beg != -1:
                     positions.append(reg.a - rev_beg)
                 else:
-                    return
+                    positions.append(reg.a)
+                    continue
             else:
                 positions.append(reg.a - rev_beg)
 
