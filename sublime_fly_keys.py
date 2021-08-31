@@ -18,6 +18,7 @@ class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
         buf = self.view
         selections = buf.sel()
         positions: List[int] = []
+
         for region in selections:
             cur_line_num = buf.line(region.begin())
             orig_whitespace = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
@@ -615,6 +616,21 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
         buf.sel().clear()
         buf.sel().add_all(reg_list)
 
+
+
+class RevertSelectionCommand(sublime_plugin.TextCommand):
+    def run(self, _):
+        buf = self.view
+        sel = buf.sel()
+        for reg in sel:
+            if reg.empty():
+                continue
+            region = sublime.Region(reg.b, reg.a)
+            sel.subtract(reg)
+            sel.add(region)
+
+
+
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view
@@ -694,11 +710,156 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
         buf.sel().add_all(positions)
 
 
+class SmartCopyCommand(sublime_plugin.TextCommand):
+    def run(self, _, whole_line: bool = False) -> None:
+        buf = self.view
+        sel = buf.sel()
+
+        if whole_line:
+            sublime.set_clipboard(''.join(buf.substr(buf.full_line(reg)) for reg in sel))
+            reg = sel[-1].b
+            sel.clear()
+            sel.add(reg)
+            return
+
+        regions_to_copy: List[sublime.Region] = []
+        end = buf.full_line(sel[0].a).a
+
+        only_empty_selections = True
+        contiguous_regions = True
+
+        for region in sel:
+            if region.empty():
+
+                line = buf.full_line(region.a)
+                if regions_to_copy:
+                    if regions_to_copy[-1].a != line.a and regions_to_copy[-1].b != line.b:
+                        regions_to_copy.append(line)
+                else:
+                    regions_to_copy.append(line)
+
+                if contiguous_regions == True:
+                    if end == line.a:
+                        end = line.b
+                    else:
+                        contiguous_regions = False
+
+            else:
+                only_empty_selections = False
+                regions_to_copy.append(region)
+
+        if only_empty_selections:
+            if contiguous_regions:
+                clip = buf.substr(sublime.Region(regions_to_copy[0].a, regions_to_copy[-1].b))
+            else:
+                clip = ''.join(buf.substr(reg) for reg in regions_to_copy)
+        else:
+            clip = '\n'.join(buf.substr(reg) for reg in regions_to_copy)
+
+        if clip.isspace():
+            return
+
+        if only_empty_selections and contiguous_regions:
+            reg = sel[-1].a
+            sel.clear()
+            sel.add(reg)
+        else:
+            pos = [reg.end() for reg in sel]
+            sel.clear()
+            sel.add_all(pos)
+
+        sublime.set_clipboard(clip)
+        return
+
+
+
+class SmartCutCommand(sublime_plugin.TextCommand):
+    """docstring for SmartCopyCommand"""
+    def run(self, edit: sublime.Edit) -> None:
+        buf = self.view
+        sel = buf.sel()
+
+        regions_to_copy: List[sublime.Region] = []
+        end = buf.full_line(sel[0].begin()).begin()
+
+        only_empty_selections = True
+        contiguous_regions = True
+
+        for region in sel:
+            if region.empty():
+                line = buf.full_line(region.begin())
+
+                if regions_to_copy != []:
+                    if regions_to_copy[-1].a != line.a and regions_to_copy[-1].b != line.b:
+                        regions_to_copy.append(line)
+                else:
+                    regions_to_copy.append(line)
+
+                if end == line.begin():
+                    end = line.end()
+                else:
+                    contiguous_regions = False
+
+            else:
+                only_empty_selections = False
+                regions_to_copy.append(region)
+
+        if only_empty_selections:
+            reg = sel[-1].a
+            if contiguous_regions:
+                interesting_region = sublime.Region(regions_to_copy[0].begin(), regions_to_copy[-1].end())
+                clip = buf.substr(interesting_region)
+                buf.erase(edit, interesting_region)
+            else:
+                clip = ''.join(buf.substr(reg) for reg in regions_to_copy)
+                for reg in reversed(regions_to_copy):
+                    buf.erase(edit, reg)
+
+        else:
+            clip = '\n'.join(buf.substr(reg) for reg in regions_to_copy)
+            for reg in reversed(regions_to_copy):
+                buf.erase(edit, reg)
+
+        if clip.isspace():
+            return
+
+        sublime.set_clipboard(clip)
+        return
+
+class SmartPasteCutNewlinesCommand(sublime_plugin.TextCommand):
+    def run(self, edit: sublime.Edit) -> None:
+        buf = self.view
+        sels: sublime.Selection = buf.sel()
+
+        clipboard = sublime.get_clipboard()
+        clips = clipboard.splitlines()
+
+        if clipboard.endswith('\n'):
+            pass
+        else:
+
+            clip_pos: List[Tuple[int, int]] = [(len(clips[-1]), len(clips[-1]) + 1)]
+            for clip in reversed(clips[:-1]):
+                clip_pos.append((len(clip) + 1 + clip_pos[-1][0], len(clip) + 1))
+
+            rev_sel: reversed[sublime.Region] = reversed(sels)
+            for reg in rev_sel:
+                if not reg.empty():
+                    buf.erase(edit, reg)
+                buf.insert(edit, reg.a, ' '.join(clips))
+
+            rev_sel_new: reversed[sublime.Region] = reversed(sels)
+            for reg in rev_sel_new:
+                sels.add_all(sublime.Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] -1) for pos in clip_pos)
+
 
 class SmartPasteCommand(sublime_plugin.TextCommand):
-
-    def find_indent(self, cur_line_num, cur_line) -> int:
+    def find_indent(self, cur_line_num: sublime.Region, cur_line: str) -> int:
         buf = self.view
+        # if we have a new, empty file:
+        if buf.size() == 0:
+            return 0
+
         clipboard = sublime.get_clipboard()
         if len(cur_line) == 0 and clipboard.startswith(' '):
             lines_above, _ = buf.line(cur_line_num.begin())
@@ -713,9 +874,9 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         return indent
 
 
-    def run(self, edit):
+    def run(self, edit: sublime.Edit):
         buf = self.view
-        selections = buf.sel()
+        sels: sublime.Selection = buf.sel()
         clipboard = sublime.get_clipboard()
         clips = clipboard.splitlines()
 
@@ -724,8 +885,11 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         else:
             has_final_newline = False
 
-        if len(clips) == len(selections):
-            for region, cliplet in zip(reversed(selections), reversed(clips)):
+        # means we need to match the selections with the clips
+        if len(clips) == len(sels):
+
+            rev_sel: reversed[sublime.Region] = reversed(sels)
+            for region, cliplet in zip(rev_sel, reversed(clips)):
 
                 cur_line_num = buf.line(region.begin())
                 cur_line = buf.substr(cur_line_num)
@@ -740,18 +904,20 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
                 if region.empty() == False:
                     buf.erase(edit, region)
-                elif has_final_newline and len(selections) > 1:
+                elif has_final_newline and len(sels) > 1:
                     if region.a == buf.size():
                         reg = buf.full_line(region.begin() -1)
                     else:
                         reg = buf.full_line(region.begin())
                     buf.erase(edit, reg)
 
-
                 buf.insert(edit, insert_pos, insert_string)
 
-        elif len(clips) > len(selections):
-            for region in reversed(selections):
+
+        # Ok, just regular paste
+        elif len(clips) > len(sels):
+            rev_sel: reversed[sublime.Region] = reversed(sels)
+            for region in rev_sel:
 
                 cur_line_num = buf.line(region.begin())
                 cur_line = buf.substr(cur_line_num)
@@ -767,46 +933,54 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                         initial_indent = cur_indent
                     this_indent = above_indent + cur_indent - initial_indent
                     insert_string += " " * this_indent  + deindented_line + '\n'
-                print(repr(insert_string))
 
                 if region.empty() == False:
                     buf.erase(edit, region)
 
                 buf.insert(edit, insert_pos, insert_string)
-        elif len(clips) < len(selections):
-            contiguous_regions = []
-            cur_line_beg, cur_line_end = buf.line(selections[0])
-            hem_list = [cur_line_beg]
-            for i in range(1, len(selections)):
-                next_line_beg, next_line_end = buf.line(selections[i])
-                print('next_line_beg', next_line_beg)
-                print('cur_line_end',cur_line_end)
-                if cur_line_end + 1 == next_line_beg:
-                    cur_line_beg, cur_line_end = buf.line(selections[i])
-                    print('hallo')
-                else:
-                    prev_line_beg, prev_line_end = buf.line(selections[i-1])
-                    hem_list.append(prev_line_end)
-                    contiguous_regions.append(hem_list)
-                    hem_list = [prev_line_beg]
-                    print('no')
-                    # sublime.Region()
-                i+=1
-                print(i)
 
-            print(contiguous_regions)
-            for reg in contiguous_regions:
-                selections.add(sublime.Region(reg[0], reg[1]))
+        # we can use the selections as markers of where to cut
+        # but only if it is clear that we want to do that.
+        # We have two criteria:
+        # 1. they must belong to consecutive lines, and
+        # 2. the selections must not be on the border of words
+        elif len(clips) < len(sels):
 
+            if has_final_newline:
 
-            return
-            for region in reversed(selections):
+                regions_to_remove: List[List[int]] = []
+                # It has to be
+                end: int = -1
 
-                cur_line_num = buf.line(region.begin())
-                cur_line = buf.substr(cur_line_num)
+                # first we just loop over all the regions, collecting consecutive lines regions
+                i = -1
+                for region in sels:
+                    line = buf.full_line(region.begin())
+                    if end == line.a:
+                        regions_to_remove[i].append(line.end())
+                    else:
+                        i += 1
+                        regions_to_remove.append([line.begin()])
 
-                if has_final_newline:
-                    insert_pos, _ = buf.line(region.begin())
+                    end = line.end()
+
+                # print(regions_to_remove)
+
+                # Now we have the regions, and we now if we should delete anything
+                # on the lines. We can now do the loop again where we modify the buffer
+                # regions to be deleted will be those with more than two elements in the
+                # inner list
+                for regs in reversed(regions_to_remove):
+                    if len(regs) > 1:
+                        buf.erase(edit, sublime.Region(regs[0], regs[-1]))
+
+                # now we can start inserting:
+                rev_sel: reversed[sublime.Region] = reversed(sels)
+                for region in rev_sel:
+                    cur_line_num = buf.line(region.begin())
+                    cur_line = buf.substr(cur_line_num)
+
+                    insert_pos = buf.line(region.begin()).begin()
                     above_indent = self.find_indent(cur_line_num, cur_line)
                     insert_string = ''
                     initial_indent = None
@@ -817,27 +991,24 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                             initial_indent = cur_indent
                         this_indent = above_indent + cur_indent - initial_indent
                         insert_string += " " * this_indent  + deindented_line + '\n'
-                else:
+
+                    buf.insert(edit, insert_pos, insert_string)
+
+            else:
+                rev_sel: reversed[sublime.Region] = reversed(sels)
+                for region in rev_sel:
+                    if not region.empty():
+                        buf.erase(edit, region)
                     insert_pos = region.begin()
-                    insert_string = clipboard
+                    buf.insert(edit, insert_pos, clipboard)
 
-                print(repr(insert_string))
-                if region.empty() == False:
-                    buf.erase(edit, region)
-                elif has_final_newline:
-                    if region.a == buf.size():
-                        reg = buf.full_line(region.begin() -1)
-                    else:
-                        reg = buf.full_line(region.begin())
-                    buf.erase(edit, reg)
-
-                buf.insert(edit, insert_pos, insert_string)
 
 class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
-    def run(self, view):
+    def run(self, _) -> None:
         buf = self.view
         selections = buf.sel()
-        for region in reversed(selections):
+        rev_sels: reversed[sublime.Region] = reversed(selections)
+        for region in rev_sels:
             if region.empty():
                 continue
 
@@ -850,7 +1021,7 @@ class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
 
 
 class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         selection = buf.sel()
 

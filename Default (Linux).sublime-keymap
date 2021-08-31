@@ -6,8 +6,35 @@
 
 
 ////////////////// Move line up/down
-{"keys": ["ctrl+c"], "command": "move", "args": {"by": "lines", "forward": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 {"keys": ["ctrl+t"], "command": "move", "args": {"by": "lines", "forward": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+{"keys": ["ctrl+t"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move", "args": {"by": "lines", "forward": true}},
+            {"command": "auto_complete_open_link"}
+        ]
+    },
+    "context": [
+        {"key": "setting.lsp_active"},
+        {"key": "setting.command_mode", "operator": "equal", "operand": false },
+        { "key": "auto_complete_visible", "operand": true },
+    ]
+},
+{"keys": ["ctrl+c"], "command": "move", "args": {"by": "lines", "forward": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+{"keys": ["ctrl+c"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move", "args": {"by": "lines", "forward": false}},
+            {"command": "auto_complete_open_link"}
+        ]
+    },
+    "context": [
+        {"key": "setting.command_mode", "operator": "equal", "operand": false },
+        {"key": "setting.lsp_active"},
+        { "key": "auto_complete_visible", "operand": true },
+    ]
+},
+
 
 // navigate side bar
 {"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false}, "context":
@@ -86,70 +113,56 @@
 
 
 ////////////////// Right word begin:
-{"keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": false }, "context": [{"key": "setting.command_mode"}] },
-{"keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": true }, "context": [
+{"keys": ["ctrl+shift+r"], "command": "move", "args": {"by": "word_ends", "forward": true, "extend": true}},
+{"keys": ["ctrl+r"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+r"], "command": "move", "args": {"by": "subwords", "forward": true, "extend": true}, "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ] },
-{"keys": ["l"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": false, "empty_line": false, "forward": true, "extend": false },
+
+{"keys": ["r"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": false, "empty_line": false, "forward": true, "extend": false },
 "context": [{"key": "setting.command_mode"}]
 },
-{"keys": ["l"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": false, "empty_line": false, "forward": true, "extend": true }, "context": [
+{"keys": ["r"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_begin": false, "empty_line": false, "forward": true, "extend": true }, "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ]
 },
 
 ////////////////// Right word end:
-{"keys": ["r"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": false, "forward": true, "extend": false },
+{"keys": ["l"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": false, "forward": true, "extend": false },
 "context": [{"key": "setting.command_mode"}]
 },
-{"keys": ["r"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": false, "forward": true, "extend": true }, "context": [
+{"keys": ["l"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": false, "forward": true, "extend": true }, "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ]
 },
-{"keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": false },
+{"keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": false },
 "context": [{"key": "setting.command_mode"}]
 },
-{"keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": true },
+{"keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": true },
 "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ]
 },
-{"keys": ["R"], "command": "move", "args": {"by": "subword_ends", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+shift+r"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true} },
+{"keys": ["L"], "command": "move", "args": {"by": "subword_ends", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+shift+l"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true} },
 
 ////////////////// Left word end:
-{"keys": ["ctrl+shift+g"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": true} },
-{"keys": ["g"], "command": "move", "args": {"by": "word_ends","forward": false}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["G"], "command": "move", "args": {"by": "subword_ends", "forward": false}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["g"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/mark_word_backward_init.sublime-macro"}, "context":
-[
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
-    {"key": "last_command", "operator": "equal", "operand": "find_under_expand" },
-]
-},
-{"keys": ["g"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": false, "forward": false, "extend": false },
+{"keys": ["g"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_begin": false, "empty_line": false, "forward": false, "extend": false },
 "context": [{"key": "setting.command_mode"}]
 },
-{"keys": ["g"], "command": "move", "args": {"by": "stops", "word_begin": true, "punct_begin": true, "empty_line": false, "forward": false, "extend": true },
-"context": [
+
+{"keys": ["g"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_begin": false, "empty_line": false, "forward": true, "extend": true }, "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ]
 },
-{"keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": false, "extend": false },
-"context": [{"key": "setting.command_mode"}]
-},
-{"keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": false, "extend": true },
-"context": [
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
-]
-},
+{"keys": ["ctrl+g"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": false} },
+{"keys": ["ctrl+shift+g"], "command": "move", "args": {"by": "words", "forward": false, "extend": true}},
+
 
 ////////////////// Beginning of line/Backward by Paragraph:
 {"keys": ["a"], "command": "move_to", "args": { "to": "bol" }, "context":
@@ -263,6 +276,9 @@
 {"keys": ["ctrl+c"], "command": "swap_line_up", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+t"], "command": "swap_line_down", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+alt+t"], "command": "transpose" },
+
+{"keys": ["ctrl+shift+c"], "command": "increment"},
+{"keys": ["ctrl+shift+t"], "command": "decrement"},
 
 ////////////////////////////////////////////////////////////////
 /////////////////// Delete left/right: //////////////////////
@@ -607,7 +623,7 @@
 {"keys": ["escape"], "command": "show_at_center", "context": [{"key": "setting.command_mode"}, ] ,},
 {"keys": ["escape"], "command": "single_selection", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
 {"keys": ["escape"], "command": "hide_popup", "context": [{"key": "popup_visible", "operator": "equal", "operand": true} ] },
-// {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{ "key": "panel_visible", "operator": "equal", "operand": true } ] },
+{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{ "key": "panel_visible", "operator": "equal", "operand": true } ] },
 { "keys": ["escape"], "command": "hide_overlay", "context":
  [
   { "key": "overlay_visible", "operator": "equal", "operand": true },
@@ -653,6 +669,12 @@
  { "key": "auto_complete_visible", "operator": "equal", "operand": false },
  ] },
 
+{"keys": ["tab"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "overlay_visible", "operator": "equal", "operand": true },
+    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
+    {"key": "setting.command_mode", "operator": "equal", "operand": false },
+ { "key": "auto_complete_visible", "operator": "equal", "operand": false },
+ ] },
+
 //////////////////////////////////////////////////
 /////////////////// OVERLAY: /////////////////////
 //////////////////////////////////////////////////
@@ -672,6 +694,7 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["h"], "command": "insert_mode", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["H"], "command": "delete_rest_of_line_and_insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 {"keys": ["h"], "command": "noop", "context":
