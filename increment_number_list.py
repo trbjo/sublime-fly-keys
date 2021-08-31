@@ -15,30 +15,39 @@ class IncrementNumberListCommand(sublime_plugin.TextCommand):
                 else:
                     break
             num = int(num) + 1
-            buf.insert(edit, region.end(), f'\n{num}. ')
-
+            where_to_insert = buf.line(region.end()).end()
+            buf.insert(edit, where_to_insert, f'\n{num}. ')
             next_line_num_offset = cur_line_num + 1
-            continue_while = True
-            while continue_while == True:
-                next_line_num_offset += 1
-                next_line_begin_in_points = buf.text_point(next_line_num_offset, 0)
-                next_line_content = buf.substr(buf.line(next_line_begin_in_points))
+            next_line_begin_in_points = buf.text_point(next_line_num_offset, 0)
+            selections.subtract(region)
+            selections.add(next_line_begin_in_points +2 + len(str(num)))
 
-                if len(next_line_content) < 1:
-                    continue_while = False
-                    break
-                if not next_line_content[0].isdigit():
-                    continue_while = False
-                    break
+            # next_line_num_offset = cur_line_num + 2
+            # continue_while = True
+            # while continue_while == True:
+            #     next_line_begin_in_points = buf.text_point(next_line_num_offset, 0)
+            #     next_line_content = buf.substr(buf.line(next_line_begin_in_points))
 
-                next_num = next_line_content[0]
-                for char in next_line_content[1:]:
-                    if char.isdigit():
-                        next_num+=char
-                    else:
-                        offset = len(next_num)
-                        next_num = int(next_num) + 1
-                        buf.erase(edit,sublime.Region(next_line_begin_in_points, next_line_begin_in_points+offset))
-                        buf.insert(edit, next_line_begin_in_points, f'{next_num}')
-                        break
+                # if len(next_line_content) < 1:
+                #     # return
+                #     continue_while = False
+                #     # continue
+                #     break
+                # if not next_line_content[0].isdigit():
+                #     continue_while = False
+                #     break
+                #     # return
+                #     continue
 
+                # next_num = next_line_content[0]
+                # for char in next_line_content[1:]:
+                #     if char.isdigit():
+                #         next_num+=char
+                #     else:
+                #         offset = len(next_num)
+                #         next_num = int(next_num) + 1
+                #         buf.erase(edit,sublime.Region(next_line_begin_in_points, next_line_begin_in_points+offset))
+                #         buf.insert(edit, next_line_begin_in_points, f'{next_num}')
+                #         break
+
+                # next_line_num_offset += 1
