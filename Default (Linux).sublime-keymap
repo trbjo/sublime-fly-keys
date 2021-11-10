@@ -756,7 +756,20 @@
 
 {"keys": ["5"], "command": "close_pane", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["6"], "command": "new_pane", "args": {"move": true}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+6"], "command": "set_layout", "args": {"cells": [[0, 0, 1, 1], [0, 1, 1, 2]], "cols": [0.0, 1.0], "rows": [0.0, 0.5, 1.0]}, "context": [{"key": "setting.command_mode"}, ] },
+
+{"keys": ["ctrl+6"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "set_layout", "args": {"cells": [[0, 0, 1, 1], [0, 1, 1, 2]], "cols": [0.0, 1.0], "rows": [0.0, 0.5, 1.0]}},
+            {"command": "focus_neighboring_group"},
+            {"command": "move_to_neighboring_group", "args": {"forward": false} },
+        ]
+    },
+    "context": [
+        {"key": "setting.command_mode"},
+    ]
+},
+
 
 {"keys": ["7"], "command": "revert_hunk", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["7"], "command": "revert_modification", "context": [{"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }, {"key": "setting.command_mode"}, ] },
