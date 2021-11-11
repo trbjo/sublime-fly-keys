@@ -497,7 +497,6 @@
 
 
 {"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "scope"}, "context": [{"key": "setting.command_mode"},  ] },
-// this command is intended to be run after a search to mark the whole word
 
 { "keys": ["ctrl+d"], "command": "chain",
         "args": {
@@ -555,7 +554,6 @@
      ]
 },
 
-// this command is intended to be run after a search to mark the whole word
 { "keys": ["n"], "command": "chain",
         "args": {
             "commands": [
