@@ -316,7 +316,7 @@
 
 {"keys": ["ctrl+c"], "command": "swap_line_up", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+t"], "command": "swap_line_down", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+alt+t"], "command": "transpose" },
+{"keys": ["T"], "command": "transpose", "context": [{"key": "setting.command_mode" } ] },
 
 {"keys": ["ctrl+shift+c"], "command": "increment"},
 {"keys": ["ctrl+shift+t"], "command": "decrement"},
