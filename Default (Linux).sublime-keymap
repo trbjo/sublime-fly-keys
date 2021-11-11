@@ -228,7 +228,9 @@
 {"keys": ["shift+enter"], "command": "find_prev", "context": [{"key": "setting.command_mode"} ] },
 
 // because we use enter as fallback we must include all the default keybindings as well
-{"keys": ["enter"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
+{"keys": ["enter"], "command": "find_next", "context": [{"key": "setting.command_mode"} ] },
+{"keys": ["enter"], "command": "find_under_expand_skip", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.command_mode"} ] },
+
 {"keys": ["enter"], "command": "select", "context": [{"key": "control", "operand": "sidebar_tree"}] },
 {"keys": ["enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context": [
     {"key": "setting.command_mode", "operator": "equal", "operand": false },
@@ -260,9 +262,7 @@
 {"keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
-{"keys": ["alt"], "command" : "noop"},
-{"keys": ["alt"], "command": "find_next", "context": [{"key": "setting.command_mode"} ] },
-{"keys": ["alt"], "command": "find_under_expand_skip", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.command_mode"} ] },
+{"keys": ["alt"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
 
 /////////////////////////////////////////////////////
 /////////////////// insert line: ////////////////////
