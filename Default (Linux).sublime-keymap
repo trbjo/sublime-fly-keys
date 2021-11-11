@@ -538,6 +538,23 @@
     {"key": "selection_empty", "operator": "equal", "operand": false},
 ] },
 
+{"keys": ["N"], "command": "find_all_under", "context": [
+    {"key": "setting.command_mode"},
+    {"key": "selection_empty", "operator": "equal", "operand": false},
+] },
+
+{ "keys": ["N"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "find_under_expand"},
+                {"command": "find_all_under"},
+            ]},
+        "context": [
+            {"key": "selection_empty", "operator": "equal", "operand": true},
+            { "key": "setting.command_mode" },
+     ]
+},
+
 // this command is intended to be run after a search to mark the whole word
 { "keys": ["n"], "command": "chain",
         "args": {
