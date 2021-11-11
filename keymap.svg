@@ -135,7 +135,9 @@
         <tspan x="623" y="228">Next W</tspan>
         <tspan x="710" y="167">␣insert</tspan>
         <tspan x="683" y="228">Find @</tspan>
-        <tspan x="772" y="167">Cmd Palette</tspan>
+        <tspan x="772" y="167">Find next</tspan>
+        <tspan x="95" y="280">Cmd</tspan>
+        <tspan x="95" y="293">Palette</tspan>
         <tspan x="8" y="167">Normal mode</tspan>
     </text>
 
@@ -152,6 +154,7 @@
         <tspan x="8" y="141">Esc</tspan>
         <tspan x="8" y="90">↹</tspan>
         <tspan x="155" y="263">Ctrl</tspan>
+        <tspan x="95" y="263">Alt</tspan>
         <tspan x="360" y="277">Show Overlay</tspan>
     </text>
 
