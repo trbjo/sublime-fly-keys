@@ -755,8 +755,11 @@
 ////////////// Focus neighbor groups: ////////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["v"], "command": "focus_neighboring_group", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+v"], "command": "focus_neighboring_group", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, ] },
+
+{"keys": ["v"], "command": "focus_neighboring_group"},
+{"keys": ["v"], "command": "insert", "args": {"characters": "v"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
+{"keys": ["ctrl+v"], "command": "focus_neighboring_group", "args": {"forward": false}},
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////// THe number row is not used in command mode, so we can use it for all sorts off cool stuff //////////////////////
