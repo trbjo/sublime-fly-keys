@@ -305,6 +305,8 @@ class SampleListener(sublime_plugin.EventListener):
         global pos_begin
         global ought_to_extend
         v = sublime.active_window().active_view()
+        if v is None:
+            return
         has_selection = v.sel()[0].empty()
         if not has_selection:
             prev_buf_id = v.id()
