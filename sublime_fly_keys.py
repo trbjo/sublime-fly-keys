@@ -668,6 +668,32 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
 
 
 
+class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        buf = self.view
+        if buf.is_read_only():
+            return
+        selections = buf.sel()
+        positions: List[int] = []
+
+        for region in reversed(selections):
+            if region.empty():
+                continue
+
+            cur_line_num = buf.line(region.end())
+            indent = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            content = "\n" + indent*" " + "print(f'{"+ buf.substr(region)+ "=}')"
+            print(f'{content=}')
+            _, insert_pos = buf.line(region.end())
+            sel_beg_pos = cur_line_num.b + indent + 10
+            sel_beg_end = sel_beg_pos + region.end() - region.begin()
+            buf.insert(edit, insert_pos, content)
+            selections.subtract(region)
+            new_reg = sublime.Region(sel_beg_pos, sel_beg_end)
+
+            selections.add(new_reg)
+
+
 class RevertSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view
