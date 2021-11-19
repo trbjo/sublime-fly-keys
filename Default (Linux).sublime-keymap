@@ -611,6 +611,7 @@
 },
 
 {"keys": ["ctrl+s"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["S"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["ctrl+w"], "command": "select_lines", "args": {"forward": false} , "context": [{"key": "setting.command_mode"}, ] },
 

@@ -13,6 +13,54 @@ timeout = datetime.datetime.now()
 WORDCHARS = r'[-\._\w]+'
 
 
+class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
+    def run(self, _):
+        buf = self.view
+        selections = buf.sel()
+        positions: List[int] = []
+
+        for region in selections:
+            cur_line_num = buf.line(region.begin())
+            orig_whitespace = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            current_pos_on_line = region.begin() - cur_line_num.a
+            put_at_soft_bol = orig_whitespace == current_pos_on_line
+            put_at_end = region.begin() == cur_line_num.b
+            if put_at_soft_bol:
+                has_empty_lines = False
+                prev_line = cur_line_num
+                while prev_line.a - 1 > 0:
+                    prev_line = buf.line(prev_line.a - 1)
+                    while len(prev_line) == 0 and prev_line.b - 1 < 0:
+                        has_empty_lines = True
+                        prev_line = buf.line(prev_line.a - 1)
+                    mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                    if mod_whitespace < orig_whitespace or (has_empty_lines and mod_whitespace == 0):
+                        break
+                    positions.append(prev_line.a + mod_whitespace)
+
+            elif put_at_end == True:
+                prev_line = buf.line(cur_line_num.a - 1)
+                mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                while mod_whitespace >= orig_whitespace and prev_line.a != prev_line.b and prev_line.a - 1 > 0:
+                    positions.append(prev_line.b)
+                    prev_line = buf.line(prev_line.a - 1)
+                    mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+            else:
+                prev_line = buf.line(cur_line_num.a - 1)
+                mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                while mod_whitespace >= orig_whitespace and len(prev_line) > 0 and prev_line.a - 1 > 0:
+                    if prev_line.a + current_pos_on_line > prev_line.b:
+                        positions.append(prev_line.a)
+                    else:
+                        positions.append(prev_line.a + current_pos_on_line)
+
+                    prev_line = buf.line(prev_line.a - 1)
+                    mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+
+        selections.add_all(positions)
+
+
+
 class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view
