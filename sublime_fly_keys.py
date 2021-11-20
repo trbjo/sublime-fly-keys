@@ -478,7 +478,7 @@ class CommandModeCommand(sublime_plugin.WindowCommand):
         buf = sublime.active_window().active_view()
         buf.settings().set(key="block_caret", value=True)
         buf.settings().set(key="command_mode", value=True)
-        buf.window().run_command('hide_panel')
+        # buf.window().run_command('hide_panel')
         buf.window().run_command('hide_popup')
 
 
