@@ -682,7 +682,9 @@
 {"keys": ["escape"], "command": "show_at_center", "context": [{"key": "setting.command_mode"}, ] ,},
 {"keys": ["escape"], "command": "single_selection", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
 {"keys": ["escape"], "command": "hide_popup", "context": [{"key": "popup_visible", "operator": "equal", "operand": true} ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [{ "key": "panel_visible", "operator": "equal", "operand": true } ] },
+{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
+    {"key": "panel", "operand": "output.exec"},
+    { "key": "panel_visible", "operator": "equal", "operand": true } ] },
 { "keys": ["escape"], "command": "hide_overlay", "context":
  [
   { "key": "overlay_visible", "operator": "equal", "operand": true },
