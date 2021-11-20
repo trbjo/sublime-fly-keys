@@ -262,7 +262,7 @@
 {"keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
-{"keys": ["alt"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
+{"keys": ["alt"], "command": "lsp_hover", "context": [{"key": "setting.lsp_active"}, ] },
 
 /////////////////////////////////////////////////////
 /////////////////// insert line: ////////////////////
@@ -655,7 +655,7 @@
 },
 {"keys": ["shift"], "command": "revert_selection", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true } ] },
 
-{"keys": ["ctrl"], "command": "lsp_hover", "context": [{"key": "setting.lsp_active"}, ] },
+{"keys": ["ctrl"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
 {"keys": ["ctrl"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 
