@@ -685,6 +685,15 @@
 {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
     {"key": "panel", "operand": "output.exec"},
     { "key": "panel_visible", "operator": "equal", "operand": true } ] },
+{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
+    {"key": "panel", "operand": "find"},
+    { "key": "panel_visible", "operator": "equal", "operand": true } ] },
+{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
+    {"key": "panel", "operand": "replace"},
+    { "key": "panel_visible", "operator": "equal", "operand": true } ] },
+{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
+    {"key": "panel", "operand": "find_in_files"},
+    { "key": "panel_visible", "operator": "equal", "operand": true } ] },
 { "keys": ["escape"], "command": "hide_overlay", "context":
  [
   { "key": "overlay_visible", "operator": "equal", "operand": true },
