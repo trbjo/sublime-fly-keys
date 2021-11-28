@@ -386,9 +386,7 @@
 /////////////////// COMMENT: //////////////////////
 ///////////////////////////////////////////////////
 
-{"keys": [";"], "command": "toggle_comment", "args": { "block": false },"context": [{"key": "setting.command_mode"}, ] },
-{"keys": [";"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/toggle_comment.sublime-macro"},"context": [{"key": "selection_empty", "operator": "equal", "operand": false}, {"key": "setting.command_mode"}, ] },
-{"keys": [";"], "command": "toggle_comment", "args": { "block": false }, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^\\s*$", "match_all": true}, {"key": "following_text", "operator": "regex_match", "operand": "^$|^[a-z\\-_\\.\\(\\),]+$", "match_all": true}, {"key": "setting.command_mode"}, ] }, {"keys": [";"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/toggle_comment_when_has_selection.sublime-macro"},"context": [{"key": "text", "operator": "not_regex_contains", "operand": "\n"}, {"key": "selection_empty", "operator": "equal", "operand": false}, {"key": "setting.command_mode"}, ] },
+{"keys": [";"], "command": "toggle_comment_enhanced", "args": { "block": false },"context": [{"key": "setting.command_mode"}, ] },
 
 /////////////////////////////////////////////////
 /////////////////// CUT: //////////////////////
