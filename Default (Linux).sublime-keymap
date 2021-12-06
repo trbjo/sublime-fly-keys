@@ -513,12 +513,7 @@
 
 
 
-{"keys": ["ctrl+d"], "command": "extended_expand_selection_to_paragraph_backward", "context": [{"key": "setting.command_mode"},
-    {"key": "last_command", "operator": "equal", "operand": "extended_expand_selection_to_paragraph_forward" },
- ] },
-
-{"keys": ["ctrl+d"], "command": "extended_expand_selection_to_paragraph_backward", "context": [{"key": "setting.command_mode"},
-    {"key": "last_command", "operator": "equal", "operand": "extended_expand_selection_to_paragraph_backward" },
+{"keys": ["D"], "command": "extended_expand_selection_to_paragraph_backward", "context": [{"key": "setting.command_mode"},
  ] },
 
 ////////////////////////////////////////////////////
