@@ -705,6 +705,7 @@ class RevertSelectionCommand(sublime_plugin.TextCommand):
             sel.subtract(reg)
             sel.add(region)
 
+        buf.show(sel[-1], True)
 
 
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
