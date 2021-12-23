@@ -651,7 +651,7 @@
 {"keys": ["f"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["f"], "command": "lsp_symbol_definition" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 {"keys": ["f"], "command": "expand_selection_to_sentence", "context": [
-    { "key": "selector", "operator": "equal", "operand": "(text.html, text.xml, text.html.markdown) - string - comment", "match_all": true },
+    { "key": "selector", "operator": "equal", "operand": "(text.xml, text.html.markdown) - string - comment", "match_all": true },
     {"key": "setting.command_mode"}
 ] },
 
