@@ -109,69 +109,6 @@ class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
 
 
 
-class AddLineCommand(sublime_plugin.TextCommand):
-    def eol_token_helper(self, cur_line: str, buf: sublime.View) -> bool:
-        syntax = buf.syntax().name
-        if syntax == 'Python':
-            if cur_line[-1] == ':':
-                return True
-            else:
-                return False
-        elif syntax == 'Bash':
-            if cur_line.endswith('else') or cur_line.endswith('then') or cur_line.endswith('{'):
-                return True
-            else:
-                return False
-
-        return False
-
-
-    def run(self, edit, forward):
-        buf = self.view
-        if buf.is_read_only() == True:
-            return
-        selections = buf.sel()
-        for region in reversed(selections):
-
-            cur_line_num = buf.line(region.begin())
-            cur_line = buf.substr(cur_line_num)
-            cur_indent = len(cur_line) - len(cur_line.lstrip())
-
-            if forward == True and cur_line and self.eol_token_helper(cur_line, buf):
-                indent = cur_indent + 4
-                target_line_offset = cur_line_num.b + 1
-
-            else:
-                if forward == True:
-                    target_line_offset = cur_line_num.b + 1
-
-                    target_line = buf.line(target_line_offset)
-                    while target_line.b - target_line.a < 1 and target_line.b < buf.size():
-                        target_line = buf.line(target_line.b + 1)
-
-                else:
-                    target_line_offset = cur_line_num.a
-                    target_line = buf.line(target_line_offset)
-                    while target_line.b - target_line.a < 1 and target_line.a > 1:
-                        target_line = buf.line(target_line.a - 1)
-
-                target_line = buf.substr(target_line)
-                target_indent = len(target_line) - len(target_line.lstrip())
-
-                if target_indent > cur_indent:
-                    indent = target_indent
-                else:
-                    indent = cur_indent
-
-            selections.subtract(region)
-            buf.insert(edit, target_line_offset,' ' * indent + '\n')
-            selections.add(target_line_offset + indent)
-
-        buf.settings().set(key="block_caret", value=False)
-        buf.settings().set(key="command_mode", value=False)
-
-
-
 class ClearSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _, forward):
         buf = self.view

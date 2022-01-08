@@ -311,9 +311,8 @@
     "args": {
         "commands": [
             {"command": "move_to", "args": {"to": "hardbol"}},
+            {"command": "move", "args": {"by": "characters", "forward": false}},
             {"command": "insert", "args": {"characters": "\n"}},
-            {"command": "move", "args": {"by": "lines", "forward": false}},
-            {"command": "reindent", "args": {"force_indent": false}},
             {"command": "set_setting", "args": {"setting": "block_caret", "value": false }},
             {"command": "set_setting", "args": {"setting": "command_mode", "value": false }},
         ]
@@ -323,9 +322,6 @@
     ]
 },
 
-
-{"keys": ["."], "command": "add_line", "args": {"forward": true}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+."], "command": "add_line", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, ] },
 
 /////////////////////////////////////////////////////
 ////////////////// insert space: ////////////////////
