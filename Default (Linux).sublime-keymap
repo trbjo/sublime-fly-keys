@@ -318,6 +318,23 @@
         ]
     },
     "context": [
+        {"key": "preceding_text", "operator": "regex_contains", "operand": "^\\s"},
+        { "key": "setting.command_mode" },
+    ]
+},
+
+
+{ "keys": ["ctrl+."], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move_to", "args": {"to": "hardbol"}},
+            {"command": "insert", "args": {"characters": "\n"}},
+            {"command": "move", "args": {"by": "characters", "forward": false}},
+            {"command": "set_setting", "args": {"setting": "block_caret", "value": false }},
+            {"command": "set_setting", "args": {"setting": "command_mode", "value": false }},
+        ]
+    },
+    "context": [
         { "key": "setting.command_mode" },
     ]
 },
