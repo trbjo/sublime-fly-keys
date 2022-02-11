@@ -784,10 +784,15 @@
 
 {"keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}},
 {"keys": [" "], "command": "insert", "args": {"characters": " "}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
-
+{ "keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "text": "#"},
+        "context": [
+            {"key": "overlay_visible", "operator": "equal", "operand": true },
+            {"key": "preceding_text", "operator": "regex_match", "operand": "^$"},
+            {"key": "following_text", "operator": "regex_match", "operand": "^$"},
+        ]
+    },
 {"keys": [" "], "command": "insert", "args": {"characters": "@"}, "context": [{"key": "preceding_text", "operator": "not_regex_contains", "operand": "@$|#$"}, {"key": "goto_anything:input" }, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
-{"keys": [" "], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "overlay_visible", "operator": "equal", "operand": true }, {"key": "preceding_text", "operator": "regex_contains", "operand": "@|:$"}, ] },
+{"keys": [" "], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "overlay_visible", "operator": "equal", "operand": true }, {"key": "preceding_text", "operator": "regex_contains", "operand": "@|:$|#$"}, ] },
 {"keys": [" "], "command": "insert", "args": {"characters": ":"}, "context": [{"key": "preceding_text", "operator": "regex_contains", "operand": ":[0-9]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
 
 ///////////////////////////////////////////////////////
