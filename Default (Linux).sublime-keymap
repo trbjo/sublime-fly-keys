@@ -832,10 +832,32 @@
 {"keys": ["3"], "command": "lsp_save", "context": [{"key": "setting.lsp_active"}, {"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "textDocumentSync.willSave | textDocumentSync.willSaveWaitUntil | codeActionProvider.codeActionKinds | documentFormattingProvider | documentRangeFormattingProvider"} ] },
 {"keys": ["3"], "command": "prompt_git", "context": [{"key": "selector", "operator": "equal", "operand": "text.git.commit"}, {"key": "setting.command_mode"}, ] },
 
-{"keys": ["5"], "command": "close_pane"},
+{"keys": ["5"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "close_pane"},
+            {"command": "set_tabs_false"},
+        ]
+    },
+    "context": [
+        {"key": "setting.command_mode"},
+    ]
+},
+
 {"keys": ["5"], "command": "insert", "args": {"characters": "5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
-{"keys": ["6"], "command": "new_pane", "args": {"move": true}},
+{"keys": ["6"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "new_pane", "args": {"move": true}},
+            {"command": "hey_hey"},
+        ]
+    },
+    "context": [
+        {"key": "setting.command_mode"},
+    ]
+},
+
 {"keys": ["6"], "command": "insert", "args": {"characters": "6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 
