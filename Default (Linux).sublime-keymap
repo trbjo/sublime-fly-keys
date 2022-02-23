@@ -850,7 +850,7 @@
     "args": {
         "commands": [
             {"command": "new_pane", "args": {"move": true}},
-            {"command": "hey_hey"},
+            {"command": "set_tabs_true"},
         ]
     },
     "context": [
