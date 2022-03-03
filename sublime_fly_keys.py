@@ -301,6 +301,10 @@ class SampleListener(sublime_plugin.EventListener):
         v = sublime.active_window().active_view()
         if v is None:
             return
+        if len(v.sel()) == 0:
+            v.sel().add(0)
+            v.show(0, False)
+            return
         has_selection = v.sel()[0].empty()
         if not has_selection:
             prev_buf_id = v.id()
