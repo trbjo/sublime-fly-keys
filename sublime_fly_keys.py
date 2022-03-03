@@ -598,6 +598,45 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
         buf.show(buf.sel()[0], False)
 
 
+class FindNextCommand(sublime_plugin.TextCommand):
+    def find_next(self, forward, char, pt):
+        lr = self.view.line(pt)
+
+        if forward:
+            while lr.b < self.view.size():
+                linestr = self.view.substr(sublime.Region(pt, lr.b))
+                idx = linestr.find(char, 1)
+                if idx >= 0:
+                    return pt + idx
+                else:
+                    lr = self.view.line(lr.b + 1)
+
+        else:
+            while lr.a > 0:
+                linestr = self.view.substr(sublime.Region(lr.a, pt))[::-1]
+                idx = linestr.find(char, 0)
+                if idx >= 0:
+                    return pt - idx - 1
+                else:
+                    lr = self.view.line(lr.a - 1)
+
+
+
+        return pt
+
+    def run(self, edit, character, forward):
+        buf = self.view
+        selections = []
+        for region in buf.sel():
+            pt = self.find_next(forward, character, region.begin())
+            buf.sel().subtract(region)
+            selections.append(pt)
+            buf.sel().add(pt)
+        buf.sel().add_all(selections)
+        buf.show(buf.sel()[-1], True)
+        return
+
+
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view

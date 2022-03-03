@@ -669,6 +669,16 @@
 ] },
 
 
+{ "keys": ["f", "<character>"], "command": "find_next", "args": {
+  "forward": true },
+  "context": [{"key": "setting.command_mode"}]
+ },
+
+{ "keys": ["F", "<character>"], "command": "find_next", "args": {
+  "forward": false },
+  "context": [{"key": "setting.command_mode"}]
+ },
+
 
 
 {"keys": ["ctrl+f"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
