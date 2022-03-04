@@ -607,7 +607,7 @@ class FindNextCharacterCommand(sublime_plugin.TextCommand):
         lr = self.view.line(pt)
 
         if forward:
-            while lr.b < self.view.size():
+            while lr.b <= self.view.size():
                 linestr = self.view.substr(sublime.Region(pt, lr.b))
                 idx = linestr.find(char, 1)
                 if idx >= 0:
@@ -616,7 +616,7 @@ class FindNextCharacterCommand(sublime_plugin.TextCommand):
                     lr = self.view.line(lr.b + 1)
 
         else:
-            while lr.a > 0:
+            while lr.a >= 0:
                 linestr = self.view.substr(sublime.Region(lr.a, pt))[::-1]
                 idx = linestr.find(char, 0)
                 if idx >= 0:
