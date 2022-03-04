@@ -602,7 +602,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
         buf.show(buf.sel()[0], False)
 
 
-class FindNextCommand(sublime_plugin.TextCommand):
+class FindNextCharacterCommand(sublime_plugin.TextCommand):
     def find_next(self, forward, char, pt):
         lr = self.view.line(pt)
 
@@ -623,8 +623,6 @@ class FindNextCommand(sublime_plugin.TextCommand):
                     return pt - idx - 1
                 else:
                     lr = self.view.line(lr.a - 1)
-
-
 
         return pt
 

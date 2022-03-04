@@ -669,12 +669,12 @@
 ] },
 
 
-{ "keys": ["f", "<character>"], "command": "find_next", "args": {
+{ "keys": ["f", "<character>"], "command": "find_next_character", "args": {
   "forward": true },
   "context": [{"key": "setting.command_mode"}]
  },
 
-{ "keys": ["F", "<character>"], "command": "find_next", "args": {
+{ "keys": ["F", "<character>"], "command": "find_next_character", "args": {
   "forward": false },
   "context": [{"key": "setting.command_mode"}]
  },
