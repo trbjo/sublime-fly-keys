@@ -98,6 +98,8 @@
         <tspan x="143" y="228">Cmt</tspan>
         <tspan x="153" y="107">⌫Word</tspan>
         <tspan x="183" y="40">Save</tspan>
+        <tspan x="124" y="40">Goto</tspan>
+        <tspan x="124" y="55">def</tspan>
         <tspan x="183" y="55">Buffer</tspan>
         <tspan x="203" y="228">Cut</tspan>
         <tspan x="214" y="107">Newline</tspan>
@@ -112,8 +114,8 @@
         <tspan x="349" y="173">→|</tspan>
         <tspan x="365" y="47">Split |</tspan>
         <tspan x="383" y="228">Duplct.</tspan>
-        <tspan x="395" y="101">Goto</tspan>
-        <tspan x="395" y="116">Def</tspan>
+        <tspan x="395" y="101">Find</tspan>
+        <tspan x="395" y="116">char</tspan>
         <tspan x="411" y="167">Select¶</tspan>
         <tspan x="424" y="39">Revert</tspan>
         <tspan x="424" y="55">Mod</tspan>
