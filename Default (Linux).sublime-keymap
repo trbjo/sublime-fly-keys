@@ -661,14 +661,6 @@
 
 
 
-{"keys": ["f"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["f"], "command": "lsp_symbol_definition" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
-{"keys": ["f"], "command": "expand_selection_to_sentence", "context": [
-    { "key": "selector", "operator": "equal", "operand": "(text.xml, text.html.markdown) - string - comment", "match_all": true },
-    {"key": "setting.command_mode"}
-] },
-
-
 { "keys": ["f", "<character>"], "command": "find_next_character", "args": {
   "forward": true },
   "context": [{"key": "setting.command_mode"}]
@@ -679,10 +671,20 @@
   "context": [{"key": "setting.command_mode"}]
  },
 
+{ "keys": ["ctrl+f"], "command": "repeat_find_next_character",
+  "context": [{"key": "setting.command_mode"}]
+ },
 
 
-{"keys": ["ctrl+f"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+f"], "command": "lsp_symbol_references" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
+{"keys": ["2"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["2"], "command": "lsp_symbol_definition" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
+{"keys": ["2"], "command": "expand_selection_to_sentence", "context": [
+    { "key": "selector", "operator": "equal", "operand": "(text.xml, text.html.markdown) - string - comment", "match_all": true },
+    {"key": "setting.command_mode"}
+] },
+
+{"keys": ["@"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["@"], "command": "lsp_symbol_references" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 {"keys": ["ctrl+shift+f"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 
 {"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
