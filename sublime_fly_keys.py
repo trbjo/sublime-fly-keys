@@ -601,8 +601,25 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
         buf.sel().add_all(sublime.Region(begin, end) for begin,end in regs_dict.items())
         buf.show(buf.sel()[0], False)
 
+# tuple of (char: str, forward: bool)
+next_char: Tuple[str, bool] = ('', True)
 
-class FindNextCharacterCommand(sublime_plugin.TextCommand):
+class RepeatFindNextCharacterCommand(FindNextCommand):
+    def run(self, edit):
+        global next_char
+        character, forward = next_char
+        buf = self.view
+        selections = []
+        for region in buf.sel():
+            pt = self.find_next(forward, character, region.begin())
+            buf.sel().subtract(region)
+            selections.append(pt)
+            buf.sel().add(pt)
+        buf.sel().add_all(selections)
+        buf.show(buf.sel()[-1], True)
+        return
+
+class FindNextCommand(sublime_plugin.TextCommand):
     def find_next(self, forward, char, pt):
         lr = self.view.line(pt)
 
@@ -626,7 +643,10 @@ class FindNextCharacterCommand(sublime_plugin.TextCommand):
 
         return pt
 
+class FindNextCharacterCommand(FindNextCommand):
     def run(self, edit, character, forward):
+        global next_char
+        next_char = (character, forward)
         buf = self.view
         selections = []
         for region in buf.sel():
