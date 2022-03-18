@@ -127,13 +127,13 @@ class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
         else:
             view.sel().add(sublime.Region(thisRegionBegin, thisRegionBegin))
 
-class ExpandSelectionToStringDoubleCommand(ExpandSelectionToSentenceCommand):
-    def op(self):
-          return "'"
-
-class ExpandSelectionToStringSingleCommand(ExpandSelectionToSentenceCommand):
+class ExpandSelectionToStringDoubleCommand(ExpandSelectionToStringCommand):
     def op(self):
           return '"'
+
+class ExpandSelectionToStringSingleCommand(ExpandSelectionToStringCommand):
+    def op(self):
+          return "'"
 
 class SetReadOnly(sublime_plugin.EventListener):
     def on_new_async(self, view):
