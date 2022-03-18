@@ -498,6 +498,12 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["b"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["b"], "command": "expand_selection_to_string",
+    "context": [
+    {"key": "setting.command_mode"},
+    {"key": "selector", "operator": "equal", "operand": "string - punctuation.definition.string.begin.json, meta.string" },
+    {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
+  ] },
 {"keys": ["ctrl+b"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["4"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
@@ -532,24 +538,6 @@
     {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
     {"key": "last_command", "operator": "not_equal", "operand": "" },
 ] },
-
-
-{"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "scope"}, "context": [{"key": "setting.command_mode"},  ] },
-
-{ "keys": ["ctrl+d"], "command": "chain",
-        "args": {
-            "commands": [
-                {"command": "smart_find_word"},
-                {"command": "expand_selection", "args": {"to": "smart"}},
-            ]},
-        "context": [
-            {"key": "selection_empty", "operator": "equal", "operand": true},
-            // {"key": "selector", "operand": "string"},
-            { "key": "setting.command_mode" },
-     ]
-},
-
-
 
 {"keys": ["D"], "command": "extended_expand_selection_to_paragraph_backward", "context": [{"key": "setting.command_mode"},
  ] },
