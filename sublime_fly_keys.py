@@ -111,14 +111,14 @@ class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
         view.sel().clear()
         for thisregion in oldSelRegions:
             thisRegionBegin = thisregion.begin() - 1
-            while ((view.substr(thisRegionBegin) not in '"') and (thisRegionBegin >= 0)):
+            while ((view.substr(thisRegionBegin) not in self.op()) and (thisRegionBegin >= 0)):
                 thisRegionBegin -= 1
             thisRegionBegin += 1
         while((view.substr(thisRegionBegin) in string.whitespace) and (thisRegionBegin < view.size())):
             thisRegionBegin += 1
 
         thisRegionEnd = thisregion.end()
-        while((view.substr(thisRegionEnd) not in '"') and (thisRegionEnd < view.size())):
+        while((view.substr(thisRegionEnd) not in self.op()) and (thisRegionEnd < view.size())):
             thisRegionEnd += 1
         thisRegionEnd -= 1
 
@@ -127,6 +127,13 @@ class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
         else:
             view.sel().add(sublime.Region(thisRegionBegin, thisRegionBegin))
 
+class ExpandSelectionToStringDoubleCommand(ExpandSelectionToSentenceCommand):
+    def op(self):
+          return "'"
+
+class ExpandSelectionToStringSingleCommand(ExpandSelectionToSentenceCommand):
+    def op(self):
+          return '"'
 
 class SetReadOnly(sublime_plugin.EventListener):
     def on_new_async(self, view):

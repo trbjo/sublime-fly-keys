@@ -498,12 +498,21 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["b"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["b"], "command": "expand_selection_to_string",
+
+{"keys": ["b"], "command": "expand_selection_to_string_double",
     "context": [
     {"key": "setting.command_mode"},
-    {"key": "selector", "operator": "equal", "operand": "string - punctuation.definition.string.begin.json, meta.string" },
+    {"key": "selector", "operator": "equal", "operand": "string.quoted.double - punctuation.definition.string.begin" },
     {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
+
+{"keys": ["b"], "command": "expand_selection_to_string_single",
+    "context": [
+    {"key": "setting.command_mode"},
+    {"key": "selector", "operator": "equal", "operand": "string.quoted.single - punctuation.definition.string.begin" },
+    {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
+  ] },
+
 {"keys": ["ctrl+b"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["4"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
