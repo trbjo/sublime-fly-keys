@@ -559,7 +559,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                     sel_end = region.a
                     sel_begin = region.b
                 else:
-                    sel_begin = buf.full_line(region.a).b
+                    sel_begin = buf.full_line(region.a).a
                     buf.sel().subtract(region)
 
             elif region.a > region.b:
