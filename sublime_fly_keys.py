@@ -516,7 +516,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
 
             if region.b > region.a:
                 bisect_res = bisect.bisect(first, region.b)
-                sel_begin = region.a
+                sel_begin = buf.full_line(region.a).a
                 sel_end = first[bisect_res] + 2
 
             elif region.a > region.b:
@@ -559,7 +559,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                     sel_end = region.a
                     sel_begin = region.b
                 else:
-                    sel_begin = region.a
+                    sel_begin = buf.full_line(region.a).b
                     buf.sel().subtract(region)
 
             elif region.a > region.b:
