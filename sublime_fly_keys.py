@@ -29,6 +29,45 @@ class ClearSelectionCommand(sublime_plugin.TextCommand):
             buf.sel().add(reg)
             buf.show(reg, False)
 
+true_false_dict = {
+    "false": "true",
+    "False": "True",
+    "true": "false",
+    "True": "False"
+}
+
+class ToggleTrueFalseCommand(sublime_plugin.TextCommand):
+    """First we try around the cursor (-6, +6), else we try the whole line"""
+    def run(self, edit):
+        buf = self.view
+        for region in reversed(buf.sel()):
+            if region.empty():
+                linestr = self.view.substr(sublime.Region(region.a - 6, region.a + 6))
+                g = re.search(r'((F|f)alse|(T|t)rue)', linestr)
+                if g is None:
+                    lr = self.view.line(region.begin())
+                    linestr = self.view.substr(sublime.Region(lr.a, lr.b))
+                    g = re.search(r'((F|f)alse|(T|t)rue)', linestr)
+                    if g is None:
+                        return
+                    begin = g.span()[0] + lr.a
+                    end = g.span()[1] + lr.a
+
+                else:
+                    begin = g.span()[0] + region.begin() - 6
+                    end = g.span()[1] + region.begin() - 6
+
+                myregion=sublime.Region(begin, end)
+                buf.sel().subtract(region)
+                mybool=g.group(0)
+                myopposite=true_false_dict[mybool]
+                buf.replace(edit, myregion, myopposite)
+                buf.sel().add(begin)
+            else:
+                pass
+
+
+
 class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
     def run(self, _):
         buf = self.view

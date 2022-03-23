@@ -355,6 +355,9 @@
 {"keys": ["ctrl+c"], "command": "swap_line_up", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+t"], "command": "swap_line_down", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["T"], "command": "transpose", "context": [{"key": "setting.command_mode" } ] },
+{"keys": ["T"], "command": "toggle_true_false", "context": [{"key": "setting.command_mode" },
+    {"key": "num_selections", "operator": "not_equal", "operand": 2 },
+ ] },
 
 {"keys": ["ctrl+shift+c"], "command": "increment"},
 {"keys": ["ctrl+shift+t"], "command": "decrement"},
