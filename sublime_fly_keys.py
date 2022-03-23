@@ -355,6 +355,7 @@ class CommandModeCommand(sublime_plugin.WindowCommand):
     def run(self):
         buf = sublime.active_window().active_view()
         buf.settings().set(key="block_caret", value=True)
+        buf.settings().set(key="stored_char", value=False)
         buf.settings().set(key="command_mode", value=True)
         # buf.window().run_command('hide_panel')
         buf.window().run_command('hide_popup')
@@ -530,12 +531,10 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
         buf.show(buf.sel()[0], False)
 
 # tuple of (char: str, forward: bool)
-next_char: Tuple[str, bool] = ('', True)
-
+first_char: Tuple[str, bool] = ('', True)
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def find_next(self, forward, char, pt):
         lr = self.view.line(pt)
-
         if forward:
             while lr.b <= self.view.size():
                 linestr = self.view.substr(sublime.Region(pt, lr.b))
@@ -544,7 +543,6 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     return pt + idx
                 else:
                     lr = self.view.line(lr.b + 1)
-
         else:
             while lr.a >= 0:
                 linestr = self.view.substr(sublime.Region(lr.a, pt))[::-1]
@@ -553,39 +551,50 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     return pt - idx - 1
                 else:
                     lr = self.view.line(lr.a - 1)
-
         return pt
+
+    def move_or_expand_selections(self, edit, character, forward):
+        buf = self.view
+        selections = []
+        for region in reversed(buf.sel()):
+            pt = self.find_next(forward, character, region.end() if forward else region.begin())
+            if region.a == region.b:
+                buf.sel().subtract(region)
+                tp = (pt, pt)
+            else:
+                if forward:
+                    tp = (region.begin(), pt + 1)
+                else:
+                    tp = (region.end(), pt)
+            selections.append(tp)
+        buf.sel().add_all(sublime.Region(begin,end) for begin,end in selections)
+        buf.show(buf.sel()[-1], True)
+        return
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, edit):
-        global next_char
-        character, forward = next_char
-        buf = self.view
-        selections = []
-        for region in buf.sel():
-            pt = self.find_next(forward, character, region.begin())
-            buf.sel().subtract(region)
-            selections.append(pt)
-            buf.sel().add(pt)
-        buf.sel().add_all(selections)
-        buf.show(buf.sel()[-1], True)
-        return
+        global first_char
+        character, forward = first_char
+        self.move_or_expand_selections(edit, character, forward)
+
+class StoreCharacterCommand(FindNextCharacterBaseCommand):
+    def run(self, edit, character, forward):
+        self.view.settings().set(key="stored_char", value=True)
+        global first_char
+        first_char = (character, forward)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, edit, character, forward):
-        global next_char
-        next_char = (character, forward)
-        buf = self.view
-        selections = []
-        for region in buf.sel():
-            pt = self.find_next(forward, character, region.begin())
-            buf.sel().subtract(region)
-            selections.append(pt)
-            buf.sel().add(pt)
-        buf.sel().add_all(selections)
-        buf.show(buf.sel()[-1], True)
-        return
-
+    def run(self, edit, **kwargs):
+        self.view.settings().set(key="stored_char", value=False)
+        mychar=kwargs['character']
+        global first_char
+        first_char, forward = first_char
+        if forward:
+            search_string = first_char + mychar
+        else:
+            search_string = mychar + first_char
+        first_char = (search_string, forward)
+        self.move_or_expand_selections(edit, search_string, forward)
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _):

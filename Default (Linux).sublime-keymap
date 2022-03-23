@@ -236,8 +236,8 @@
 //////////////////// SEARCH AND REPLACE /////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["m"], "command": "show_panel", "args": {"panel": "find", "reverse": false}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["M"], "command": "show_panel", "args": {"panel": "replace"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["/"], "command": "show_panel", "args": {"panel": "find", "reverse": false}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+/"], "command": "show_panel", "args": {"panel": "replace"}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+m"], "command": "show_panel", "args": {"panel": "find_in_files"}, "context": [{"key": "setting.command_mode"}, ] },
 
 ////////////////////////////////////////////////
@@ -671,25 +671,8 @@
 
 {"keys": ["shift+space"], "command": "auto_complete"},
 
-{"keys": ["/"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
-
-
-
-{ "keys": ["f", "<character>"], "command": "find_next_character", "args": {
-  "forward": true },
-  "context": [{"key": "setting.command_mode"}]
- },
-
-{ "keys": ["F", "<character>"], "command": "find_next_character", "args": {
-  "forward": false },
-  "context": [{"key": "setting.command_mode"}]
- },
-
-{ "keys": ["ctrl+f"], "command": "repeat_find_next_character",
-  "context": [{"key": "setting.command_mode"}]
- },
-
+// {"keys": ["/"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, ] },
+// {"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["2"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["2"], "command": "lsp_symbol_definition" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
@@ -734,10 +717,19 @@
 /////////////////// ESCAPE: /////////////////////
 /////////////////////////////////////////////////
 
-{"keys": ["ctrl+escape"], "command": "jump_back", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["shift+escape"], "command": "jump_back", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+escape"], "command": "single_selection_last", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
 
-{"keys": ["escape"], "command": "show_at_center", "context": [{"key": "setting.command_mode"}, ] ,},
+{"keys": ["escape"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "set_setting", "args": {"setting": "stored_char", "value": false }},
+            {"command": "show_at_center" },
+        ]
+    },
+    "context": [{"key": "setting.command_mode"}, ]
+},
+
 {"keys": ["escape"], "command": "single_selection", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
 {"keys": ["escape"], "command": "hide_popup", "context": [{"key": "popup_visible", "operator": "equal", "operand": true} ] },
 {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
@@ -899,5 +891,26 @@
 {"keys": ["8"], "command": "insert", "args": {"characters": ":8"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
 {"keys": ["9"], "command": "insert", "args": {"characters": ":9"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
 {"keys": ["0"], "command": "insert", "args": {"characters": ":0"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
+
+{ "keys": ["m", "<character>"], "command": "store_character", "args": {
+  "forward": true },
+  "context": [{"key": "setting.command_mode"}]
+ },
+
+{ "keys": ["ctrl+m", "<character>"], "command": "store_character", "args": {
+  "forward": false },
+  "context": [{"key": "setting.command_mode"}]
+ },
+
+{ "keys": ["M"], "command": "repeat_find_next_character",
+  "context": [{"key": "setting.command_mode"}]
+ },
+
+{ "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>" },
+        "context": [
+            { "key": "setting.command_mode" },
+            {"key": "setting.stored_char", "operator": "equal", "operand": true }
+     ]
+},
 
 ]
