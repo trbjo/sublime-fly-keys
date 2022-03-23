@@ -984,6 +984,11 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
                 buf.insert(edit, insert_pos, insert_string)
 
+            if has_final_newline and len(sels) > 1:
+                m = buf.sel()[-1]
+                buf.sel().clear()
+                buf.sel().add(m)
+
 
         # Ok, just regular paste
         elif len(clips) > len(sels):
