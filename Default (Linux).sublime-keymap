@@ -726,7 +726,7 @@
 {"keys": ["escape"], "command": "chain",
     "args": {
         "commands": [
-            {"command": "set_setting", "args": {"setting": "stored_char", "value": false }},
+            {"command": "set_setting", "args": {"setting": "waiting_for_char", "value": false }},
             {"command": "show_at_center" },
         ]
     },
@@ -899,16 +899,23 @@
   "context": [{"key": "setting.command_mode"}]
  },
 
-{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": false },
+{ "keys": ["ctrl+m", "<character>"], "command": "store_character", "args": {"forward": false },
   "context": [{"key": "setting.command_mode"}]
  },
 
- { "keys": ["ctrl+m"], "command": "repeat_find_next_character", "args": {"forward": true}, "context": [
+ { "keys": ["m"], "command": "repeat_find_next_character", "args": {"forward": true}, "context": [
+        {"key": "setting.command_mode"},
+       {"key": "setting.has_stored_char", "operator": "equal", "operand": true }
+   ]
+  },
+
+ { "keys": ["M"], "command": "repeat_find_next_character", "args": {"forward": true}, "context": [
         {"key": "setting.command_mode"},
    ]
   },
 
-{ "keys": ["ctrl+shift+m"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [
+{ "keys": ["ctrl+m"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [
+       {"key": "setting.has_stored_char", "operator": "equal", "operand": true },
        {"key": "setting.command_mode"},
   ]
  },
@@ -916,7 +923,7 @@
 { "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>" },
         "context": [
             {"key": "setting.command_mode"},
-            {"key": "setting.stored_char", "operator": "equal", "operand": true }
+            {"key": "setting.waiting_for_char", "operator": "equal", "operand": true }
      ]
 },
 

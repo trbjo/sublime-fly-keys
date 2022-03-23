@@ -644,25 +644,38 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, edit, forward):
+        self.view.settings().set(key="has_stored_char", value=True)
         global first_char
         character, _ = first_char
         self.move_or_expand_selections(edit, character, forward)
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, edit, character, forward):
-        self.view.settings().set(key="stored_char", value=True)
+        self.view.settings().set(key="waiting_for_char", value=True)
         global first_char
         first_char = (character, forward)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, edit, **kwargs):
-        self.view.settings().set(key="stored_char", value=False)
+        self.view.settings().set(key="has_stored_char", value=True)
+        self.view.settings().set(key="waiting_for_char", value=False)
         mychar=kwargs['character']
         global first_char
         first_char, forward = first_char
         search_string = first_char + mychar
         first_char = (search_string, forward)
         self.move_or_expand_selections(edit, search_string, forward)
+
+class FindNextCharacterListener(sublime_plugin.EventListener):
+    def on_window_command(self, window, command_name, args):
+        window.active_view().settings().set(key="waiting_for_char", value=False)
+        window.active_view().settings().set(key="has_stored_char", value=False)
+
+    def on_text_command(self, view, command_name, args):
+        if command_name != "find_next_character" and command_name != "repeat_find_next_character" and command_name != "store_character":
+            view.settings().set(key="has_stored_char", value=False)
+            view.settings().set(key="waiting_for_char", value=False)
+
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _):
