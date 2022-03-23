@@ -605,26 +605,47 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
 
     def move_or_expand_selections(self, edit, character, forward):
         buf = self.view
-        selections = []
+        character = character[::-1] if not forward else character
         for region in reversed(buf.sel()):
-            pt = self.find_next(forward, character, region.end() if forward else region.begin())
             if region.a == region.b:
+                pt = self.find_next(forward, character, region.end() if forward else region.begin())
+                if region.end() == pt or region.begin() -1 == pt:
+                    return
+                pt = self.find_next(forward, character, region.end() if forward else region.begin())
                 buf.sel().subtract(region)
-                tp = (pt, pt)
-            else:
+                tp = pt if forward else pt -1
+                buf.sel().add(tp)
+                # normal sel
+            elif region.a < region.b:
                 if forward:
-                    tp = (region.begin(), pt + 1)
+                    pt = self.find_next(forward, character, region.b -1)
+                    buf.sel().add(sublime.Region(region.a, pt+2))
                 else:
-                    tp = (region.end(), pt)
-            selections.append(tp)
-        buf.sel().add_all(sublime.Region(begin,end) for begin,end in selections)
+                    pt = self.find_next(forward, character, region.b -2)
+                    if pt < region.a:
+                        buf.sel().subtract(sublime.Region(region.b, region.a))
+                        buf.sel().add(sublime.Region(region.a))
+                    else:
+                        buf.sel().subtract(sublime.Region(region.b, pt+1))
+                # reverse sel
+            elif region.a > region.b:
+                if forward:
+                    pt = self.find_next(forward, character, region.b)
+                    if pt > region.a:
+                        buf.sel().subtract(sublime.Region(region.a, region.b))
+                        buf.sel().add(sublime.Region(region.a))
+                    else:
+                        buf.sel().subtract(sublime.Region(region.b, pt))
+                else:
+                    pt = self.find_next(forward, character, region.b -1)
+                    buf.sel().add(sublime.Region(region.a, pt -1))
         buf.show(buf.sel()[-1], True)
         return
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, edit):
+    def run(self, edit, forward):
         global first_char
-        character, forward = first_char
+        character, _ = first_char
         self.move_or_expand_selections(edit, character, forward)
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
@@ -639,10 +660,7 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
         mychar=kwargs['character']
         global first_char
         first_char, forward = first_char
-        if forward:
-            search_string = first_char + mychar
-        else:
-            search_string = mychar + first_char
+        search_string = first_char + mychar
         first_char = (search_string, forward)
         self.move_or_expand_selections(edit, search_string, forward)
 

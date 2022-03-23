@@ -895,23 +895,27 @@
 {"keys": ["9"], "command": "insert", "args": {"characters": ":9"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
 {"keys": ["0"], "command": "insert", "args": {"characters": ":0"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
 
-{ "keys": ["m", "<character>"], "command": "store_character", "args": {
-  "forward": true },
+{ "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true },
   "context": [{"key": "setting.command_mode"}]
  },
 
-{ "keys": ["ctrl+m", "<character>"], "command": "store_character", "args": {
-  "forward": false },
+{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": false },
   "context": [{"key": "setting.command_mode"}]
  },
 
-{ "keys": ["M"], "command": "repeat_find_next_character",
-  "context": [{"key": "setting.command_mode"}]
+ { "keys": ["ctrl+m"], "command": "repeat_find_next_character", "args": {"forward": true}, "context": [
+        {"key": "setting.command_mode"},
+   ]
+  },
+
+{ "keys": ["ctrl+shift+m"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [
+       {"key": "setting.command_mode"},
+  ]
  },
 
 { "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>" },
         "context": [
-            { "key": "setting.command_mode" },
+            {"key": "setting.command_mode"},
             {"key": "setting.stored_char", "operator": "equal", "operand": true }
      ]
 },
