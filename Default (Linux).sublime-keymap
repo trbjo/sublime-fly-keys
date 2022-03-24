@@ -641,30 +641,9 @@
         ]
 },
 
-{ "keys": ["ctrl+s"], "command": "chain",
-        "args": {
-            "commands": [
-                {"command": "expand_selection", "args": {"to": "indentation"}},
-                {"command": "split_selection_into_lines"},
-                {"command": "move_to", "args": {"to": "hardeol", "extend": false}}
-            ]},
-        "context": [
-            { "key": "setting.command_mode" },
-        ]
-},
+{"keys": ["ctrl+s"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+a"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}]},
 
-
-{ "keys": ["ctrl+a"], "command": "chain",
-        "args": {
-        "commands": [
-            {"command": "expand_selection", "args": {"to": "indentation"}},
-            {"command": "split_selection_into_lines"},
-            {"command": "move_to", "args": {"to": "bol", "extend": false}}
-        ]},
-        "context": [
-            { "key": "setting.command_mode" },
-        ]
-},
 
 {"keys": ["ctrl+w"], "command": "select_lines", "args": {"forward": false} , "context": [{"key": "setting.command_mode"}, ] },
 
