@@ -802,18 +802,18 @@
 /////////////////// OVERLAY: /////////////////////
 //////////////////////////////////////////////////
 
-{"keys": ["ctrl+h"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"} },
+// {"keys": ["ctrl+h"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"} },
 
-{"keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}},
-{"keys": [" "], "command": "insert", "args": {"characters": " "}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-{ "keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "text": "#"},
-        "context": [
-            {"key": "overlay_visible", "operator": "equal", "operand": true },
-            {"key": "preceding_text", "operator": "regex_match", "operand": "^$"},
-            {"key": "following_text", "operator": "regex_match", "operand": "^$"},
-        ]
-    },
-{"keys": [" "], "command": "insert", "args": {"characters": "@"}, "context": [{"key": "preceding_text", "operator": "not_regex_contains", "operand": "@$|#$"}, {"key": "goto_anything:input" }, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
+// {"keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}},
+// {"keys": [" "], "command": "insert", "args": {"characters": " "}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+// { "keys": [" "], "command": "show_overlay", "args": {"overlay": "goto", "text": "#"},
+//         "context": [
+//             {"key": "overlay_visible", "operator": "equal", "operand": true },
+//             {"key": "preceding_text", "operator": "regex_match", "operand": "^$"},
+//             {"key": "following_text", "operator": "regex_match", "operand": "^$"},
+//         ]
+//     },
+// {"keys": [" "], "command": "insert", "args": {"characters": "@"}, "context": [{"key": "preceding_text", "operator": "not_regex_contains", "operand": "@$|#$"}, {"key": "goto_anything:input" }, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
 {"keys": [" "], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "overlay_visible", "operator": "equal", "operand": true }, {"key": "preceding_text", "operator": "regex_contains", "operand": "@|:$|#$"}, ] },
 {"keys": [" "], "command": "insert", "args": {"characters": ":"}, "context": [{"key": "preceding_text", "operator": "regex_contains", "operand": ":[0-9]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, ] },
 
@@ -883,18 +883,23 @@
 {"keys": ["9"], "command": "toggle_inline_diff", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["0"], "command": "git_add_selected_hunk", "context": [{"key": "setting.command_mode"}, ] },
 
-// if we are in overlay we can infer that typing numbers will always refer to line numbers. This of course only applies if your files are not named with numbers
-{"keys": ["1"], "command": "insert", "args": {"characters": ":1"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["2"], "command": "insert", "args": {"characters": ":2"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["3"], "command": "insert", "args": {"characters": ":3"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["4"], "command": "insert", "args": {"characters": ":4"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["5"], "command": "insert", "args": {"characters": ":5"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["6"], "command": "insert", "args": {"characters": ":6"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["7"], "command": "insert", "args": {"characters": ":7"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["8"], "command": "insert", "args": {"characters": ":8"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["9"], "command": "insert", "args": {"characters": ":9"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-{"keys": ["0"], "command": "insert", "args": {"characters": ":0"}, "context": [{"key": "preceding_text", "operator": "regex_match", "operand": "^$|^[A-Za-z\\-_\\.\\(\\),]+$"}, {"key": "overlay_visible", "operator": "equal", "operand": true }, { "key": "goto_anything:input" }, ] },
-
+{"keys": [" ", "h"], "command": "show_overlay", "args": {"overlay": "goto", "text": "#"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", " "], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "e"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "u"], "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "enter"], "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "s"], "command": "goto_symbol_in_project", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "1"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":1"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "2"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":2"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "3"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":3"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "4"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":4"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "5"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "6"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "7"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":7"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "8"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":8"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "9"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":9"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "0"], "command": "move_to", "args": {"to": "eof", "extend": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "0"], "command": "move_to", "args": {"to": "eof", "extend": true}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 { "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true },
   "context": [{"key": "setting.command_mode"}]
  },
