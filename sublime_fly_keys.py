@@ -1,20 +1,21 @@
+from sublime import Edit, View, Region, Selection, set_clipboard, active_window
 import sublime
 import sublime_plugin
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from os import path
 import bisect
 import datetime
 import re
 import string
 
-interesting_regions = {}
+interesting_regions: Dict[View, Dict[str, Tuple[int]]] = {}
 timeout = datetime.datetime.now()
 WORDCHARS = r'[-\._\w]+'
 
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _, forward) -> None:
+    def run(self, _, forward: bool) -> None:
         buf = self.view
         for region in buf.sel():
             buf.sel().subtract(region)
@@ -38,11 +39,11 @@ true_false_dict = {
 
 class ToggleTrueFalseCommand(sublime_plugin.TextCommand):
     """First we try around the cursor (-6, +6), else we try the whole line"""
-    def run(self, edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         for region in reversed(buf.sel()):
             if region.empty():
-                linestr = self.view.substr(sublime.Region(region.a - 6, region.a + 6))
+                linestr = self.view.substr(Region(region.a - 6, region.a + 6))
                 g = [(m.start(), m.end(), m.groups()[0]) for m in re.finditer(r'((F|f)alse|(T|t)rue)', linestr)]
                 # if more than one match was found, we take the one that is nearest
                 # the caret
@@ -62,14 +63,16 @@ class ToggleTrueFalseCommand(sublime_plugin.TextCommand):
                     mybool = g[0][2]
                 elif len(g) == 0:
                     lr = self.view.line(region.begin())
-                    linestr = self.view.substr(sublime.Region(lr.a, lr.b))
+                    linestr = self.view.substr(Region(lr.a, lr.b))
                     g = re.search(r'((F|f)alse|(T|t)rue)', linestr)
                     if g is None:
                         return
                     begin = g.span()[0] + lr.a
                     end = g.span()[1] + lr.a
                     mybool = g.group(0)
-                myregion=sublime.Region(begin, end)
+                else:
+                    return
+                myregion=Region(begin, end)
                 buf.sel().subtract(region)
                 myopposite=true_false_dict[mybool]
                 buf.replace(edit, myregion, myopposite)
@@ -87,13 +90,13 @@ class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
         line_content = buf.substr(line)
 
         if line_content.startswith('/'):
-            sublime.set_clipboard(line_content[:-1])
+            set_clipboard(line_content[:-1])
             return
 
         line_match = re.match(r"^\s+\d+", line_content)
         if line_match:
             offset = line_match.end() + 2
-            sublime.set_clipboard(line_content[offset:])
+            set_clipboard(line_content[offset:])
             return
 
 
@@ -104,10 +107,10 @@ class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
         line_beg = buf.full_line(sel[0]).begin()
         line_end = buf.full_line(sel[-1]).end()
         sel.clear()
-        sel.add(sublime.Region(line_beg, line_end))
+        sel.add(Region(line_beg, line_end))
 
 class DeleteSmartCommand(sublime_plugin.TextCommand):
-    def run(self, edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         for region in reversed(buf.sel()):
             if region.empty():
@@ -122,7 +125,7 @@ class DeleteSmartCommand(sublime_plugin.TextCommand):
                     end_line += 1
                 reg_beg = buf.text_point(begin_line, 0)
                 reg_end = buf.text_point(end_line, 0) - 1
-                reg = sublime.Region(reg_beg, reg_end + 1)
+                reg = Region(reg_beg, reg_end + 1)
             buf.erase(edit, reg)
 
 
@@ -134,66 +137,69 @@ class ExpandSelectionToSentenceCommand(sublime_plugin.TextCommand):
         # whitespace = '\t\n\x0b\x0c\r ' # Equivalent to string.whitespace
         oldSelRegions = list(view.sel())
         view.sel().clear()
-        for thisregion in oldSelRegions:
-            thisRegionBegin = thisregion.begin() - 1
-            while ((view.substr(thisRegionBegin) not in ".") and (thisRegionBegin >= 0)):
-                thisRegionBegin -= 1
-            thisRegionBegin += 1
-        while((view.substr(thisRegionBegin) in string.whitespace) and (thisRegionBegin < view.size())):
-            thisRegionBegin += 1
+        for region in oldSelRegions:
+            reg_begin = region.begin() - 1
+            while ((view.substr(reg_begin) not in ".") and (reg_begin >= 0)):
+                reg_begin -= 1
+            reg_begin += 1
+            while((view.substr(reg_begin) in string.whitespace) and (reg_begin < view.size())):
+                reg_begin += 1
+            reg_begin -= 1
 
-        thisRegionEnd = thisregion.end()
-        while((view.substr(thisRegionEnd) not in ".") and (thisRegionEnd < view.size())):
-            thisRegionEnd += 1
+            reg_end = region.end()
+            while((view.substr(reg_end) not in ".") and (reg_end < view.size())):
+                reg_end += 1
 
-        if(thisRegionBegin != thisRegionEnd):
-            view.sel().add(sublime.Region(thisRegionBegin, thisRegionEnd+1))
-        else:
-            view.sel().add(sublime.Region(thisRegionBegin, thisRegionBegin))
+            if(reg_begin != reg_end):
+                view.sel().add(Region(reg_begin, reg_end+1))
+            else:
+                view.sel().add(Region(reg_begin, reg_begin))
 
 
 class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
-    # TODO: Add foward command to go forward and backward selction of sentences
+    def op(self)->str:
+        return ''
     def run(self, _) -> None:
         view = self.view
-        # whitespace = '\t\n\x0b\x0c\r ' # Equivalent to string.whitespace
-        oldSelRegions = list(view.sel())
-        view.sel().clear()
-        for thisregion in oldSelRegions:
-            thisRegionBegin = thisregion.begin() - 1
-            while ((view.substr(thisRegionBegin) not in self.op()) and (thisRegionBegin >= 0)):
-                thisRegionBegin -= 1
-            thisRegionBegin += 1
-        while((view.substr(thisRegionBegin) in string.whitespace) and (thisRegionBegin < view.size())):
-            thisRegionBegin += 1
+        for region in view.sel():
+            reg_begin = region.begin() - 1
+            while ((view.substr(reg_begin) not in self.op()) and (reg_begin >= 0)):
+                reg_begin -= 1
+            reg_begin += 1
+            while((view.substr(reg_begin) in string.whitespace) and (reg_begin < view.size())):
+                reg_begin += 1
 
-        thisRegionEnd = thisregion.end()
-        while((view.substr(thisRegionEnd) not in self.op()) and (thisRegionEnd < view.size())):
-            thisRegionEnd += 1
-        thisRegionEnd -= 1
+            reg_end: int = region.end()
+            while((view.substr(reg_end) not in self.op()) and (reg_end < view.size())):
+                reg_end += 1
+            reg_end -= 1
 
-        if(thisRegionBegin != thisRegionEnd):
-            view.sel().add(sublime.Region(thisRegionBegin, thisRegionEnd+1))
-        else:
-            view.sel().add(sublime.Region(thisRegionBegin, thisRegionBegin))
+            if(reg_begin != reg_end):
+                view.sel().add(Region(reg_begin, reg_end+1))
+            else:
+                view.sel().add(Region(reg_begin, reg_begin))
 
 class ExpandSelectionToStringDoubleCommand(ExpandSelectionToStringCommand):
-    def op(self):
+    def op(self) -> str:
           return '"'
 
 class ExpandSelectionToStringSingleCommand(ExpandSelectionToStringCommand):
-    def op(self):
+    def op(self) -> str:
           return "'"
 
 class SetReadOnly(sublime_plugin.EventListener):
-    def on_new_async(self, view):
+    def on_new_async(self, view: View):
         if view.name() == 'Find Results':
             view.set_read_only(True)
 
 class FindInFilesGotoCommand(sublime_plugin.TextCommand):
-
     def run(self, _) -> None:
         view = self.view
+        if view is None:
+            return
+        window: sublime.Window|None = view.window()
+        if window is None:
+            return
         if view.name() == "Find Results":
             line_no = self.get_line_no()
             file_name = self.get_file()
@@ -201,9 +207,9 @@ class FindInFilesGotoCommand(sublime_plugin.TextCommand):
                 caretpos = view.sel()[0].begin()
                 (_,col) = view.rowcol(caretpos)
                 file_loc = "%s:%s:%s" % (file_name, line_no, col -6)
-                view.window().open_file(file_loc, sublime.ENCODED_POSITION)
+                window.open_file(file_loc, sublime.ENCODED_POSITION)
             elif file_name is not None:
-                view.window().open_file(file_name)
+                window.open_file(file_name)
 
     def get_line_no(self):
         view = self.view
@@ -236,7 +242,7 @@ should_change_to_bol = False
 
 
 class SampleListener(sublime_plugin.EventListener):
-    def on_query_context(self, view, key, _, operand, __):
+    def on_query_context(self, view: View, key: str, _, operand, __):
         global allow_extend
         global ought_to_extend
         global should_change_to_bol
@@ -260,23 +266,27 @@ class SampleListener(sublime_plugin.EventListener):
         global should_change_to_bol
         if allow_extend == True:
             allow_extend = False
-            v = sublime.active_window().active_view()
+            v: View | None = active_window().active_view()
+            if v is None:
+                return
             if prev_buf_id == v.id():
                 end = v.full_line(v.sel()[0].end()).end()
-                v.sel().add(sublime.Region(pos_begin,end))
+                v.sel().add(Region(pos_begin,end))
         elif should_change_to_bol:
-            v = sublime.active_window().active_view()
+            v: View | None = active_window().active_view()
+            if v is None:
+                return
             end = v.full_line(v.sel()[0].end()).end()
             should_change_to_bol = False
-            next_res, next_res_end = v.find(r'\S|^$|^\s+$', v.sel()[0].end())
+            next_res, _ = v.find(r'\S|^$|^\s+$', v.sel()[0].end())
             v.sel().clear()
-            v.sel().add(sublime.Region(next_res,next_res))
+            v.sel().add(Region(next_res,next_res))
 
     def on_deactivated_async(self, _):
         global prev_buf_id
         global pos_begin
         global ought_to_extend
-        v = sublime.active_window().active_view()
+        v = active_window().active_view()
         if v is None:
             return
         if len(v.sel()) == 0:
@@ -294,8 +304,10 @@ class SampleListener(sublime_plugin.EventListener):
 
 
 class NumberCommand(sublime_plugin.TextCommand):
+    def op(self, value: int) -> int:
+          return value
 
-    def run(self, edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         selection = buf.sel()
         for region in selection:
@@ -303,7 +315,7 @@ class NumberCommand(sublime_plugin.TextCommand):
                 mystr = buf.substr(region)
                 if mystr.isdigit() or mystr.startswith('-') and mystr[1:].isdigit():
                     continue
-                reg_list = [sublime.Region(m.start() + region.begin(), m.end() + region.begin()) for m in re.finditer(r'-?\d+', buf.substr(region))]
+                reg_list = [Region(m.start() + region.begin(), m.end() + region.begin()) for m in re.finditer(r'-?\d+', buf.substr(region))]
                 if reg_list != []:
                     selection.subtract(region)
                     for maybe_digit in reg_list:
@@ -349,7 +361,7 @@ class NumberCommand(sublime_plugin.TextCommand):
 
                 if start_pos is not None and end_pos is not None:
                     selection.subtract(region)
-                    selection.add(sublime.Region(buf.text_point(line, start_pos), buf.text_point(line, end_pos + 1)))
+                    selection.add(Region(buf.text_point(line, start_pos), buf.text_point(line, end_pos + 1)))
 
         for region in selection:
             try:
@@ -360,16 +372,16 @@ class NumberCommand(sublime_plugin.TextCommand):
 
 
 class IncrementCommand(NumberCommand):
-    def op(self, value):
+    def op(self, value: int) -> int:
           return value + 1
 
 class DecrementCommand(NumberCommand):
-    def op(self, value):
+    def op(self, value: int) -> int:
           return value - 1
 
 
 class InsertModeCommand(sublime_plugin.TextCommand):
-    def run(self, edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         if buf.is_read_only() == True:
             sublime.status_message('Buffer is read only')
@@ -384,31 +396,33 @@ class InsertModeCommand(sublime_plugin.TextCommand):
 
 
 class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
-    def run(self, edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         if buf.is_read_only() == True:
             sublime.status_message('Buffer is read only')
             return
 
-        rev_sel: reversed[List[sublime.Region]] = reversed(buf.sel())
-        for reg in rev_sel:
+        sels: Selection = buf.sel()
+        for reg in reversed(sels):
             if reg.empty():
                 line = buf.line(reg.begin())
-                buf.erase(edit, sublime.Region(reg.begin(), line.end()))
+                buf.erase(edit, Region(reg.begin(), line.end()))
             else:
-                buf.erase(edit, region)
+                buf.erase(edit, reg)
         buf.settings().set(key="block_caret", value=False)
         buf.settings().set(key="command_mode", value=False)
 
 
 class CommandModeCommand(sublime_plugin.WindowCommand):
     def run(self) -> None:
-        buf = sublime.active_window().active_view()
+        buf: View | None = active_window().active_view()
+        active_window().run_command('hide_popup')
+        # active_window().run_command('hide_panel')
+        if buf is None:
+            return
         buf.settings().set(key="block_caret", value=True)
         buf.settings().set(key="waiting_for_char", value=False)
         buf.settings().set(key="command_mode", value=True)
-        # buf.window().run_command('hide_panel')
-        buf.window().run_command('hide_popup')
 
 
 class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
@@ -439,14 +453,17 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
 
 
 
-def build_or_rebuild_ws_for_view(view, immediate: bool):
+def build_or_rebuild_ws_for_view(view: View, immediate: bool):
+    if view is None:
+        return
     global interesting_regions
     global timeout
     if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
-        interesting_regions[view] = {}
+        interesting_regions[view] = dict()
         try:
-            whitespaces = view.find_all(r'\n\n *\S')
-            first, last = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(view.size() + 1, view.size() + 1)])
+            whitespaces: List[Region] = view.find_all(r'\n\n *\S')
+            size = view.size() + 1
+            first, last = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(size, size)])
             interesting_regions[view]['first'] = first
             interesting_regions[view]['last'] = last
         except ValueError:
@@ -454,8 +471,8 @@ def build_or_rebuild_ws_for_view(view, immediate: bool):
     timeout = datetime.datetime.now()
 
 
-class HejSampleListener(sublime_plugin.EventListener):
-    def on_modified_async(self, view):
+class ModifiedViewListener(sublime_plugin.EventListener):
+    def on_modified_async(self, view: View):
         if view.element() is None:
             try:
                 global interesting_regions
@@ -464,7 +481,7 @@ class HejSampleListener(sublime_plugin.EventListener):
                 pass
             sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
-    def on_load_async(self, view):
+    def on_load_async(self, view: View):
         if view not in interesting_regions and view.element() is None:
             build_or_rebuild_ws_for_view(view, immediate=True)
 
@@ -473,13 +490,13 @@ class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
         buf = self.view
         region = buf.sel()[-1].begin()
         try:
-            myregs = interesting_regions[buf]['last']
+            myregs: Tuple[int] = interesting_regions[buf]['last']
         except KeyError:
             build_or_rebuild_ws_for_view(buf, immediate=True)
-            myregs = interesting_regions[buf]['last']
+            myregs: Tuple[int] = interesting_regions[buf]['last']
         bisect_res = bisect.bisect(myregs, region)
         sel_end = myregs[bisect_res]
-        reg = sublime.Region(sel_end)
+        reg = Region(sel_end)
         buf.sel().clear()
         buf.sel().add(reg)
         buf.show(reg, False)
@@ -490,13 +507,13 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
         buf = self.view
         region = buf.sel()[0].begin()
         try:
-            myregs = interesting_regions[buf]['last']
+            myregs: Tuple[int] = interesting_regions[buf]['last']
         except KeyError:
             build_or_rebuild_ws_for_view(buf, immediate=True)
-            myregs = interesting_regions[buf]['last']
+            myregs: Tuple[int] = interesting_regions[buf]['last']
         bisect_res = bisect.bisect(myregs, region - 1)
-        sel_end = myregs[bisect_res -1 ]
-        reg = sublime.Region(sel_end)
+        sel_end: int = myregs[bisect_res -1 ]
+        reg = Region(sel_end)
         buf.sel().clear()
         buf.sel().add(reg)
         buf.show(reg, False)
@@ -505,14 +522,14 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
 class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
-        regs_dict = {}
+        regs_dict: Dict[int, int] = dict()
         for region in buf.sel():
 
             try:
-                first = interesting_regions[buf]['first']
+                first: Tuple[int] = interesting_regions[buf]['first']
             except KeyError:
                 build_or_rebuild_ws_for_view(buf, immediate=True)
-                first = interesting_regions[buf]['first']
+                first: Tuple[int] = interesting_regions[buf]['first']
 
             if region.b > region.a:
                 bisect_res = bisect.bisect(first, region.b)
@@ -536,21 +553,21 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
 
             regs_dict[sel_begin] = sel_end
 
-        buf.sel().add_all(sublime.Region(begin,end) for begin,end in regs_dict.items())
+        buf.sel().add_all(Region(begin,end) for begin,end in regs_dict.items())
         buf.show(buf.sel()[-1], False)
 
 
 class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
-        regs_dict = {}
+        regs_dict: Dict[int, int] = dict()
         for region in buf.sel():
 
             try:
-                first = interesting_regions[buf]['first']
+                first: Tuple[int] = interesting_regions[buf]['first']
             except KeyError:
                 build_or_rebuild_ws_for_view(buf, immediate=True)
-                first = interesting_regions[buf]['first']
+                first: Tuple[int] = interesting_regions[buf]['first']
 
             if region.b > region.a:
                 bisect_end = bisect.bisect(first, region.b - 3)
@@ -577,7 +594,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
 
             regs_dict[sel_begin] = sel_end
 
-        buf.sel().add_all(sublime.Region(begin, end) for begin,end in regs_dict.items())
+        buf.sel().add_all(Region(begin, end) for begin,end in regs_dict.items())
         buf.show(buf.sel()[0], False)
 
 # tuple of (char: str, forward: bool)
@@ -587,7 +604,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         lr = self.view.line(pt)
         if forward:
             while lr.b <= self.view.size():
-                linestr = self.view.substr(sublime.Region(pt, lr.b))
+                linestr = self.view.substr(Region(pt, lr.b))
                 idx = linestr.find(char, 1)
                 if idx >= 0:
                     return pt + idx
@@ -595,7 +612,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     lr = self.view.line(lr.b + 1)
         else:
             while lr.a >= 0:
-                linestr = self.view.substr(sublime.Region(lr.a, pt))[::-1]
+                linestr = self.view.substr(Region(lr.a, pt))[::-1]
                 idx = linestr.find(char, 0)
                 if idx >= 0:
                     return pt - idx - 1
@@ -619,26 +636,26 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
             elif region.a < region.b:
                 if forward:
                     pt = self.find_next(forward, character, region.b)
-                    buf.sel().add(sublime.Region(region.b -1, pt+2))
+                    buf.sel().add(Region(region.b -1, pt+2))
                 else:
                     pt = self.find_next(forward, character, region.b -2)
                     if pt < region.a:
-                        buf.sel().subtract(sublime.Region(region.b, region.a))
-                        buf.sel().add(sublime.Region(region.a))
+                        buf.sel().subtract(Region(region.b, region.a))
+                        buf.sel().add(Region(region.a))
                     else:
-                        buf.sel().subtract(sublime.Region(region.b, pt+1))
+                        buf.sel().subtract(Region(region.b, pt+1))
                 # reverse sel
             elif region.a > region.b:
                 if forward:
                     pt = self.find_next(forward, character, region.b)
                     if pt > region.a:
-                        buf.sel().subtract(sublime.Region(region.a, region.b))
-                        buf.sel().add(sublime.Region(region.a))
+                        buf.sel().subtract(Region(region.a, region.b))
+                        buf.sel().add(Region(region.a))
                     else:
-                        buf.sel().subtract(sublime.Region(region.b, pt))
+                        buf.sel().subtract(Region(region.b, pt))
                 else:
                     pt = self.find_next(forward, character, region.b -1)
-                    buf.sel().add(sublime.Region(region.a, pt -1))
+                    buf.sel().add(Region(region.a, pt -1))
         buf.show(buf.sel()[-1], True)
         return
 
@@ -667,11 +684,14 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
         self.move_or_expand_selections(search_string, forward)
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
-    def on_window_command(self, window, command_name, args):
-        window.active_view().settings().set(key="waiting_for_char", value=False)
-        window.active_view().settings().set(key="has_stored_char", value=False)
+    def on_window_command(self, window: sublime.Window, _, __):
+        view: View | None = window.active_view()
+        if view is None:
+            return
+        view.settings().set(key="waiting_for_char", value=False)
+        view.settings().set(key="has_stored_char", value=False)
 
-    def on_text_command(self, view, command_name, args):
+    def on_text_command(self, view: View, command_name: str, _):
         if (command_name != "find_next_character" and command_name != "repeat_find_next_character"
         and command_name != "store_character" and command_name != "revert_selection"):
             view.settings().set(key="has_stored_char", value=False)
@@ -681,26 +701,25 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
-        reg_list = []
+        reg_list: List[Region] = []
         for region in buf.sel():
             reg_begin = region.begin() - 1
-            buffer = buf.substr(sublime.Region(reg_begin, region.end()))
+            buffer = buf.substr(Region(reg_begin, region.end()))
             if reg_begin <= 1:
                 reg_begin += 1
-                reg_list.append(-2)
-            reg_list += [sublime.Region(m.start() + reg_begin) for m in re.finditer(r'\S.*\n', buffer)]
+                reg_list.append(Region(-2))
+            reg_list += [Region(m.start() + reg_begin) for m in re.finditer(r'\S.*\n', buffer)]
         buf.sel().clear()
         buf.sel().add_all(reg_list)
 
 
 
 class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
-    def run(self, edit) -> None:
+    def run(self, edit: sublime.Edit) -> None:
         buf = self.view
         if buf.is_read_only():
             return
         selections = buf.sel()
-        positions: List[int] = []
 
         for region in reversed(selections):
             if region.empty():
@@ -709,13 +728,12 @@ class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
             cur_line_num = buf.line(region.end())
             indent = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
             content = "\n" + indent*" " + "print(f'{"+ buf.substr(region)+ "=}')"
-            print(f'{content=}')
             _, insert_pos = buf.line(region.end())
             sel_beg_pos = cur_line_num.b + indent + 10
             sel_beg_end = sel_beg_pos + region.end() - region.begin()
             buf.insert(edit, insert_pos, content)
             selections.subtract(region)
-            new_reg = sublime.Region(sel_beg_pos, sel_beg_end)
+            new_reg = Region(sel_beg_pos, sel_beg_end)
 
             selections.add(new_reg)
 
@@ -727,7 +745,7 @@ class RevertSelectionCommand(sublime_plugin.TextCommand):
         for reg in sel:
             if reg.empty():
                 continue
-            region = sublime.Region(reg.b, reg.a)
+            region = Region(reg.b, reg.a)
             sel.subtract(reg)
             sel.add(region)
 
@@ -772,7 +790,7 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
 
             cur_line_in_points_beg, cur_line_in_points_end = buf.line(reg)
 
-            rev_reg = sublime.Region(cur_line_in_points_beg, reg.begin())
+            rev_reg = Region(cur_line_in_points_beg, reg.begin())
             rev_reg_str = buf.substr(rev_reg)
             i = 0
             rev_beg = -1
@@ -785,7 +803,7 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
 
             forw_reg_str = ''
             if rev_beg > 1 or rev_beg == -1:
-                forw_reg = sublime.Region(cur_line_in_points_end, reg.begin())
+                forw_reg = Region(cur_line_in_points_end, reg.begin())
                 forw_reg_str = buf.substr(forw_reg)
             if len(forw_reg_str) > 0:
                 j = 0
@@ -819,13 +837,13 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         sel = buf.sel()
 
         if whole_line:
-            sublime.set_clipboard(''.join(buf.substr(buf.full_line(reg)) for reg in sel))
+            set_clipboard(''.join(buf.substr(buf.full_line(reg)) for reg in sel))
             reg = sel[-1].b
             sel.clear()
             sel.add(reg)
             return
 
-        regions_to_copy: List[sublime.Region] = []
+        regions_to_copy: List[Region] = []
         end = buf.full_line(sel[0].a).a
 
         only_empty_selections = True
@@ -853,7 +871,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
 
         if only_empty_selections:
             if contiguous_regions:
-                clip = buf.substr(sublime.Region(regions_to_copy[0].a, regions_to_copy[-1].b))
+                clip = buf.substr(Region(regions_to_copy[0].a, regions_to_copy[-1].b))
             else:
                 clip = ''.join(buf.substr(reg) for reg in regions_to_copy)
         else:
@@ -871,7 +889,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
             sel.clear()
             sel.add_all(pos)
 
-        sublime.set_clipboard(clip)
+        set_clipboard(clip)
         return
 
 
@@ -882,7 +900,7 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         buf = self.view
         sel = buf.sel()
 
-        regions_to_copy: List[sublime.Region] = []
+        regions_to_copy: List[Region] = []
         end = buf.full_line(sel[0].begin()).begin()
 
         only_empty_selections = True
@@ -910,7 +928,7 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         if only_empty_selections:
             reg = sel[-1].a
             if contiguous_regions:
-                interesting_region = sublime.Region(regions_to_copy[0].begin(), regions_to_copy[-1].end())
+                interesting_region = Region(regions_to_copy[0].begin(), regions_to_copy[-1].end())
                 clip = buf.substr(interesting_region)
                 buf.erase(edit, interesting_region)
             else:
@@ -926,13 +944,13 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         if clip.isspace():
             return
 
-        sublime.set_clipboard(clip)
+        set_clipboard(clip)
         return
 
 class SmartPasteCutNewlinesCommand(sublime_plugin.TextCommand):
     def run(self, edit: sublime.Edit) -> None:
         buf = self.view
-        sels: sublime.Selection = buf.sel()
+        sels: Selection = buf.sel()
 
         clipboard = sublime.get_clipboard()
         clips = clipboard.splitlines()
@@ -945,19 +963,19 @@ class SmartPasteCutNewlinesCommand(sublime_plugin.TextCommand):
             for clip in reversed(clips[:-1]):
                 clip_pos.append((len(clip) + 1 + clip_pos[-1][0], len(clip) + 1))
 
-            rev_sel: reversed[sublime.Region] = reversed(sels)
+            rev_sel: reversed[Region] = reversed(sels)
             for reg in rev_sel:
                 if not reg.empty():
                     buf.erase(edit, reg)
                 buf.insert(edit, reg.a, ' '.join(clips))
 
-            rev_sel_new: reversed[sublime.Region] = reversed(sels)
+            rev_sel_new: reversed[Region] = reversed(sels)
             for reg in rev_sel_new:
-                sels.add_all(sublime.Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] -1) for pos in clip_pos)
+                sels.add_all(Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] -1) for pos in clip_pos)
 
 
 class SmartPasteCommand(sublime_plugin.TextCommand):
-    def find_indent(self, cur_line_num: sublime.Region, cur_line: str) -> int:
+    def find_indent(self, cur_line_num: Region, cur_line: str) -> int:
         buf = self.view
         # if we have a new, empty file:
         if buf.size() == 0:
@@ -980,7 +998,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
     def run(self, edit: sublime.Edit) -> None:
         buf = self.view
-        sels: sublime.Selection = buf.sel()
+        sels: Selection = buf.sel()
         clipboard = sublime.get_clipboard()
         clips = clipboard.splitlines()
 
@@ -992,7 +1010,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         # means we need to match the selections with the clips
         if len(clips) == len(sels):
 
-            rev_sel: reversed[sublime.Region] = reversed(sels)
+            rev_sel: reversed[Region] = reversed(sels)
             for region, cliplet in zip(rev_sel, reversed(clips)):
 
                 cur_line_num = buf.line(region.begin())
@@ -1025,7 +1043,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
         # Ok, just regular paste
         elif len(clips) > len(sels):
-            rev_sel: reversed[sublime.Region] = reversed(sels)
+            rev_sel: reversed[Region] = reversed(sels)
             for region in rev_sel:
 
                 cur_line_num = buf.line(region.begin())
@@ -1073,18 +1091,16 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
                     end = line.end()
 
-                # print(regions_to_remove)
-
                 # Now we have the regions, and we now if we should delete anything
                 # on the lines. We can now do the loop again where we modify the buffer
                 # regions to be deleted will be those with more than two elements in the
                 # inner list
                 for regs in reversed(regions_to_remove):
                     if len(regs) > 1:
-                        buf.erase(edit, sublime.Region(regs[0], regs[-1]))
+                        buf.erase(edit, Region(regs[0], regs[-1]))
 
                 # now we can start inserting:
-                rev_sel: reversed[sublime.Region] = reversed(sels)
+                rev_sel: reversed[Region] = reversed(sels)
                 for region in rev_sel:
                     cur_line_num = buf.line(region.begin())
                     cur_line = buf.substr(cur_line_num)
@@ -1104,7 +1120,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                     buf.insert(edit, insert_pos, insert_string)
 
             else:
-                rev_sel: reversed[sublime.Region] = reversed(sels)
+                rev_sel: reversed[Region] = reversed(sels)
                 for region in rev_sel:
                     if not region.empty():
                         buf.erase(edit, region)
@@ -1116,14 +1132,14 @@ class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
         selections = buf.sel()
-        rev_sels: reversed[sublime.Region] = reversed(selections)
+        rev_sels: reversed[Region] = reversed(selections)
         for region in rev_sels:
             if region.empty():
                 continue
 
             contents = buf.substr(region)
             begin = region.begin()
-            word_boundaries = [sublime.Region(m.start() + begin, m.end() + begin) for m in re.finditer(WORDCHARS, contents)]
+            word_boundaries = [Region(m.start() + begin, m.end() + begin) for m in re.finditer(WORDCHARS, contents)]
             if word_boundaries != []:
                 selections.subtract(region)
                 selections.add_all(word_boundaries)
@@ -1148,7 +1164,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
             buf.show(selection[-1], True)
             return
 
-        reg = sublime.Region(min_point, max_point)
+        reg = Region(min_point, max_point)
         all_regs = [min_point +  m.end() for m in re.finditer(selected_word, buf.substr(reg))]
 
         i = 0
