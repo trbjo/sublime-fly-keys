@@ -505,7 +505,7 @@
 {"keys": ["b"], "command": "expand_selection_to_string_double",
     "context": [
     {"key": "setting.command_mode"},
-    {"key": "selector", "operator": "equal", "operand": "string.quoted.double - punctuation.definition.string.begin" },
+    {"key": "selector", "operator": "equal", "operand": "string.quoted.double - punctuation.definition.string.begin, meta.string" },
     {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
 

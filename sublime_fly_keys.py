@@ -48,9 +48,9 @@ class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
             else:
                 prev_line = buf.line(cur_line_num.a - 1)
                 mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
-                while mod_whitespace >= orig_whitespace and len(prev_line) > 0 and prev_line.a - 1 > 0:
+                while len(prev_line) > 0 and prev_line.a - 1 > 0:
                     if prev_line.a + current_pos_on_line > prev_line.b:
-                        positions.append(prev_line.a)
+                        positions.append(prev_line.b)
                     else:
                         positions.append(prev_line.a + current_pos_on_line)
 
@@ -565,7 +565,7 @@ def build_or_rebuild_ws_for_view(view: View, immediate: bool):
     if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
         interesting_regions[view] = dict()
         try:
-            whitespaces: List[Region] = view.find_all(r'\n\n *\S')
+            whitespaces: List[Region] = view.find_all(r'\n *\n *\S')
             size = view.size() + 1
             first, last = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(size, size)])
             interesting_regions[view]['first'] = first
