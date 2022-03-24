@@ -242,7 +242,7 @@ should_change_to_bol = False
 
 
 class SampleListener(sublime_plugin.EventListener):
-    def on_query_context(self, view: View, key: str, _, operand, __):
+    def on_query_context(self, view: View, key: str, _, operand: int, __):
         global allow_extend
         global ought_to_extend
         global should_change_to_bol
