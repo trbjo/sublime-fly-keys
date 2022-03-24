@@ -551,6 +551,9 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 sel_begin = first[bisect_res -1] + 2
                 sel_end = first[bisect_res] + 2
 
+            else:
+                return
+
             regs_dict[sel_begin] = sel_end
 
         buf.sel().add_all(Region(begin,end) for begin,end in regs_dict.items())
@@ -591,6 +594,9 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                 bisect_end = bisect.bisect(first, region.b - 2)
                 sel_end = first[bisect_end -1] + 2
                 sel_begin = first[bisect_end] + 2
+
+            else:
+                return
 
             regs_dict[sel_begin] = sel_end
 
@@ -673,7 +679,7 @@ class StoreCharacterCommand(FindNextCharacterBaseCommand):
         char_forward_tuple = (character, forward)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, **kwargs) -> None:
+    def run(self, _, **kwargs: str) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
         self.view.settings().set(key="waiting_for_char", value=False)
         mychar: str = kwargs['character']
