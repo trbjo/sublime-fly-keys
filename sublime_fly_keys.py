@@ -581,9 +581,9 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
         buf.show(buf.sel()[0], False)
 
 # tuple of (char: str, forward: bool)
-first_char: Tuple[str, bool] = ('', True)
+char_forward_tuple: Tuple[str, bool] = ('', True)
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
-    def find_next(self, forward, char, pt):
+    def find_next(self, forward: bool, char: str, pt: int) -> int:
         lr = self.view.line(pt)
         if forward:
             while lr.b <= self.view.size():
@@ -603,7 +603,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     lr = self.view.line(lr.a - 1)
         return pt
 
-    def move_or_expand_selections(self, edit, character, forward):
+    def move_or_expand_selections(self, character: str, forward: bool) -> None:
         buf = self.view
         character = character[::-1] if not forward else character
         for region in reversed(buf.sel()):
@@ -618,8 +618,8 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 # normal sel
             elif region.a < region.b:
                 if forward:
-                    pt = self.find_next(forward, character, region.b -1)
-                    buf.sel().add(sublime.Region(region.a, pt+2))
+                    pt = self.find_next(forward, character, region.b)
+                    buf.sel().add(sublime.Region(region.b -1, pt+2))
                 else:
                     pt = self.find_next(forward, character, region.b -2)
                     if pt < region.a:
@@ -643,28 +643,28 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         return
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, edit, forward):
+    def run(self, _, forward: bool):
         self.view.settings().set(key="has_stored_char", value=True)
-        global first_char
-        character, _ = first_char
-        self.move_or_expand_selections(edit, character, forward)
+        global char_forward_tuple
+        character, _ = char_forward_tuple
+        self.move_or_expand_selections(character, forward)
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, edit, character, forward):
+    def run(self, _, character: str, forward: bool):
         self.view.settings().set(key="waiting_for_char", value=True)
-        global first_char
-        first_char = (character, forward)
+        global char_forward_tuple
+        char_forward_tuple = (character, forward)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, edit, **kwargs):
+    def run(self, _, **kwargs):
         self.view.settings().set(key="has_stored_char", value=True)
         self.view.settings().set(key="waiting_for_char", value=False)
-        mychar=kwargs['character']
-        global first_char
-        first_char, forward = first_char
-        search_string = first_char + mychar
-        first_char = (search_string, forward)
-        self.move_or_expand_selections(edit, search_string, forward)
+        mychar: str = kwargs['character']
+        global char_forward_tuple
+        character, forward = char_forward_tuple
+        search_string: str = character + mychar
+        char_forward_tuple = (search_string, forward)
+        self.move_or_expand_selections(search_string, forward)
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
     def on_window_command(self, window, command_name, args):
@@ -672,7 +672,8 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         window.active_view().settings().set(key="has_stored_char", value=False)
 
     def on_text_command(self, view, command_name, args):
-        if command_name != "find_next_character" and command_name != "repeat_find_next_character" and command_name != "store_character":
+        if (command_name != "find_next_character" and command_name != "repeat_find_next_character"
+        and command_name != "store_character" and command_name != "revert_selection"):
             view.settings().set(key="has_stored_char", value=False)
             view.settings().set(key="waiting_for_char", value=False)
 
