@@ -14,7 +14,7 @@ WORDCHARS = r'[-\._\w]+'
 
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _, forward):
+    def run(self, _, forward) -> None:
         buf = self.view
         for region in buf.sel():
             buf.sel().subtract(region)
@@ -38,7 +38,7 @@ true_false_dict = {
 
 class ToggleTrueFalseCommand(sublime_plugin.TextCommand):
     """First we try around the cursor (-6, +6), else we try the whole line"""
-    def run(self, edit):
+    def run(self, edit) -> None:
         buf = self.view
         for region in reversed(buf.sel()):
             if region.empty():
@@ -80,7 +80,7 @@ class ToggleTrueFalseCommand(sublime_plugin.TextCommand):
 
 
 class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         sel = buf.sel()
         line = buf.line(sel[0])
@@ -98,7 +98,7 @@ class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
 
 
 class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         sel = buf.sel()
         line_beg = buf.full_line(sel[0]).begin()
@@ -107,7 +107,7 @@ class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
         sel.add(sublime.Region(line_beg, line_end))
 
 class DeleteSmartCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit) -> None:
         buf = self.view
         for region in reversed(buf.sel()):
             if region.empty():
@@ -129,7 +129,7 @@ class DeleteSmartCommand(sublime_plugin.TextCommand):
 
 class ExpandSelectionToSentenceCommand(sublime_plugin.TextCommand):
     # TODO: Add foward command to go forward and backward selction of sentences
-    def run(self, _):
+    def run(self, _) -> None:
         view = self.view
         # whitespace = '\t\n\x0b\x0c\r ' # Equivalent to string.whitespace
         oldSelRegions = list(view.sel())
@@ -154,7 +154,7 @@ class ExpandSelectionToSentenceCommand(sublime_plugin.TextCommand):
 
 class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
     # TODO: Add foward command to go forward and backward selction of sentences
-    def run(self, _):
+    def run(self, _) -> None:
         view = self.view
         # whitespace = '\t\n\x0b\x0c\r ' # Equivalent to string.whitespace
         oldSelRegions = list(view.sel())
@@ -192,7 +192,7 @@ class SetReadOnly(sublime_plugin.EventListener):
 
 class FindInFilesGotoCommand(sublime_plugin.TextCommand):
 
-    def run(self, _):
+    def run(self, _) -> None:
         view = self.view
         if view.name() == "Find Results":
             line_no = self.get_line_no()
@@ -295,7 +295,7 @@ class SampleListener(sublime_plugin.EventListener):
 
 class NumberCommand(sublime_plugin.TextCommand):
 
-    def run(self, edit):
+    def run(self, edit) -> None:
         buf = self.view
         selection = buf.sel()
         for region in selection:
@@ -369,7 +369,7 @@ class DecrementCommand(NumberCommand):
 
 
 class InsertModeCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit) -> None:
         buf = self.view
         if buf.is_read_only() == True:
             sublime.status_message('Buffer is read only')
@@ -384,7 +384,7 @@ class InsertModeCommand(sublime_plugin.TextCommand):
 
 
 class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit) -> None:
         buf = self.view
         if buf.is_read_only() == True:
             sublime.status_message('Buffer is read only')
@@ -402,7 +402,7 @@ class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
 
 
 class CommandModeCommand(sublime_plugin.WindowCommand):
-    def run(self):
+    def run(self) -> None:
         buf = sublime.active_window().active_view()
         buf.settings().set(key="block_caret", value=True)
         buf.settings().set(key="waiting_for_char", value=False)
@@ -412,7 +412,7 @@ class CommandModeCommand(sublime_plugin.WindowCommand):
 
 
 class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
-    def run(self, _, after=False, plusone=False):
+    def run(self, _, after=False, plusone=False) -> None:
         if plusone == True:
             offset = 1
         else:
@@ -469,7 +469,7 @@ class HejSampleListener(sublime_plugin.EventListener):
             build_or_rebuild_ws_for_view(view, immediate=True)
 
 class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         region = buf.sel()[-1].begin()
         try:
@@ -486,7 +486,7 @@ class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
 
 
 class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         region = buf.sel()[0].begin()
         try:
@@ -503,7 +503,7 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
 
 
 class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         regs_dict = {}
         for region in buf.sel():
@@ -541,7 +541,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
 
 
 class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         regs_dict = {}
         for region in buf.sel():
@@ -643,20 +643,20 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         return
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, forward: bool):
+    def run(self, _, forward: bool) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
         global char_forward_tuple
         character, _ = char_forward_tuple
         self.move_or_expand_selections(character, forward)
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, character: str, forward: bool):
+    def run(self, _, character: str, forward: bool) -> None:
         self.view.settings().set(key="waiting_for_char", value=True)
         global char_forward_tuple
         char_forward_tuple = (character, forward)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, **kwargs):
+    def run(self, _, **kwargs) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
         self.view.settings().set(key="waiting_for_char", value=False)
         mychar: str = kwargs['character']
@@ -679,7 +679,7 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
 
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         reg_list = []
         for region in buf.sel():
@@ -695,7 +695,7 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
 
 
 class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit) -> None:
         buf = self.view
         if buf.is_read_only():
             return
@@ -721,7 +721,7 @@ class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
 
 
 class RevertSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         sel = buf.sel()
         for reg in sel:
@@ -735,7 +735,7 @@ class RevertSelectionCommand(sublime_plugin.TextCommand):
 
 
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         reg = buf.sel()[-1]
         buf.sel().clear()
@@ -744,7 +744,7 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
 
 
 class SmartFindWordCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         buf = self.view
         sel = buf.sel()
         positions: List[int] = []
@@ -978,7 +978,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         return indent
 
 
-    def run(self, edit: sublime.Edit):
+    def run(self, edit: sublime.Edit) -> None:
         buf = self.view
         sels: sublime.Selection = buf.sel()
         clipboard = sublime.get_clipboard()
@@ -1169,7 +1169,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
         buf.show(selection[-1], True)
 
 class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _):
+    def run(self, _) -> None:
         selections = self.view.sel()
         if len(selections) > 1:
             selections.subtract(selections[0])
