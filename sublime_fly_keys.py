@@ -707,8 +707,8 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
         buf.sel().add_all(Region(begin, end) for begin,end in regs_dict.items())
         buf.show(buf.sel()[0], False)
 
-# tuple of (char: str, forward: bool)
-char_forward_tuple: Tuple[str, bool] = ('', True)
+# tuple of (char: str, forward: bool, extend: bool)
+char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def find_next(self, forward: bool, char: str, pt: int) -> int:
         lr = self.view.line(pt)
@@ -730,7 +730,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     lr = self.view.line(lr.a - 1)
         return pt
 
-    def move_or_expand_selections(self, character: str, forward: bool) -> None:
+    def move_or_expand_selections(self, character: str, forward: bool, extend: bool) -> None:
         buf = self.view
         character = character[::-1] if not forward else character
         for region in reversed(buf.sel()):
@@ -738,10 +738,13 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 pt = self.find_next(forward, character, region.end() if forward else region.begin())
                 if region.end() == pt or region.begin() -1 == pt:
                     return
-                pt = self.find_next(forward, character, region.end() if forward else region.begin())
-                buf.sel().subtract(region)
-                tp = pt if forward else pt -1
-                buf.sel().add(tp)
+                if extend:
+                    tp = pt + 2 if forward else pt -1
+                    buf.sel().add(sublime.Region(region.a, tp))
+                else:
+                    tp = pt if forward else pt -1
+                    buf.sel().subtract(region)
+                    buf.sel().add(tp)
                 # normal sel
             elif region.a < region.b:
                 if forward:
@@ -773,14 +776,14 @@ class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, forward: bool) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
         global char_forward_tuple
-        character, _ = char_forward_tuple
-        self.move_or_expand_selections(character, forward)
+        character, _, _ = char_forward_tuple
+        self.move_or_expand_selections(character, forward, False)
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, character: str, forward: bool) -> None:
+    def run(self, _, character: str, forward: bool, extend: bool = False) -> None:
         self.view.settings().set(key="waiting_for_char", value=True)
         global char_forward_tuple
-        char_forward_tuple = (character, forward)
+        char_forward_tuple = (character, forward, extend)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: str) -> None:
@@ -788,10 +791,10 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
         self.view.settings().set(key="waiting_for_char", value=False)
         mychar: str = kwargs['character']
         global char_forward_tuple
-        character, forward = char_forward_tuple
+        character, forward, extend = char_forward_tuple
         search_string: str = character + mychar
-        char_forward_tuple = (search_string, forward)
-        self.move_or_expand_selections(search_string, forward)
+        char_forward_tuple = (search_string, forward, extend)
+        self.move_or_expand_selections(search_string, forward, extend)
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
     def on_window_command(self, window: sublime.Window, _, __):
