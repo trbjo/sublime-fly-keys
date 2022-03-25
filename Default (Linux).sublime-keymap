@@ -868,60 +868,35 @@
 {"keys": ["9"], "command": "toggle_inline_diff", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["0"], "command": "git_add_selected_hunk", "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": [" ", "h"], "command": "show_overlay", "args": {"overlay": "goto", "text": "#"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", " "], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "e"], "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "u"], "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "s"],     "command": "goto_symbol_in_project", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 {"keys": [" ", "enter"], "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "s"], "command": "goto_symbol_in_project", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "1"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":1"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "2"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":2"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "3"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":3"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "4"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":4"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "5"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "6"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "7"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":7"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "8"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":8"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "9"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":9"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "0"], "command": "move_to", "args": {"to": "bof", "extend": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "0"], "command": "move_to", "args": {"to": "bof", "extend": true}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "["], "command": "move_to", "args": {"to": "eof", "extend": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
-{"keys": [" ", "["], "command": "move_to", "args": {"to": "eof", "extend": true}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "u"],     "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "e"],     "command": "show_overlay", "args": {"overlay": "goto", "show_files": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "h"],     "command": "show_overlay", "args": {"overlay": "goto", "text": "#"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", " "],     "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "1"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":1"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "2"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":2"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "3"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":3"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "4"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":4"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "5"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "6"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "7"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":7"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "8"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":8"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "9"],     "command": "show_overlay", "args": {"overlay": "goto", "text": ":9"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "0"],     "command": "move_to", "args": {"to": "bof", "extend": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "0"],     "command": "move_to", "args": {"to": "bof", "extend": true}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "["],     "command": "move_to", "args": {"to": "eof", "extend": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{"keys": [" ", "["],     "command": "move_to", "args": {"to": "eof", "extend": true}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 
-{ "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true },
-  "context": [{"key": "setting.command_mode"}]
- },
+{ "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": true, "extend": true}, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": true, "extend": true}, "context": [
-       {"key": "setting.command_mode"},
-  ]
- },
+{ "keys": ["ctrl+m", "<character>"],       "command": "store_character", "args": {"forward": false }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+shift+m", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["ctrl+m", "<character>"], "command": "store_character", "args": {"forward": false },
-  "context": [{"key": "setting.command_mode"}]
- },
+{ "keys": ["m"],      "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.has_stored_char"}, {"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+m"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.has_stored_char"}, {"key": "setting.command_mode"}]},
 
-{ "keys": ["ctrl+shift+m", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true },
-  "context": [{"key": "setting.command_mode"}]
- },
-
- { "keys": ["m"], "command": "repeat_find_next_character", "args": {"forward": true}, "context": [
-        {"key": "setting.command_mode"},
-       {"key": "setting.has_stored_char", "operator": "equal", "operand": true }
-   ]
-  },
-
-{ "keys": ["ctrl+m"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [
-       {"key": "setting.has_stored_char", "operator": "equal", "operand": true },
-       {"key": "setting.command_mode"},
-  ]
- },
-
-{ "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>" },
-        "context": [
-            {"key": "setting.command_mode"},
-            {"key": "setting.waiting_for_char", "operator": "equal", "operand": true }
-     ]
-},
+{ "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
 
 ]

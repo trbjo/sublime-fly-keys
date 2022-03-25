@@ -715,7 +715,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         if forward:
             while lr.b <= self.view.size():
                 linestr = self.view.substr(Region(pt, lr.b))
-                idx = linestr.find(char, 1)
+                idx = linestr.find(char)
                 if idx >= 0:
                     return pt + idx
                 else:
@@ -723,7 +723,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         else:
             while lr.a >= 0:
                 linestr = self.view.substr(Region(lr.a, pt))[::-1]
-                idx = linestr.find(char, 0)
+                idx = linestr.find(char)
                 if idx >= 0:
                     return pt - idx - 1
                 else:
@@ -734,10 +734,10 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         buf = self.view
         character = character[::-1] if not forward else character
         for region in reversed(buf.sel()):
+            pt = self.find_next(forward, character, region.b)
+            if pt == region.b:
+                return
             if region.a == region.b:
-                pt = self.find_next(forward, character, region.end() if forward else region.begin())
-                if region.end() == pt or region.begin() -1 == pt:
-                    return
                 if extend:
                     tp = pt + 2 if forward else pt -1
                     buf.sel().add(sublime.Region(region.a, tp))
@@ -748,10 +748,8 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 # normal sel
             elif region.a < region.b:
                 if forward:
-                    pt = self.find_next(forward, character, region.b)
-                    buf.sel().add(Region(region.b -1, pt+2))
+                    buf.sel().add(Region(region.b -1, pt + 2))
                 else:
-                    pt = self.find_next(forward, character, region.b -2)
                     if pt < region.a:
                         buf.sel().subtract(Region(region.b, region.a))
                         buf.sel().add(Region(region.a))
@@ -760,14 +758,12 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 # reverse sel
             elif region.a > region.b:
                 if forward:
-                    pt = self.find_next(forward, character, region.b)
                     if pt > region.a:
                         buf.sel().subtract(Region(region.a, region.b))
                         buf.sel().add(Region(region.a))
                     else:
                         buf.sel().subtract(Region(region.b, pt))
                 else:
-                    pt = self.find_next(forward, character, region.b -1)
                     buf.sel().add(Region(region.a, pt -1))
         buf.show(buf.sel()[-1], True)
         return
