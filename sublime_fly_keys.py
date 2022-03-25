@@ -715,7 +715,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         if forward:
             while lr.b <= self.view.size():
                 linestr = self.view.substr(Region(pt, lr.b))
-                idx = linestr.find(char)
+                idx = linestr.find(char, 1)
                 if idx >= 0:
                     return pt + idx
                 else:
