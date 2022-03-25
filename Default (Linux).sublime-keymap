@@ -465,6 +465,12 @@
 {"keys": ["alt+k"], "command": "smart_paste_cut_newlines", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["k"], "command": "smart_paste", "context": [{"key": "setting.command_mode"}, ] },
 
+{"keys": ["k"], "command": "smart_paste_cut_whitespace", "context": [
+    {"key": "selection_empty", "operator": "equal", "operand": false },
+    {"key": "text", "operator": "not_regex_contains", "operand": "\n"},
+    {"key": "setting.command_mode"},
+] },
+
 ///////////////////////////////////////////////////
 /////////////////// DUPLICATE: //////////////////////
 ///////////////////////////////////////////////////

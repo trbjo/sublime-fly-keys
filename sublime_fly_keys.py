@@ -1083,6 +1083,14 @@ class SmartPasteCutNewlinesCommand(sublime_plugin.TextCommand):
             for reg in rev_sel_new:
                 sels.add_all(Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] -1) for pos in clip_pos)
 
+class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
+    def run(self, edit: Edit):
+        buf = self.view
+        stripped_clipboard = get_clipboard().strip()
+        sels: Selection = buf.sel()
+        for region in reversed(sels):
+            buf.erase(edit, region)
+            buf.insert(edit, region.begin(), stripped_clipboard)
 
 class SmartPasteCommand(sublime_plugin.TextCommand):
     def find_indent(self, cur_line_num: Region, cur_line: str) -> int:
