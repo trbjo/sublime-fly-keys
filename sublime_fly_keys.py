@@ -1,4 +1,4 @@
-from sublime import Edit, View, Region, Selection, set_clipboard, active_window
+from sublime import Edit, View, Region, Selection, get_clipboard, set_clipboard, active_window
 import sublime
 import sublime_plugin
 
@@ -828,7 +828,7 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
 
 
 class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         if buf.is_read_only():
             return
@@ -1009,7 +1009,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
 
 class SmartCutCommand(sublime_plugin.TextCommand):
     """docstring for SmartCopyCommand"""
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         sel = buf.sel()
 
@@ -1061,11 +1061,11 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         return
 
 class SmartPasteCutNewlinesCommand(sublime_plugin.TextCommand):
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         sels: Selection = buf.sel()
 
-        clipboard = sublime.get_clipboard()
+        clipboard = get_clipboard()
         clips = clipboard.splitlines()
 
         if clipboard.endswith('\n'):
@@ -1101,8 +1101,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         # if we have a new, empty file:
         if buf.size() == 0:
             return 0
-
-        clipboard = sublime.get_clipboard()
+        clipboard = get_clipboard()
         if len(cur_line) == 0 and clipboard.startswith(' '):
             return 0
             lines_above, _ = buf.line(cur_line_num.begin())
@@ -1117,10 +1116,10 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         return indent
 
 
-    def run(self, edit: sublime.Edit) -> None:
+    def run(self, edit: Edit) -> None:
         buf = self.view
         sels: Selection = buf.sel()
-        clipboard = sublime.get_clipboard()
+        clipboard = get_clipboard()
         clips = clipboard.splitlines()
 
         if clipboard.endswith('\n'):
