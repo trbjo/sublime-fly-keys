@@ -556,6 +556,19 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
         buf.settings().set(key="command_mode", value=False)
 
 
+class ReverseSelectionListener(sublime_plugin.EventListener):
+    def on_query_context(self, view, key, operator, operand, match_all):
+        if key != "reversed_selection":
+            return None
+
+        lhs = operand
+        if match_all:
+            rhs = all([r.a > r.b for r in view.sel()])
+        else:
+            rhs = view.sel()[0].a > view.sel()[0].b
+
+        return True if operator == sublime.OP_EQUAL and rhs == lhs else False
+
 
 def build_or_rebuild_ws_for_view(view: View, immediate: bool):
     if view is None:

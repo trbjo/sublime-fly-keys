@@ -114,8 +114,8 @@
 
 ////////////////// Right word begin:
 {"keys": ["ctrl+shift+r"], "command": "move", "args": {"by": "word_ends", "forward": true, "extend": true}},
-{"keys": ["ctrl+r"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+r"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
+{"keys": ["R"], "command": "move", "args": {"by": "subwords", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["R"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ] },
@@ -128,16 +128,24 @@
     {"key": "selection_empty", "operator": "equal", "operand": false },
 ] },
 
-{ "keys": ["R"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": false }, "context": [
+{ "keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": false }, "context": [
     {"key": "setting.command_mode", "operator": "equal", "operand": true },
 ]
 },
 
-{ "keys": ["R"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true }, "context": [
-    { "key": "selection_empty", "operator": "equal", "operand": false },
-    {"key": "setting.command_mode", "operator": "equal", "operand": true },
-]
-},
+{"keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": true },
+"context": [
+    {"key": "reversed_selection", "match_all": true, "operand": false },
+    {"key": "setting.command_mode"},
+    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
+] },
+
+{"keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": true },
+"context": [
+    {"key": "setting.command_mode"},
+    {"key": "reversed_selection", "match_all": true, "operand": true },
+    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
+] },
 
 ////////////////// Right word end:
 {"keys": ["l"], "command": "move", "args": {"by": "stops", "word_end": true, "punct_end": true, "empty_line": false, "forward": true, "extend": false },
@@ -151,12 +159,22 @@
 {"keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": false },
 "context": [{"key": "setting.command_mode"}]
 },
-{"keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": false, "separators": "", "forward": true, "extend": true },
-"context": [
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
+
+{ "keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": true, "extend": true }, "context": [
+    {"key": "reversed_selection", "match_all": true, "operand": true },
+    { "key": "selection_empty", "operator": "equal", "operand": false },
+    {"key": "setting.command_mode", "operator": "equal", "operand": true },
 ]
 },
+
+{ "keys": ["ctrl+l"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true }, "context": [
+    {"key": "reversed_selection", "match_all": true, "operand": false },
+    { "key": "selection_empty", "operator": "equal", "operand": false },
+    {"key": "setting.command_mode", "operator": "equal", "operand": true },
+]
+},
+
+
 {"keys": ["L"], "command": "move", "args": {"by": "subword_ends", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+shift+l"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true} },
 
@@ -173,7 +191,22 @@
 
 
 
-{ "keys": ["G"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": false }, "context": [
+{ "keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": false }, "context": [
+    {"key": "setting.command_mode", "operator": "equal", "operand": true },
+]
+},
+
+{ "keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": false, "extend": true }, "context": [
+    { "key": "selection_empty", "operator": "equal", "operand": false },
+    {"key": "reversed_selection", "match_all": true, "operand": false },
+    {"key": "setting.command_mode", "operator": "equal", "operand": true },
+]
+},
+
+
+{ "keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": true }, "context": [
+    { "key": "selection_empty", "operator": "equal", "operand": false },
+    {"key": "reversed_selection", "match_all": true, "operand": true },
     {"key": "setting.command_mode", "operator": "equal", "operand": true },
 ]
 },
@@ -185,8 +218,8 @@
 ]
 },
 
-{"keys": ["ctrl+g"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": false} },
-{"keys": ["ctrl+g"], "command": "move", "args": {"by": "subword_ends", "forward": false, "extend": true}, "context": [
+ {"keys": ["G"], "command": "move", "args": {"by": "subwords", "forward": false, "extend": false} },
+{"keys": ["G"], "command": "move", "args": {"by": "subword_ends", "forward": false, "extend": true}, "context": [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
 ] },
@@ -466,6 +499,7 @@
 {"keys": ["k"], "command": "smart_paste", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["k"], "command": "smart_paste_cut_whitespace", "context": [
+    {"key": "num_selections", "operator": "equal", "operand": 1 },
     {"key": "selection_empty", "operator": "equal", "operand": false },
     {"key": "text", "operator": "not_regex_contains", "operand": "\n"},
     {"key": "setting.command_mode"},
