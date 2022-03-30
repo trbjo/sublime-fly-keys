@@ -1,0 +1,5 @@
+[
+    {"command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": true}},
+    { "command": "left_delete" },
+    { "command": "left_delete" },
+]
