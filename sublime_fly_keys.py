@@ -744,6 +744,22 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     lr = self.view.line(lr.a - 1)
         return pt
 
+    def get_next_chars(self, forward: bool, search_string: str):
+        if len(self.view.sel()) != 1:
+            return
+
+        region = self.view.sel()[0].b
+        pt_one = self.find_next(forward, search_string, region)
+        if pt_one == region:
+            return
+        myreg_one = Region(pt_one , pt_one + len(search_string))
+        pt_two = self.find_next(forward, search_string, pt_one)
+        if pt_two == pt_one:
+            self.view.add_regions("Sneak", [myreg_one], "special_line", flags=sublime.DRAW_NO_OUTLINE)
+            return
+        myreg_two = Region(pt_two , pt_two + len(search_string))
+        self.view.add_regions("Sneak", [myreg_one, myreg_two], "special_line", flags=sublime.DRAW_NO_OUTLINE)
+
     def move_or_expand_selections(self, character: str, forward: bool, extend: bool) -> None:
         buf = self.view
         for region in buf.sel():
@@ -798,25 +814,7 @@ class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
             search_string, forward, _ = char_forward_tuple
 
         self.move_or_expand_selections(search_string, forward, False)
-        if len(self.view.sel()) != 1:
-            return
-
-        region = self.view.sel()[0].b
-        pt_one = self.find_next(forward, search_string, region)
-        if pt_one == region:
-            return
-        myreg_one = Region(pt_one , pt_one + len(search_string))
-
-        pt_two = self.find_next(forward, search_string, pt_one)
-        if pt_two == pt_one:
-            self.view.add_regions("Sneak", [myreg_one], "special_line")
-            return
-
-        myreg_two = Region(pt_two , pt_two + len(search_string))
-
-        self.view.add_regions("Sneak", [myreg_one, myreg_two], "special_line")
-
-
+        self.get_next_chars(forward, search_string)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: str) -> None:
@@ -831,20 +829,7 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
         search_string: str = character + mychar
         char_forward_tuple = (search_string, forward, extend)
         self.move_or_expand_selections(search_string, forward, extend)
-        if len(self.view.sel()) != 1:
-            return
-        region = self.view.sel()[0].b
-        pt_one = self.find_next(forward, search_string, region)
-        if pt_one == region:
-            return
-        myreg_one = Region(pt_one , pt_one + len(search_string))
-        pt_two = self.find_next(forward, search_string, pt_one)
-        if pt_two == pt_one:
-            self.view.add_regions("Sneak", [myreg_one], "special_line", flags=sublime.DRAW_NO_OUTLINE)
-            return
-        myreg_two = Region(pt_two , pt_two + len(search_string))
-        self.view.add_regions("Sneak", [myreg_one, myreg_two], "special_line", flags=sublime.DRAW_NO_OUTLINE)
-
+        self.get_next_chars(forward, search_string)
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
     def on_window_command(self, window: sublime.Window, _, __):
