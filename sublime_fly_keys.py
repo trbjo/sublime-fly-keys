@@ -724,6 +724,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def find_next(self, forward: bool, char: str, pt: int) -> int:
+        char = char[::-1] if not forward else char
         lr = self.view.line(pt)
         if forward:
             while lr.b <= self.view.size():
@@ -745,8 +746,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
 
     def move_or_expand_selections(self, character: str, forward: bool, extend: bool) -> None:
         buf = self.view
-        character = character[::-1] if not forward else character
-        for region in reversed(buf.sel()):
+        for region in buf.sel():
             pt = self.find_next(forward, character, region.b)
             if pt == region.b:
                 return
@@ -782,11 +782,35 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         return
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, forward: bool) -> None:
+    def run(self, _, **kwargs: bool) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
         global char_forward_tuple
-        character, _, _ = char_forward_tuple
-        self.move_or_expand_selections(character, forward, False)
+        if bool(kwargs):
+            forward = kwargs['forward']
+            search_string, _, _ = char_forward_tuple
+        else:
+            search_string, forward, _ = char_forward_tuple
+
+        self.move_or_expand_selections(search_string, forward, False)
+        if len(self.view.sel()) != 1:
+            return
+
+        region = self.view.sel()[0].b
+        pt_one = self.find_next(forward, search_string, region)
+        if pt_one == region:
+            return
+        myreg_one = Region(pt_one , pt_one + len(search_string))
+
+        pt_two = self.find_next(forward, search_string, pt_one)
+        if pt_two == pt_one:
+            self.view.add_regions("Sneak", [myreg_one], "special_line")
+            return
+
+        myreg_two = Region(pt_two , pt_two + len(search_string))
+
+        self.view.add_regions("Sneak", [myreg_one, myreg_two], "special_line")
+
+
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, character: str, forward: bool, extend: bool = False) -> None:
@@ -798,12 +822,29 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: str) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
         self.view.settings().set(key="waiting_for_char", value=False)
-        mychar: str = kwargs['character']
+        if bool(kwargs):
+            mychar = kwargs['character']
+        else:
+            mychar = ''
         global char_forward_tuple
         character, forward, extend = char_forward_tuple
         search_string: str = character + mychar
         char_forward_tuple = (search_string, forward, extend)
         self.move_or_expand_selections(search_string, forward, extend)
+        if len(self.view.sel()) != 1:
+            return
+        region = self.view.sel()[0].b
+        pt_one = self.find_next(forward, search_string, region)
+        if pt_one == region:
+            return
+        myreg_one = Region(pt_one , pt_one + len(search_string))
+        pt_two = self.find_next(forward, search_string, pt_one)
+        if pt_two == pt_one:
+            self.view.add_regions("Sneak", [myreg_one], "special_line", flags=sublime.DRAW_NO_OUTLINE)
+            return
+        myreg_two = Region(pt_two , pt_two + len(search_string))
+        self.view.add_regions("Sneak", [myreg_one, myreg_two], "special_line", flags=sublime.DRAW_NO_OUTLINE)
+
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
     def on_window_command(self, window: sublime.Window, _, __):
@@ -814,6 +855,7 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         view.settings().set(key="has_stored_char", value=False)
 
     def on_text_command(self, view: View, command_name: str, _):
+        view.erase_regions("Sneak")
         if (command_name != "find_next_character" and command_name != "repeat_find_next_character"
         and command_name != "store_character" and command_name != "revert_selection"):
             view.settings().set(key="has_stored_char", value=False)
