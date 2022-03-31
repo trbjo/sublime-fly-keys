@@ -781,6 +781,12 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         buf.show(buf.sel()[-1], True)
         return
 
+class StoreCharacterCommand(FindNextCharacterBaseCommand):
+    def run(self, _, character: str, forward: bool, extend: bool = False) -> None:
+        self.view.settings().set(key="waiting_for_char", value=True)
+        global char_forward_tuple
+        char_forward_tuple = (character, forward, extend)
+
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: bool) -> None:
         self.view.settings().set(key="has_stored_char", value=True)
@@ -811,12 +817,6 @@ class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
         self.view.add_regions("Sneak", [myreg_one, myreg_two], "special_line")
 
 
-
-class StoreCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, character: str, forward: bool, extend: bool = False) -> None:
-        self.view.settings().set(key="waiting_for_char", value=True)
-        global char_forward_tuple
-        char_forward_tuple = (character, forward, extend)
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: str) -> None:
