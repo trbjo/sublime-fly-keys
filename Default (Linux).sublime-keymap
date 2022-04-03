@@ -350,8 +350,7 @@
 /////////////////// Delete left/right: //////////////////////
 ////////////////////////////////////////////////////////////////
 
-{"keys": ["e"], "command": "left_delete", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+e"], "command": "right_delete", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["e"], "command": "right_delete", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+backspace"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_subword_backward.sublime-macro"}, "context": [{ "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }, {"key": "setting.command_mode"}, ] },
 
 {"keys": [","], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode"}, ] },
@@ -571,6 +570,7 @@
 { "keys": ["n"], "command": "chain",
         "args": {
             "commands": [
+                {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
                 {"command": "smart_find_word"},
                 {"command": "find_under_expand"},
             ]},
@@ -579,13 +579,19 @@
      ]
 },
 
-{"keys": ["n"], "command": "find_under_expand", "context": [
-    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
-    {"key": "last_command", "operator": "not_equal", "operand": "" },
-    {"key": "selection_empty", "operator": "equal", "operand": false},
-    {"key": "setting.command_mode"},
-] },
-
+{ "keys": ["n"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+                {"command": "find_under_expand"},
+            ]},
+        "context": [
+            {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
+            {"key": "last_command", "operator": "not_equal", "operand": "" },
+            {"key": "selection_empty", "operator": "equal", "operand": false},
+            {"key": "setting.command_mode"},
+     ]
+},
 
 //////////////////////////////////////////////
 ///////////// EXPAND WITH CONTROL: ///////////
@@ -906,19 +912,47 @@
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
 { "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true }, "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": true, "extend": true}, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["ctrl+m", "<character>"],       "command": "store_character", "args": {"forward": false }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+m", "<character>"],       "command": "store_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 { "keys": ["ctrl+shift+m", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["enter"],      "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.has_stored_char"}, {"key": "setting.command_mode"}]},
+{ "keys": ["enter"],      "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
+
+{"keys": [" ", "m"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+            {"command": "show_panel", "args": {"panel": "find", "reverse": false},},
+        ]
+    },
+"context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+
+{"keys": [" ", "r"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+            {"command": "show_panel", "args": {"panel": "replace", "reverse": false},},
+        ]
+    },
+"context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+
+{"keys": [" ", "f"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+            {"command": "show_panel", "args": {"panel": "find_in_files", "reverse": false},},
+        ]
+    },
+"context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+
 { "keys": ["ctrl+enter"], "command": "find_prev", "context": [{"key": "setting.command_mode"} ] },
-{ "keys": ["ctrl+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.has_stored_char"}, {"key": "setting.command_mode"}]},
+{"keys": ["ctrl+enter"], "command": "replace_next", "context": [{"key": "panel_visible", "operator": "equal", "operand": true}] },
+{ "keys": ["ctrl+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 
 { "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
 { "keys": ["enter"], "command": "find_next_character", "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
 
-// {"keys": ["ctrl+enter"], "command": "replace_next", "context": [{"key": "panel_visible", "operator": "equal", "operand": true}, {"key": "setting.command_mode"} ] },
 
 { "keys": ["shift+enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
     [
@@ -927,39 +961,18 @@
     ]
 },
 
-{"keys": ["ctrl"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "repeat_find_next_character"},
-            {"command": "repeat_find_next_character"}
-        ]
-    },
-    "context": [
-        {"key": "last_command", "operator": "equal", "operand": "repeat_find_next_character" },
-        { "key": "setting.command_mode", "operator": "equal", "operand": true },
-    ]
-},
-
-{"keys": ["ctrl"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "repeat_find_next_character"},
-            {"command": "repeat_find_next_character"}
-        ]
-    },
-    "context": [
-        {"key": "last_command", "operator": "equal", "operand": "find_next_character" },
-        { "key": "setting.command_mode", "operator": "equal", "operand": true },
-    ]
-},
-
 /////////////////////////////////////////////////////
 //////////////////// SEARCH AND REPLACE /////////////
 /////////////////////////////////////////////////////
 
-{"keys": [" ", "m"], "command": "show_panel", "args": {"panel": "find", "reverse": false}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": [" ", "r"], "command": "show_panel", "args": {"panel": "replace"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": [" ", "f"], "command": "show_panel", "args": {"panel": "find_in_files"}, "context": [{"key": "setting.command_mode"}, ] },
-
-
+    {"keys": ["1"], "command": "go_to_nth_match", "args": {"number": 1}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["2"], "command": "go_to_nth_match", "args": {"number": 2}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["3"], "command": "go_to_nth_match", "args": {"number": 3}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["4"], "command": "go_to_nth_match", "args": {"number": 4}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["5"], "command": "go_to_nth_match", "args": {"number": 5}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["6"], "command": "go_to_nth_match", "args": {"number": 6}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["7"], "command": "go_to_nth_match", "args": {"number": 7}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["8"], "command": "go_to_nth_match", "args": {"number": 8}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["9"], "command": "go_to_nth_match", "args": {"number": 9}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+    {"keys": ["0"], "command": "go_to_nth_match", "args": {"number": 10}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
 ]
