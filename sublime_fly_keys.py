@@ -1072,18 +1072,20 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         set_clipboard(clip)
         return
 
-class SmartPasteCutNewlinesCommand(sublime_plugin.TextCommand):
+class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
         sels: Selection = buf.sel()
-
         clipboard = get_clipboard()
-        clips = clipboard.splitlines()
-
         if clipboard.endswith('\n'):
-            pass
+            stripped_clipboard = clipboard.strip()
+            for region in reversed(sels):
+                if not region.empty():
+                    buf.erase(edit, region)
+                buf.insert(edit, region.begin(), stripped_clipboard)
+            return
         else:
-
+            clips = clipboard.splitlines()
             clip_pos: List[Tuple[int, int]] = [(len(clips[-1]), len(clips[-1]) + 1)]
             for clip in reversed(clips[:-1]):
                 clip_pos.append((len(clip) + 1 + clip_pos[-1][0], len(clip) + 1))
