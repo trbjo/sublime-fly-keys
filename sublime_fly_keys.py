@@ -186,24 +186,6 @@ class ToggleTrueFalseCommand(sublime_plugin.TextCommand):
 
 
 
-class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
-        sel = buf.sel()
-        line = buf.line(sel[0])
-        line_content = buf.substr(line)
-
-        if line_content.startswith('/'):
-            set_clipboard(line_content[:-1])
-            return
-
-        line_match = re.match(r"^\s+\d+", line_content)
-        if line_match:
-            offset = line_match.end() + 2
-            set_clipboard(line_content[offset:])
-            return
-
-
 class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
