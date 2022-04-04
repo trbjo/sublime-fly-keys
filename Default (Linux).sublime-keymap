@@ -450,7 +450,7 @@
 ///////////////////////////////////////////////////
 
 // this command is intended to be run after a search to mark the whole word
-{ "keys": ["x"], "command": "chain",
+{ "keys": ["z"], "command": "chain",
         "args": {
             "commands": [
                 {"command": "clear_selection", "args": {"forward": false}},
@@ -461,14 +461,14 @@
      ]
 },
 
-{"keys": ["x"], "command": "duplicate_line", "context": [
+{"keys": ["z"], "command": "duplicate_line", "context": [
     {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
     {"key": "last_command", "operator": "not_equal", "operand": "" },
     {"key": "setting.command_mode"},
  ] },
 
 
-{"keys": ["x"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_with_multiple_cursors.sublime-macro"},"context":
+{"keys": ["z"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/duplicate_with_multiple_cursors.sublime-macro"},"context":
     [
     {"key": "setting.command_mode"},
     {"key": "selection_empty", "operator": "equal", "operand": true },
