@@ -449,6 +449,7 @@
 /////////////////// DUPLICATE: //////////////////////
 ///////////////////////////////////////////////////
 
+{"keys": ["ctrl+z"], "command": "delete_smart", "context": [{"key": "setting.command_mode"}, ] },
 // this command is intended to be run after a search to mark the whole word
 { "keys": ["z"], "command": "chain",
         "args": {
