@@ -912,10 +912,14 @@
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
 { "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true }, "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+m"],           "command": "store_character", "args": {"forward": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["M", "<character>"], "command": "store_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+shift+m"],           "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["ctrl+m", "<character>"],       "command": "store_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+shift+m", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["b", "<character>"], "command": "store_character", "args": {"forward": false }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+b"],           "command": "store_character", "args": {"forward": false }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+shift+b"],           "command": "store_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["B", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
 { "keys": ["enter"],      "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 

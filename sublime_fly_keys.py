@@ -743,7 +743,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         return
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, character: str, forward: bool, extend: bool = False) -> None:
+    def run(self, _, forward: bool, character: str='', extend: bool=False) -> None:
         self.view.settings().set(key="waiting_for_char", value=True)
         global char_forward_tuple
         char_forward_tuple = (character, forward, extend)
