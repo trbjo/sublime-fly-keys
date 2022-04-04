@@ -675,9 +675,6 @@
     {"key": "setting.command_mode", "operator": "equal", "operand": true },
 ] },
 
-// {"keys": ["z"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context": [{"key": "setting.command_mode"}, ] },
-// {"keys": ["z"], "command": "lsp_document_symbols", "context": [{"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "documentSymbolProvider"} ] },
-
 {"keys": ["ctrl+q"], "command": "cut"},
 {"keys": ["ctrl+q"], "command": "delete_smart","context": [{"key": "setting.command_mode", "operator": "equal", "operand": true },]},
 {"keys": ["ctrl+j"], "command": "copy"},
@@ -929,6 +926,9 @@
         ]
     },
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+
+{"keys": [" ", "l"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": [" ", "'"], "command": "lsp_document_symbols", "context": [{"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "documentSymbolProvider"} ] },
 
 {"keys": [" ", "r"], "command": "chain",
     "args": {
