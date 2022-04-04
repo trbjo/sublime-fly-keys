@@ -773,7 +773,6 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         if region.a != region.b:
             extend = True
 
-        global matches
         if len(matches) < number:
             return
         mymatch: Region = matches[number - 1]
