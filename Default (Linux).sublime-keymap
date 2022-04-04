@@ -907,8 +907,8 @@
 },
 
 
-{"keys": ["enter"], "command": "find_next", "context": [{"key": "panel_has_focus"}] },
-{"keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
+{ "keys": ["enter"], "command": "find_next", "context": [{"key": "panel_has_focus"}] },
+{ "keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
 { "keys": ["m", "<character>"], "command": "store_character", "args": {"forward": true }, "context": [{"key": "setting.command_mode"}]},
@@ -921,9 +921,7 @@
 { "keys": ["ctrl+shift+b"],           "command": "store_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 { "keys": ["B", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["enter"],      "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
-
-{"keys": [" ", "m"], "command": "chain",
+{"keys": [" ", "c"], "command": "chain",
     "args": {
         "commands": [
             {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
@@ -950,15 +948,16 @@
     },
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 
-{ "keys": ["ctrl+enter"], "command": "find_prev", "context": [{"key": "setting.command_mode"} ] },
-{"keys": ["ctrl+enter"], "command": "replace_next", "context": [{"key": "panel_visible", "operator": "equal", "operand": true}] },
-{ "keys": ["ctrl+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
+{ "keys": ["shift+enter"], "command": "find_prev", "context": [{"key": "setting.command_mode"} ] },
+{ "keys": ["ctrl+enter"],   "command": "replace_next", "context": [{"key": "panel_visible", "operator": "equal", "operand": true}] },
+{ "keys": ["enter"],       "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
+{ "keys": ["shift+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 
 { "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
 { "keys": ["enter"], "command": "find_next_character", "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
 
 
-{ "keys": ["shift+enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
+{ "keys": ["ctrl+enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
     [
         { "key": "setting.command_mode", "operator": "equal", "operand": true },
         { "key": "overlay_has_focus", "operator": "equal", "operand": false }
@@ -969,14 +968,17 @@
 //////////////////// SEARCH AND REPLACE /////////////
 /////////////////////////////////////////////////////
 
-    {"keys": ["1"], "command": "go_to_nth_match", "args": {"number": 1}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["2"], "command": "go_to_nth_match", "args": {"number": 2}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["3"], "command": "go_to_nth_match", "args": {"number": 3}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["4"], "command": "go_to_nth_match", "args": {"number": 4}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["5"], "command": "go_to_nth_match", "args": {"number": 5}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["6"], "command": "go_to_nth_match", "args": {"number": 6}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["7"], "command": "go_to_nth_match", "args": {"number": 7}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["8"], "command": "go_to_nth_match", "args": {"number": 8}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["9"], "command": "go_to_nth_match", "args": {"number": 9}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-    {"keys": ["0"], "command": "go_to_nth_match", "args": {"number": 10}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["1"], "command": "go_to_nth_match", "args": {"number": 1}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["2"], "command": "go_to_nth_match", "args": {"number": 2}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["3"], "command": "go_to_nth_match", "args": {"number": 3}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["4"], "command": "go_to_nth_match", "args": {"number": 4}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["5"], "command": "go_to_nth_match", "args": {"number": 5}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["6"], "command": "go_to_nth_match", "args": {"number": 6}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["7"], "command": "go_to_nth_match", "args": {"number": 7}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["8"], "command": "go_to_nth_match", "args": {"number": 8}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["9"], "command": "go_to_nth_match", "args": {"number": 9}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["0"], "command": "go_to_nth_match", "args": {"number": 10}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+
+
+
 ]
