@@ -301,7 +301,7 @@ class FindInFilesGotoCommand(sublime_plugin.TextCommand):
         view = self.view
         if view is None:
             return
-        window: sublime.Window|None = view.window()
+        window: Union[sublime.Window,None] = view.window()
         if window is None:
             return
         if view.name() == "Find Results":
