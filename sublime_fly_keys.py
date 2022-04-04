@@ -370,14 +370,14 @@ class SampleListener(sublime_plugin.EventListener):
         global should_change_to_bol
         if allow_extend == True:
             allow_extend = False
-            v: View | None = active_window().active_view()
+            v: Union[View,None] = active_window().active_view()
             if v is None:
                 return
             if prev_buf_id == v.id():
                 end = v.full_line(v.sel()[0].end()).end()
                 v.sel().add(Region(pos_begin,end))
         elif should_change_to_bol:
-            v: View | None = active_window().active_view()
+            v: Union[View,None] = active_window().active_view()
             if v is None:
                 return
             end = v.full_line(v.sel()[0].end()).end()
@@ -519,7 +519,7 @@ class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
 
 class CommandModeCommand(sublime_plugin.WindowCommand):
     def run(self) -> None:
-        buf: View | None = active_window().active_view()
+        buf: Union[View,None] = active_window().active_view()
         active_window().run_command('hide_popup')
         # active_window().run_command('hide_panel')
         if buf is None:
