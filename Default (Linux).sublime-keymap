@@ -918,7 +918,7 @@
 
 { "keys": ["b", "<character>"], "command": "store_character", "args": {"forward": false }, "context": [{"key": "setting.command_mode"}]},
 { "keys": ["ctrl+b"],           "command": "store_character", "args": {"forward": false }, "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+shift+b"],           "command": "store_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+shift+b"],           "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 { "keys": ["B", "<character>"], "command": "store_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
 {"keys": [" ", "c"], "command": "chain",
