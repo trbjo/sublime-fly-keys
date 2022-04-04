@@ -435,7 +435,7 @@
 /////////////////// PASTE: //////////////////////
 //////////////////////////////////////////////////
 
-{"keys": ["alt+k"], "command": "smart_paste_cut_newlines", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["alt+k"], "command": "smart_paste_cut_newlines_or_whitespace", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["k"], "command": "smart_paste", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["k"], "command": "smart_paste_cut_whitespace", "context": [
@@ -480,23 +480,23 @@
 /////////////////// SELECTIONS: /////////////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["b"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["f"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["b"], "command": "expand_selection_to_string_double",
+{"keys": ["f"], "command": "expand_selection_to_string_double",
     "context": [
     {"key": "setting.command_mode"},
     {"key": "selector", "operator": "equal", "operand": "string.quoted.double - punctuation.definition.string.begin, meta.string" },
     {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
 
-{"keys": ["b"], "command": "expand_selection_to_string_single",
+{"keys": ["f"], "command": "expand_selection_to_string_single",
     "context": [
     {"key": "setting.command_mode"},
     {"key": "selector", "operator": "equal", "operand": "string.quoted.single - punctuation.definition.string.begin" },
     {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
 
-{"keys": ["ctrl+b"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+d"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["4"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["4"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
@@ -667,7 +667,7 @@
 {"keys": ["shift"], "command": "revert_selection", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true } ] },
 
 {"keys": ["ctrl"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
-{"keys": ["ctrl"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+{"keys": ["`"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{ "key": "auto_complete_visible" },{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 
 {"keys": ["z"], "command": "poor_mans_debugging", "context": [
