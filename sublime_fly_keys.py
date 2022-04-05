@@ -606,7 +606,6 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                 bisect_end = bisect(first, region.b - 3)
                 sel_end = first[bisect_end -1] + 2
                 if region.a == sel_end:
-                    sel_end = region.a
                     sel_begin = region.b
                 else:
                     sel_begin = buf.full_line(region.a).a
