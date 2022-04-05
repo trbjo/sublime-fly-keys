@@ -14,20 +14,19 @@ old_pos: int = -1
 
 class GotoInputListener(sublime_plugin.ViewEventListener):
     def on_query_context(self, key: str, _, __: bool, ___):
-        if key =="can_expand":
-            view: View = self.view
-            global first_view
-            global action
-            first_view = view
-            if view.sel()[0].empty():
-                action = Action.CHANGE_TO_BOL
-            else:
-                global old_pos
-                old_pos = view.sel()[0].end()
-                action = Action.EXTEND
-            return True
-        else:
+        if key != "can_expand":
             return None
+        view: View = self.view
+        global first_view
+        global action
+        first_view = view
+        if view.sel()[0].empty():
+            action = Action.CHANGE_TO_BOL
+        else:
+            global old_pos
+            old_pos = view.sel()[0].end()
+            action = Action.EXTEND
+        return True
 
 
     def on_activated(self):
