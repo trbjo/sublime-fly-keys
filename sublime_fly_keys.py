@@ -160,32 +160,6 @@ class DeleteSmartCommand(sublime_plugin.TextCommand):
 
 
 
-class ExpandSelectionToSentenceCommand(sublime_plugin.TextCommand):
-    # TODO: Add foward command to go forward and backward selction of sentences
-    def run(self, _) -> None:
-        view = self.view
-        # whitespace = '\t\n\x0b\x0c\r ' # Equivalent to string.whitespace
-        oldSelRegions = list(view.sel())
-        view.sel().clear()
-        for region in oldSelRegions:
-            reg_begin = region.begin() - 1
-            while ((view.substr(reg_begin) not in ".") and (reg_begin >= 0)):
-                reg_begin -= 1
-            reg_begin += 1
-            while((view.substr(reg_begin) in string.whitespace) and (reg_begin < view.size())):
-                reg_begin += 1
-            reg_begin -= 1
-
-            reg_end = region.end()
-            while((view.substr(reg_end) not in ".") and (reg_end < view.size())):
-                reg_end += 1
-
-            if(reg_begin != reg_end):
-                view.sel().add(Region(reg_begin, reg_end+1))
-            else:
-                view.sel().add(Region(reg_begin, reg_begin))
-
-
 class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
     def op(self)->str:
         return ''
