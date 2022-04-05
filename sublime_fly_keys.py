@@ -4,7 +4,7 @@ import sublime_plugin
 
 from typing import List, Tuple, Dict, Union
 from os import path
-import bisect
+from bisect import bisect
 import datetime
 import re
 import string
@@ -524,7 +524,7 @@ class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
         except KeyError:
             build_or_rebuild_ws_for_view(buf, immediate=True)
             myregs: Tuple[int] = interesting_regions[buf]['last']
-        bisect_res = bisect.bisect(myregs, region)
+        bisect_res = bisect(myregs, region)
         sel_end = myregs[bisect_res]
         reg = Region(sel_end)
         buf.sel().clear()
@@ -541,7 +541,7 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
         except KeyError:
             build_or_rebuild_ws_for_view(buf, immediate=True)
             myregs: Tuple[int] = interesting_regions[buf]['last']
-        bisect_res = bisect.bisect(myregs, region - 1)
+        bisect_res = bisect(myregs, region - 1)
         sel_end: int = myregs[bisect_res -1 ]
         reg = Region(sel_end)
         buf.sel().clear()
@@ -562,12 +562,12 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 first: Tuple[int] = interesting_regions[buf]['first']
 
             if region.b > region.a:
-                bisect_res = bisect.bisect(first, region.b)
+                bisect_res = bisect(first, region.b)
                 sel_begin = buf.full_line(region.a).a
                 sel_end = first[bisect_res] + 2
 
             elif region.a > region.b:
-                bisect_res = bisect.bisect(first, region.b)
+                bisect_res = bisect(first, region.b)
                 sel_end = first[bisect_res] + 2
                 if region.a == sel_end or sel_end - 3 == region.a:
                     sel_end = region.a
@@ -577,7 +577,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                     buf.sel().subtract(region)
 
             elif region.a == region.b:
-                bisect_res = bisect.bisect(first, region.b -2)
+                bisect_res = bisect(first, region.b -2)
                 sel_begin = first[bisect_res -1] + 2
                 sel_end = first[bisect_res] + 2
 
@@ -603,7 +603,7 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
                 first: Tuple[int] = interesting_regions[buf]['first']
 
             if region.b > region.a:
-                bisect_end = bisect.bisect(first, region.b - 3)
+                bisect_end = bisect(first, region.b - 3)
                 sel_end = first[bisect_end -1] + 2
                 if region.a == sel_end:
                     sel_end = region.a
@@ -614,14 +614,14 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextComma
 
             elif region.a > region.b:
                 sel_begin = region.a
-                bisect_end = bisect.bisect(first, region.b - 3)
+                bisect_end = bisect(first, region.b - 3)
                 if bisect_end == 0:
                     sel_end = -1
                 else:
                     sel_end = first[bisect_end -1] + 2
 
             elif region.b == region.a:
-                bisect_end = bisect.bisect(first, region.b - 2)
+                bisect_end = bisect(first, region.b - 2)
                 sel_end = first[bisect_end -1] + 2
                 sel_begin = first[bisect_end] + 2
 
