@@ -7,8 +7,9 @@ should_change_to_bol: bool = False
 first_view: Union[View,None] = None
 old_pos: int = -1
 
-class GotoInputListener(sublime_plugin.EventListener):
-    def on_query_context(self, view: View, key: str, _, __: bool, ___):
+class GotoInputListener(sublime_plugin.ViewEventListener):
+    def on_query_context(self, key: str, _, __: bool, ___):
+        view: View = self.view
         global should_extend
         global should_change_to_bol
         global first_view
@@ -21,15 +22,16 @@ class GotoInputListener(sublime_plugin.EventListener):
                 should_change_to_bol = True
             else:
                 global old_pos
-                old_pos = view.sel()[0].begin()
+                old_pos = view.sel()[0].end()
                 should_extend = True
                 should_change_to_bol = False
             return True
         else:
-            return False
+            return None
 
 
-    def on_activated(self, view: View):
+    def on_activated(self):
+        view: View = self.view
         if view is None:
             return
         if view.element() is not None:
