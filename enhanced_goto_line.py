@@ -39,11 +39,13 @@ class GotoInputListener(sublime_plugin.EventListener):
             return
         if view.id() != first_view.id():
             return
+        sels: Selection = view.sel()
+        if sels[0].end() == old_pos:
+            return
         global should_extend
         global should_change_to_bol
         if should_extend:
             should_extend = False
-            sels: Selection = view.sel()
             new_pos = view.sel()[0].a
             sels.clear()
             if new_pos > old_pos:
