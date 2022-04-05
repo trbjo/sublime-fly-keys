@@ -1,16 +1,15 @@
 from sublime import View
 import sublime
-from sublime_plugin import TextCommand, ViewEventListener
+from sublime_plugin import TextCommand, EventListener
 
 from typing import Union
 from os import path
 import re
 
-class SetReadOnly(ViewEventListener):
-    def on_new_async(self):
-        view: View = self.view
+class SetReadOnly(EventListener):
+    def on_new_async(self, view: View):
         if view.element() == "find_in_files:output":
-            self.view.set_read_only(True)
+            view.set_read_only(True)
 
 class FindInFilesGotoCommand(TextCommand):
     def run(self, _) -> None:
