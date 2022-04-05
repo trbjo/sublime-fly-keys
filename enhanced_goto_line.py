@@ -14,12 +14,10 @@ old_pos: int = -1
 
 class GotoInputListener(sublime_plugin.ViewEventListener):
     def on_query_context(self, key: str, _, __: bool, ___):
-        view: View = self.view
-        global action
-        global first_view
-
-        # this line listens for the keys "sent" in the keymap file
         if key =="can_expand":
+            view: View = self.view
+            global first_view
+            global action
             first_view = view
             if view.sel()[0].empty():
                 action = Action.CHANGE_TO_BOL
@@ -37,8 +35,6 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
         if action == Action.DO_NOTHING:
             return
         view: View = self.view
-        if view is None:
-            return
         if view.element() is not None:
             return
         global first_view
