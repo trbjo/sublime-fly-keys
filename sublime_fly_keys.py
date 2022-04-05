@@ -562,7 +562,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
                 first: Tuple[int] = interesting_regions[buf]['first']
 
             if region.b > region.a:
-                bisect_res = bisect(first, region.b)
+                bisect_res = bisect(first, region.b -1)
                 sel_begin = buf.full_line(region.a).a
                 sel_end = first[bisect_res] + 2
 
