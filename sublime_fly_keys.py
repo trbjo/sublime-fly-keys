@@ -1,4 +1,4 @@
-from sublime import Edit, View, Region, Selection, set_clipboard, active_window
+from sublime import Edit, View, Region, Selection, active_window
 import sublime
 import sublime_plugin
 
