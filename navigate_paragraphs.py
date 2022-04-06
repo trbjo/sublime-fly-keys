@@ -1,8 +1,7 @@
-from sublime import View, Region
+from sublime import View, Region, active_window
 import sublime
-import sublime_plugin
-
-from typing import List, Tuple, Dict
+from sublime_plugin import WindowCommand, ViewEventListener, TextCommand
+from typing import List, Tuple, Dict, Union
 from bisect import bisect
 import datetime
 
@@ -19,15 +18,20 @@ def build_or_rebuild_ws_for_view(view: View, immediate: bool):
         try:
             whitespaces: List[Region] = view.find_all(r'\n[\t ]*\n[\t ]*\S')
             size = view.size() + 1
+            if view.file_name() is not None:
+                print("Rebuilding " + view.file_name())
+            else:
+                print("Rebuilding unsaved buffer")
             first, last = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(size, size)])
             interesting_regions[view]['first'] = first
+            print(f'{interesting_regions[view]=}')
             interesting_regions[view]['last'] = last
         except ValueError:
             pass
     timeout = datetime.datetime.now()
 
 
-class ModifiedViewListener(sublime_plugin.ViewEventListener):
+class ModifiedViewListener(ViewEventListener):
     def on_modified_async(self):
         view: View = self.view
         if view.element() is None:
@@ -36,7 +40,6 @@ class ModifiedViewListener(sublime_plugin.ViewEventListener):
                 del interesting_regions[view]
             except KeyError:
                 pass
-            print(view.file_name())
             sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
     def on_load_async(self):
@@ -45,7 +48,7 @@ class ModifiedViewListener(sublime_plugin.ViewEventListener):
             build_or_rebuild_ws_for_view(view, immediate=True)
 
 
-class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
+class NavigateByParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         region = buf.sel()[-1].begin()
@@ -62,7 +65,7 @@ class NavigateByParagraphForwardCommand(sublime_plugin.TextCommand):
         buf.show(reg, True)
 
 
-class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
+class NavigateByParagraphBackwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         region = buf.sel()[0].begin()
@@ -79,7 +82,7 @@ class NavigateByParagraphBackwardCommand(sublime_plugin.TextCommand):
 
         buf.show(reg, True)
 
-class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextCommand):
+class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         regs_dict: Dict[int, int] = dict()
@@ -120,7 +123,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(sublime_plugin.TextComman
         buf.show(buf.sel()[-1], False)
 
 
-class ExtendedExpandSelectionToParagraphBackwardCommand(sublime_plugin.TextCommand):
+class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         regs_dict: Dict[int, int] = dict()
