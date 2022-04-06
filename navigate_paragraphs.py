@@ -8,13 +8,27 @@ import datetime
 interesting_regions: Dict[View, Dict[str, Tuple[int]]] = {}
 timeout = datetime.datetime.now()
 
+class CommandModeCommand(WindowCommand):
+    def run(self) -> None:
+        view: Union[View,None] = active_window().active_view()
+        active_window().run_command('hide_popup')
+        # active_window().run_command('hide_panel')
+        if view is None:
+            return
+        view.settings().set(key="block_caret", value=True)
+        view.settings().set(key="waiting_for_char", value=False)
+        view.settings().set(key="command_mode", value=True)
+        if view.element() is None:
+            if view not in interesting_regions or not interesting_regions[view]:
+                sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
+
 def build_or_rebuild_ws_for_view(view: View, immediate: bool):
     if view is None:
         return
     global interesting_regions
     global timeout
     if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
-        interesting_regions[view] = dict()
+        interesting_regions[view] = {}
         try:
             whitespaces: List[Region] = view.find_all(r'\n[\t ]*\n[\t ]*\S')
             size = view.size() + 1
@@ -29,9 +43,11 @@ def build_or_rebuild_ws_for_view(view: View, immediate: bool):
     timeout = datetime.datetime.now()
 
 def get_regions(view: View, part: str):
+    global interesting_regions
     try:
         myregs: Tuple[int] = interesting_regions[view][part]
     except KeyError:
+        interesting_regions[view] = {}
         build_or_rebuild_ws_for_view(view, immediate=True)
         myregs: Tuple[int] = interesting_regions[view][part]
     return myregs
@@ -41,16 +57,16 @@ class ModifiedViewListener(ViewEventListener):
     def on_modified_async(self):
         view: View = self.view
         if view.element() is None:
-            try:
-                global interesting_regions
-                del interesting_regions[view]
-            except KeyError:
-                pass
-            sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
+            global interesting_regions
+            interesting_regions[view] = {}
+            if view.settings().get("command_mode") == True:
+                sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
     def on_load_async(self):
+        global interesting_regions
         view: View = self.view
         if view not in interesting_regions and view.element() is None:
+            interesting_regions[view] = {}
             build_or_rebuild_ws_for_view(view, immediate=True)
 
 
@@ -83,7 +99,7 @@ class NavigateByParagraphBackwardCommand(TextCommand):
 class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
-        regs_dict: Dict[int, int] = dict()
+        regs_dict: Dict[int, int] = {}
         first = get_regions(buf, 'first')
         for region in buf.sel():
             if region.b > region.a:
@@ -118,7 +134,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
 class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
-        regs_dict: Dict[int, int] = dict()
+        regs_dict: Dict[int, int] = {}
         first = get_regions(buf, 'first')
         for region in buf.sel():
             if region.b > region.a:

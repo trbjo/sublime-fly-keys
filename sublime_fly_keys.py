@@ -223,18 +223,6 @@ class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
         buf.settings().set(key="command_mode", value=False)
 
 
-class CommandModeCommand(sublime_plugin.WindowCommand):
-    def run(self) -> None:
-        buf: Union[View,None] = active_window().active_view()
-        active_window().run_command('hide_popup')
-        # active_window().run_command('hide_panel')
-        if buf is None:
-            return
-        buf.settings().set(key="block_caret", value=True)
-        buf.settings().set(key="waiting_for_char", value=False)
-        buf.settings().set(key="command_mode", value=True)
-
-
 class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
     def run(self, _, after=False, plusone=False) -> None:
         if plusone == True:
