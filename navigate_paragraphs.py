@@ -36,6 +36,7 @@ class ModifiedViewListener(sublime_plugin.ViewEventListener):
                 del interesting_regions[view]
             except KeyError:
                 pass
+            print(view.file_name())
             sublime.set_timeout(lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000)
 
     def on_load_async(self):
