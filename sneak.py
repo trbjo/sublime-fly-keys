@@ -8,16 +8,29 @@ from typing import List, Tuple, Union
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 matches : List[Region] = []
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
-    def find_next(self, forward: bool, char: str, pt: int) -> int:
+    def find_next(self, forward: bool, char: str, pt: int, num_matches: int) -> List[int]:
+        buf = self.view
+        pts: List[int] = []
         if forward:
-            return self.view.find(char, pt + 1, LITERAL).a
+            mybuf = self.view.substr(Region(pt+1,buf.size()))
         else:
+            mybuf = self.view.substr(Region(0, pt-1))[::-1]
             char = char[::-1]
-            mybuf = self.view.substr(Region(0, pt -1))
-            try:
-                return pt - mybuf[::-1].index(char) -2
-            except ValueError:
-                return -1
+        new_pt: int = 0
+        for _ in range(num_matches):
+            if forward:
+                try:
+                    new_pt = mybuf.index(char, new_pt) + 1
+                    pts.append(pt + new_pt)
+                except ValueError:
+                    return pts
+            else:
+                try:
+                    new_pt = mybuf.index(char, new_pt) + 2
+                    pts.append(pt - new_pt)
+                except ValueError:
+                    return pts
+        return pts
 
 
     myhtml="""<body id="my-plugin-feature"><style>div.matcher{{padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};}}</style><div class="matcher">{counter}</div></body>"""
@@ -29,9 +42,10 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         regs_to_subtract: List[Region] = []
         offset = 1 if not forward and len(search_string) == 1 else 0
         for region in sels:
-            pt = self.find_next(forward, search_string, region.b)
-            if pt == -1:
+            pts = self.find_next(forward, search_string, region.b, 1)
+            if not pts:
                 return
+            pt = pts[0]
             if region.a == region.b:
                 if extend:
                     tp = pt + len(search_string) if forward else pt -1
@@ -72,14 +86,9 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         global matches
         matches = []
         for region in sels:
-            pt = region.b
-            for _ in range(max_res):
-                new_pt = self.find_next(forward, search_string, pt)
-                if new_pt == pt or new_pt == -1:
-                    break
-                pt = new_pt + offset
-                matches.append(Region(pt, pt + len(search_string)))
-                pt = new_pt
+            new_pts = self.find_next(forward, search_string, region.b, max_res)
+            for pt in new_pts:
+                matches.append(Region(pt+offset, pt+offset+len(search_string)))
         if not matches:
             return
         # we use phantoms if we have one match, regions, if more
@@ -174,5 +183,3 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         and command_name != "store_character" and command_name != "revert_selection"):
             view.settings().set(key="has_stored_search", value=False)
             view.settings().set(key="waiting_for_char", value=False)
-
-
