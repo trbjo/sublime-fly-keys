@@ -22,13 +22,19 @@ def build_or_rebuild_ws_for_view(view: View, immediate: bool):
                 print("Rebuilding " + view.file_name())
             else:
                 print("Rebuilding unsaved buffer")
-            first, last = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(size, size)])
-            interesting_regions[view]['first'] = first
+            interesting_regions[view]['first'], interesting_regions[view]['last'] = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(size, size)])
             print(f'{interesting_regions[view]=}')
-            interesting_regions[view]['last'] = last
         except ValueError:
             pass
     timeout = datetime.datetime.now()
+
+def get_regions(view: View, part: str):
+    try:
+        myregs: Tuple[int] = interesting_regions[view][part]
+    except KeyError:
+        build_or_rebuild_ws_for_view(view, immediate=True)
+        myregs: Tuple[int] = interesting_regions[view][part]
+    return myregs
 
 
 class ModifiedViewListener(ViewEventListener):
@@ -52,11 +58,7 @@ class NavigateByParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         region = buf.sel()[-1].begin()
-        try:
-            myregs: Tuple[int] = interesting_regions[buf]['last']
-        except KeyError:
-            build_or_rebuild_ws_for_view(buf, immediate=True)
-            myregs: Tuple[int] = interesting_regions[buf]['last']
+        myregs = get_regions(buf, 'last')
         bisect_res = bisect(myregs, region)
         sel_end = myregs[bisect_res]
         reg = Region(sel_end)
@@ -69,11 +71,7 @@ class NavigateByParagraphBackwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         region = buf.sel()[0].begin()
-        try:
-            myregs: Tuple[int] = interesting_regions[buf]['last']
-        except KeyError:
-            build_or_rebuild_ws_for_view(buf, immediate=True)
-            myregs: Tuple[int] = interesting_regions[buf]['last']
+        myregs = get_regions(buf, 'last')
         bisect_res = bisect(myregs, region - 1)
         sel_end: int = myregs[bisect_res -1 ]
         reg = Region(sel_end)
@@ -86,14 +84,8 @@ class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         regs_dict: Dict[int, int] = dict()
+        first = get_regions(buf, 'first')
         for region in buf.sel():
-
-            try:
-                first: Tuple[int] = interesting_regions[buf]['first']
-            except KeyError:
-                build_or_rebuild_ws_for_view(buf, immediate=True)
-                first: Tuple[int] = interesting_regions[buf]['first']
-
             if region.b > region.a:
                 bisect_res = bisect(first, region.b -1)
                 sel_begin = buf.full_line(region.a).a
@@ -127,14 +119,8 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
     def run(self, _) -> None:
         buf = self.view
         regs_dict: Dict[int, int] = dict()
+        first = get_regions(buf, 'first')
         for region in buf.sel():
-
-            try:
-                first: Tuple[int] = interesting_regions[buf]['first']
-            except KeyError:
-                build_or_rebuild_ws_for_view(buf, immediate=True)
-                first: Tuple[int] = interesting_regions[buf]['first']
-
             if region.b > region.a:
                 bisect_end = bisect(first, region.b - 3)
                 sel_end = first[bisect_end -1] + 2
