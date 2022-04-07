@@ -852,7 +852,7 @@
 {"keys": ["6"], "command": "insert", "args": {"characters": "6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 
-{"keys": ["ctrl+6"], "command": "chain",
+{"keys": ["^"], "command": "chain",
     "args": {
         "commands": [
             {"command": "set_layout", "args": {"cells": [[0, 0, 1, 1], [0, 1, 1, 2]], "cols": [0.0, 1.0], "rows": [0.0, 0.5, 1.0]}},
