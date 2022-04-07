@@ -482,6 +482,7 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["f"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+f"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["f"], "command": "expand_selection_to_string_double",
     "context": [
@@ -497,10 +498,8 @@
     {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
 
-{"keys": ["ctrl+d"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
-
-{"keys": ["4"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["4"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
+{"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
 
 
 
