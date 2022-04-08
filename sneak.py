@@ -88,12 +88,11 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         # we use phantoms if we have one match, regions, if more
         if len(sels) > 1:
             new_offset = 1 if not forward and len(search_string) == 2 else 0
-            light_hl = []
+            light_hl: List[Region] = []
             for i,region in enumerate(sels):
                 new_pt = self.find_next(forward, search_string, region.b, 1)[0]
                 try:
-                    hej = i+1 if forward else i-1
-                    if new_pt == sels[hej].b + new_offset:
+                    if new_pt == sels[i+1 if forward else i-1].b + new_offset:
                         light_hl.append(Region(new_pt+offset, new_pt+off_length))
                         continue
                     matches.append(Region(new_pt+offset, new_pt+off_length))
