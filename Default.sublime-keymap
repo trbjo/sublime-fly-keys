@@ -539,14 +539,13 @@
 ////////////////////////////////////////////////////
 
 
-{"keys": ["ctrl+n"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
-    {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": true},
-] },
-
 {"keys": ["ctrl+n"], "command": "undo_find_under_expand", "context": [
     {"key": "setting.command_mode"},
-    {"key": "selection_empty", "operator": "equal", "operand": false},
+] },
+
+{"keys": ["ctrl+n"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
+    {"key": "setting.command_mode"},
+    {"key": "num_selections", "operator": "equal", "operand": 1 },
 ] },
 
 {"keys": ["ctrl+shift+n"], "command": "subtract_first_selection", "context": [{"key": "setting.command_mode"}, ] },
