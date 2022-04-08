@@ -94,8 +94,8 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 try:
                     if new_pt == sels[i+1 if forward else i-1].b + new_offset:
                         light_hl.append(Region(new_pt+offset, new_pt+off_length))
-                        continue
-                    matches.append(Region(new_pt+offset, new_pt+off_length))
+                    else:
+                        matches.append(Region(new_pt+offset, new_pt+off_length))
                 except IndexError:
                     matches.append(Region(new_pt+offset, new_pt+off_length))
                     break
