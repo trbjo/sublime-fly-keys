@@ -32,12 +32,7 @@ def build_or_rebuild_ws_for_view(view: View, immediate: bool):
         try:
             whitespaces: List[Region] = view.find_all(r'\n[\t ]*\n[\t ]*\S')
             size = view.size() + 1
-            if view.file_name() is not None:
-                print("Rebuilding " + view.file_name())
-            else:
-                print("Rebuilding unsaved buffer")
             interesting_regions[view]['first'], interesting_regions[view]['last'] = zip(*[(-2, -1)] + [(first, last -1) for first, last in whitespaces] + [(size, size)])
-            print(f'{interesting_regions[view]=}')
         except ValueError:
             pass
     timeout = datetime.datetime.now()
