@@ -81,28 +81,37 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         buf.show(buf.sel()[-1], True)
 
         # now we look for highlights
-        offset = offset-1 if not forward else offset
-        max_res: int = 1 if len(sels) > 1 else 10
         global matches
         matches = []
-        for region in sels:
-            new_pts = self.find_next(forward, search_string, region.b, max_res)
-            for pt in new_pts:
-                matches.append(Region(pt+offset, pt+offset+len(search_string)))
-        if not matches:
-            return
+        offset = offset-1 if not forward else offset
+        off_length = offset+len(search_string)
         # we use phantoms if we have one match, regions, if more
         if len(sels) > 1:
-            for match in enumerate(matches):
+            new_offset = 1 if not forward and len(search_string) == 2 else 0
+            light_hl = []
+            for i,region in enumerate(sels):
+                new_pt = self.find_next(forward, search_string, region.b, 1)[0]
+                try:
+                    hej = i+1 if forward else i-1
+                    if new_pt == sels[hej].b + new_offset:
+                        light_hl.append(Region(new_pt+offset, new_pt+off_length))
+                        continue
+                    matches.append(Region(new_pt+offset, new_pt+off_length))
+                except IndexError:
+                    matches.append(Region(new_pt+offset, new_pt+off_length))
+                    break
+            if matches:
                 self.view.add_regions("Sneak", matches, "accent", flags=sublime.DRAW_NO_OUTLINE)
-            return
+                matches = []
+            if light_hl:
+                self.view.add_regions("Sneaks", light_hl, "light", flags=sublime.DRAW_NO_OUTLINE)
+        else:
+            bg_color = buf.style()["accent"]
+            fg_color = buf.style()["background"]
+            matches = [Region(pt+offset, pt+off_length) for pt in self.find_next(forward, search_string, sels[0].b, 10)]
+            for i,match in enumerate(matches):
+                self.view.add_phantom("Sneak", region=match, content=self.myhtml.format(counter=self.charlist[i], background=bg_color, color=fg_color), layout=LAYOUT_INLINE)
 
-        bg_color = buf.style()["accent"]
-        fg_color = buf.style()["background"]
-
-        for i,match in enumerate(matches):
-            self.view.add_phantom("Sneak", region=match, content=self.myhtml.format(counter=self.charlist[i], background=bg_color, color=fg_color), layout=LAYOUT_INLINE)
-        return
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, forward: bool, character: str='', extend: bool=False) -> None:
@@ -149,7 +158,6 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         buf.show(sels[0], True)
         return
 
-
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: str) -> None:
         self.view.settings().set(key="has_stored_search", value=True)
@@ -173,11 +181,13 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
             return
         view.erase_phantoms("Sneak")
         view.erase_regions("Sneak")
+        view.erase_regions("Sneaks")
         view.settings().set(key="waiting_for_char", value=False)
         view.settings().set(key="has_stored_search", value=False)
 
     def on_text_command(self, view: View, command_name: str, _):
         view.erase_regions("Sneak")
+        view.erase_regions("Sneaks")
         view.erase_phantoms("Sneak")
         if (command_name != "find_next_character" and command_name != "repeat_find_next_character"
         and command_name != "store_character" and command_name != "revert_selection"):
