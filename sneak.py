@@ -1,4 +1,4 @@
-from sublime import LAYOUT_INLINE, LITERAL, View, Region, Selection
+from sublime import LAYOUT_INLINE, View, Region, Selection
 import sublime
 import sublime_plugin
 
