@@ -164,7 +164,6 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
             return 0
         clipboard = get_clipboard()
         if len(cur_line) == 0 and clipboard.startswith(' '):
-            return 0
             lines_above, _ = buf.line(cur_line_num.begin())
             for line in range(lines_above):
                 line += 1
