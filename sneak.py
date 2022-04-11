@@ -6,7 +6,7 @@ from typing import List, Tuple, Union
 # tuple of (search_string: str, forward: bool, extend: bool)
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 matches : List[Region] = []
-myhtml="""<body id="my-plugin-feature"><style>div.matcher{{padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};}}</style><div class="matcher">{counter}</div></body>"""
+myhtml="""<body style="padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};"><div>{counter}</div></body>"""
 charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
@@ -16,34 +16,33 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         matches = []
         regs_to_add: List[Union[Region,int]] = []
         regs_to_subtract: List[Region] = []
-        offset = 0
 
         try:
             if forward:
+                offset = 0
                 first_pt = view.sel()[0].b
-                new_pt: int = 0
                 mybuf = self.view.substr(Region(first_pt+1,view.size()))
                 for region in view.sel():
-                    new_pt: int = mybuf.index(search_string, region.b - first_pt +1) + 1 + first_pt
+                    pt: int = mybuf.index(search_string, region.b - first_pt +1) + 1 + first_pt
                     if region.a == region.b:
                         if extend:
-                            regs_to_add.append(sublime.Region(region.a, new_pt + len(search_string)))
+                            regs_to_add.append(sublime.Region(region.a, pt + len(search_string)))
                         else:
                             regs_to_subtract.append(region)
-                            regs_to_add.append(new_pt)
+                            regs_to_add.append(pt)
                     elif region.a < region.b:
-                        regs_to_add.append(Region(region.b -1, new_pt + len(search_string)))
+                        regs_to_add.append(Region(region.b -1, pt + len(search_string)))
                     elif region.a > region.b:
-                        if new_pt > region.a:
+                        if pt > region.a:
                             regs_to_subtract.append(Region(region.a, region.b))
                             regs_to_add.append(region.a)
                         else:
-                            regs_to_subtract.append(Region(region.b, new_pt))
+                            regs_to_subtract.append(Region(region.b, pt))
             else:
+                search_string = search_string[::-1]
                 offset = 1 if len(search_string) == 1 else 0
                 last_pt = view.sel()[-1].b
                 mybuf = self.view.substr(Region(0, last_pt-1))[::-1]
-                search_string = search_string[::-1]
                 for region in view.sel():
                     pt: int = last_pt - mybuf.index(search_string, last_pt - region.b) - 2
                     if region.a == region.b:
@@ -74,16 +73,16 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 new_offset = 1 if not forward and len(search_string) == 2 else 0
                 for i,region in enumerate(view.sel()):
                     if forward:
-                        new_pt: int = mybuf.index(search_string, region.b - first_pt + 1) + first_pt + 1
+                        pt: int = mybuf.index(search_string, region.b - first_pt + 1) + first_pt + 1
                     else:
-                        new_pt: int = last_pt - mybuf.index(search_string, last_pt - region.b) - 2
+                        pt: int = last_pt - mybuf.index(search_string, last_pt - region.b) - 2
                     try:
-                        if new_pt == view.sel()[i+1 if forward else i-1].b + new_offset:
-                            light_hl.append(Region(new_pt+offset, new_pt+off_length))
+                        if pt == view.sel()[i+1 if forward else i-1].b + new_offset:
+                            light_hl.append(Region(pt+offset, pt+off_length))
                         else:
-                            regular_hl.append(Region(new_pt+offset, new_pt+off_length))
+                            regular_hl.append(Region(pt+offset, pt+off_length))
                     except IndexError:
-                        regular_hl.append(Region(new_pt+offset, new_pt+off_length))
+                        regular_hl.append(Region(pt+offset, pt+off_length))
                         break
 
                 if regular_hl:
