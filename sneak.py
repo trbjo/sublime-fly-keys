@@ -1,12 +1,12 @@
-from sublime import LAYOUT_INLINE, View, Region, Selection
+from sublime import LAYOUT_INLINE, View, Region, Selection, DRAW_NO_OUTLINE
 import sublime
+from sublime_api import view_add_phantom, view_add_regions
 import sublime_plugin
 from typing import List, Tuple, Union
 
 # tuple of (search_string: str, forward: bool, extend: bool)
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 matches : List[Region] = []
-myhtml="""<body style="padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};"><div>{counter}</div></body>"""
 charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
@@ -64,6 +64,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 view.sel().subtract(reg)
             view.sel().add_all(regs_to_add)
             view.show(view.sel()[-1], True)
+            view_id = self.view.id()
 
             if len(view.sel()) > 1:
                 light_hl: List[Region] = []
@@ -86,18 +87,16 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                         break
 
                 if regular_hl:
-                    self.view.add_regions("Sneak", regular_hl, "accent", flags=sublime.DRAW_NO_OUTLINE)
+                    view_add_regions(view_id, "Sneak", regular_hl, "accent", "", DRAW_NO_OUTLINE, [], "", None, None)
                 if light_hl:
-                    self.view.add_regions("Sneaks", light_hl, "light", flags=sublime.DRAW_NO_OUTLINE)
-
+                    view_add_regions(view_id, "Sneaks", light_hl, "light", "", DRAW_NO_OUTLINE, [], "", None, None)
             else:
-                bg_color = view.style()["accent"]
-                fg_color = view.style()["background"]
                 if forward:
                     rel_pt: int = view.sel()[0].b - first_pt
                 else:
                     rel_pt: int = last_pt - view.sel()[0].b
 
+                html = self.get_html()
                 for i in range(10):
                     rel_pt = mybuf.index(search_string, rel_pt) + 1
                     if forward:
@@ -105,11 +104,16 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     else:
                         abs_pt: int = last_pt - rel_pt - len(search_string)
 
-                    myreg: Region = Region(abs_pt, abs_pt+len(search_string))
-                    matches.append(myreg)
-                    self.view.add_phantom("Sneak", region=myreg, content=myhtml.format(counter=charlist[i], background=bg_color, color=fg_color), layout=LAYOUT_INLINE)
+                    reg: Region = Region(abs_pt, abs_pt+len(search_string))
+                    matches.append(reg)
+                    view_add_phantom(view_id, "Sneak", reg, html.format(counter=charlist[i]), LAYOUT_INLINE, None)
         except ValueError:
             return
+
+    def get_html(self) -> str:
+        bg_color = self.view.style()["accent"]
+        fg_color = self.view.style()["background"]
+        return """<body style="padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};"><div>{{counter}}</div></body>""".format(background=bg_color, color=fg_color)
 
 class StoreCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, forward: bool, character: str='', extend: bool=False) -> None:
