@@ -125,6 +125,7 @@ class ListenForCharacterCommand(FindNextCharacterBaseCommand):
             self.view.show_popup(self.get_html().format(counter='_'))
         else:
             self.view.show_popup(self.get_html().format(counter='__'))
+            ready_to_search = False
 
         global char_forward_tuple
         char_forward_tuple = ('', forward, extend)
