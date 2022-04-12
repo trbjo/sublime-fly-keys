@@ -11,13 +11,11 @@ charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def execute(self, forward: bool, search_string: str, extend: bool) -> None:
-        self.view.hide_popup()
         view = self.view
         global matches
         matches = []
         regs_to_add: List[Union[Region,int]] = []
         regs_to_subtract: List[Region] = []
-
         try:
             if forward:
                 offset = 0
@@ -40,12 +38,12 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                         else:
                             regs_to_subtract.append(Region(region.b, pt))
             else:
-                search_string = search_string[::-1]
-                offset = 1 if len(search_string) == 1 else 0
+                char = search_string[::-1]
+                offset = 1 if len(char) == 1 else 0
                 last_pt = view.sel()[-1].b
                 mybuf = self.view.substr(Region(0, last_pt-1))[::-1]
                 for region in view.sel():
-                    pt: int = last_pt - mybuf.index(search_string, last_pt - region.b) - 2
+                    pt: int = last_pt - mybuf.index(char, last_pt - region.b) - 2
                     if region.a == region.b:
                         if extend:
                             regs_to_add.append(sublime.Region(region.a, pt -1 + offset))
@@ -61,12 +59,16 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     elif region.a > region.b:
                         regs_to_add.append(Region(region.a, pt -1 + offset))
 
-            for reg in regs_to_subtract:
-                view.sel().subtract(reg)
-            view.sel().add_all(regs_to_add)
-            view.show(view.sel()[-1], True)
-            view_id = self.view.id()
+        except ValueError:
+            self.view.show_popup(self.get_html(error=True).format(symbol=search_string),location=self.view.sel()[-1].b)
+            return
 
+        for reg in regs_to_subtract:
+            view.sel().subtract(reg)
+        view.sel().add_all(regs_to_add)
+        view.show(view.sel()[-1], True)
+        view_id = self.view.id()
+        try:
             if len(view.sel()) > 1:
                 light_hl: List[Region] = []
                 regular_hl: List[Region] = []
@@ -107,14 +109,18 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
 
                     reg: Region = Region(abs_pt, abs_pt+len(search_string))
                     matches.append(reg)
-                    view_add_phantom(view_id, "Sneak", reg, html.format(counter=charlist[i]), LAYOUT_INLINE, None)
+                    view_add_phantom(view_id, "Sneak", reg, html.format(symbol=charlist[i]), LAYOUT_INLINE, None)
         except ValueError:
             return
 
-    def get_html(self) -> str:
-        bg_color = self.view.style()["accent"]
+
+    def get_html(self, error=False) -> str:
+        if error:
+            bg_color = self.view.style()["redish"]
+        else:
+            bg_color = self.view.style()["accent"]
         fg_color = self.view.style()["background"]
-        return """<body style="padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};"><div>{{counter}}</div></body>""".format(background=bg_color, color=fg_color)
+        return """<body style="padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};"><div>{{symbol}}</div></body>""".format(background=bg_color, color=fg_color)
 
 class ListenForCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, forward: bool, extend: bool=False, single: bool=False) -> None:
@@ -122,9 +128,9 @@ class ListenForCharacterCommand(FindNextCharacterBaseCommand):
         self.view.settings().set(key="waiting_for_char", value=True)
         if single:
             ready_to_search = True
-            self.view.show_popup(self.get_html().format(counter='_'))
+            self.view.show_popup(self.get_html().format(symbol='_'),location=self.view.sel()[-1].b)
         else:
-            self.view.show_popup(self.get_html().format(counter='__'))
+            self.view.show_popup(self.get_html().format(symbol='__'),location=self.view.sel()[-1].b)
             ready_to_search = False
 
         global char_forward_tuple
@@ -186,7 +192,7 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
             self.view.settings().set(key="waiting_for_char", value=False)
         else:
             ready_to_search = True
-            self.view.show_popup(self.get_html().format(counter=character+'_'))
+            self.view.show_popup(self.get_html().format(symbol=character+'_'),location=self.view.sel()[-1].b)
             char_forward_tuple = character, forward, extend
 
 
