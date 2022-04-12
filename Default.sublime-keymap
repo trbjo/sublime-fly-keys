@@ -1002,7 +1002,6 @@
 { "keys": ["shift+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 
 { "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
-{ "keys": ["enter"], "command": "find_next_character", "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
 
 
 { "keys": ["ctrl+enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":
