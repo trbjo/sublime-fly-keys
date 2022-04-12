@@ -108,6 +108,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     matches.append(reg)
                     view_add_phantom(view_id, "Sneak", reg, html.format(counter=charlist[i]), LAYOUT_INLINE, None)
         except ValueError:
+            self.view.hide_popup()
             return
 
     def get_html(self) -> str:
@@ -115,11 +116,18 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         fg_color = self.view.style()["background"]
         return """<body style="padding: 0 2px 0 1px; margin: 0; border-radius:2px;background-color:{background};color:{color};"><div>{{counter}}</div></body>""".format(background=bg_color, color=fg_color)
 
-class StoreCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, forward: bool, character: str='', extend: bool=False) -> None:
+class ListenForCharacterCommand(FindNextCharacterBaseCommand):
+    def run(self, _, forward: bool, extend: bool=False, single: bool=False) -> None:
+        global ready_to_search
         self.view.settings().set(key="waiting_for_char", value=True)
+        if single:
+            ready_to_search = True
+            self.view.show_popup(self.get_html().format(counter='_'))
+        else:
+            self.view.show_popup(self.get_html().format(counter='__'))
+
         global char_forward_tuple
-        char_forward_tuple = (character, forward, extend)
+        char_forward_tuple = ('', forward, extend)
 
 class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, **kwargs: bool) -> None:
@@ -160,20 +168,25 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         view.show(sels[0], True)
         return
 
+ready_to_search: bool = False
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, **kwargs: str) -> None:
-        self.view.settings().set(key="has_stored_search", value=True)
-        self.view.settings().set(key="sneak_override_find_keybinding", value=True)
-        self.view.settings().set(key="waiting_for_char", value=False)
-        if bool(kwargs):
-            mychar = kwargs['character']
-        else:
-            mychar = ''
+    def run(self, _, character: str) -> None:
         global char_forward_tuple
-        character, forward, extend = char_forward_tuple
-        search_string: str = character + mychar
-        char_forward_tuple = (search_string, forward, extend)
-        self.execute(forward, search_string, extend)
+        global ready_to_search
+        stored_char, forward, extend = char_forward_tuple
+
+        if ready_to_search:
+            ready_to_search = False
+            search_string = stored_char+character
+            char_forward_tuple = (search_string, forward, extend)
+            self.execute(forward, search_string, extend)
+            self.view.settings().set(key="has_stored_search", value=True)
+            self.view.settings().set(key="sneak_override_find_keybinding", value=True)
+            self.view.settings().set(key="waiting_for_char", value=False)
+        else:
+            ready_to_search = True
+            self.view.show_popup(self.get_html().format(counter=character+'_'))
+            char_forward_tuple = character, forward, extend
 
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
