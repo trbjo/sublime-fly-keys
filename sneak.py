@@ -11,6 +11,7 @@ charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def execute(self, forward: bool, search_string: str, extend: bool) -> None:
+        self.view.hide_popup()
         view = self.view
         global matches
         matches = []
@@ -108,7 +109,6 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                     matches.append(reg)
                     view_add_phantom(view_id, "Sneak", reg, html.format(counter=charlist[i]), LAYOUT_INLINE, None)
         except ValueError:
-            self.view.hide_popup()
             return
 
     def get_html(self) -> str:
