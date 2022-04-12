@@ -60,7 +60,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                         regs_to_add.append(Region(region.a, pt -1 + offset))
 
         except ValueError:
-            self.view.show_popup(self.get_html(error=True).format(symbol=search_string not forward else search_string[::-1]),location=self.view.sel()[-1].b)
+            self.view.show_popup(self.get_html(error=True).format(symbol=search_string if forward else search_string[::-1]),location=self.view.sel()[-1].b)
             return
 
         for reg in regs_to_subtract:
