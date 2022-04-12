@@ -38,12 +38,12 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                         else:
                             regs_to_subtract.append(Region(region.b, pt))
             else:
-                char = search_string[::-1]
-                offset = 1 if len(char) == 1 else 0
+                search_string = search_string[::-1]
+                offset = 1 if len(search_string) == 1 else 0
                 last_pt = view.sel()[-1].b
                 mybuf = self.view.substr(Region(0, last_pt-1))[::-1]
                 for region in view.sel():
-                    pt: int = last_pt - mybuf.index(char, last_pt - region.b) - 2
+                    pt: int = last_pt - mybuf.index(search_string, last_pt - region.b) - 2
                     if region.a == region.b:
                         if extend:
                             regs_to_add.append(sublime.Region(region.a, pt -1 + offset))
@@ -60,7 +60,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                         regs_to_add.append(Region(region.a, pt -1 + offset))
 
         except ValueError:
-            self.view.show_popup(self.get_html(error=True).format(symbol=search_string),location=self.view.sel()[-1].b)
+            self.view.show_popup(self.get_html(error=True).format(symbol=search_string not forward else search_string[::-1]),location=self.view.sel()[-1].b)
             return
 
         for reg in regs_to_subtract:
