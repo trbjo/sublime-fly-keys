@@ -589,7 +589,7 @@
      ]
 },
 
-{ "keys": ["N"], "command": "chain",
+{ "keys": [" ", "n"], "command": "chain",
         "args": {
             "commands": [
                 {"command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true }},
@@ -601,7 +601,7 @@
          ]
     },
 
-{ "keys": ["N"], "command": "chain",
+{ "keys": [" ", "n"], "command": "chain",
         "args": {
             "commands": [
                 {"command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": false }},
