@@ -8,6 +8,7 @@ from typing import List, Tuple, Union
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 matches : List[Region] = []
 charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+ready_to_search: bool = False
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def execute(self, forward: bool, search_string: str, extend: bool) -> None:
@@ -175,7 +176,6 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         view.show(sels[0], True)
         return
 
-ready_to_search: bool = False
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, character: str) -> None:
         global char_forward_tuple
