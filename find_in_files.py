@@ -3,7 +3,7 @@ import sublime
 from sublime_plugin import TextCommand, EventListener
 
 from typing import Union
-from os import path
+from os import path, getenv
 import re
 
 class SetReadOnly(EventListener):
@@ -47,8 +47,9 @@ class FindInFilesGotoCommand(TextCommand):
                 line_text = view.substr(line)
                 match = re.match(r"(.+):$", line_text)
                 if match:
-                    if path.exists(match.group(1)):
-                        return match.group(1)
+                    normalized_path = match.group(1).replace('~', getenv("HOME"))
+                    if path.exists(normalized_path):
+                        return normalized_path
                 line = view.line(line.begin() - 1)
         return None
 
