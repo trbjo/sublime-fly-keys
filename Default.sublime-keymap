@@ -888,6 +888,13 @@
 },
 
 
+{"keys": ["7"], "command": "revert_hunk", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["7"], "command": "revert_modification", "context": [{"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }, {"key": "setting.command_mode"}, ] },
+{"keys": ["8"], "command": "next_modification", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+8"], "command": "prev_modification", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["9"], "command": "toggle_inline_diff", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["0"], "command": "git_add_selected_hunk", "context": [{"key": "setting.command_mode"}, ] },
+
 {"keys": [" ", "s"],     "command": "goto_symbol_in_project", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 {"keys": [" ", "enter"], "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 {"keys": [" ", "u"],     "command": "show_overlay", "args": {"overlay": "command_palette"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
