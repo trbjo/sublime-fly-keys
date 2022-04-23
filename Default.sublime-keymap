@@ -1016,16 +1016,16 @@
 //////////////////// SEARCH AND REPLACE /////////////
 /////////////////////////////////////////////////////
 
-{ "keys": ["1"], "command": "go_to_nth_match", "args": {"number": 1}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["2"], "command": "go_to_nth_match", "args": {"number": 2}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["3"], "command": "go_to_nth_match", "args": {"number": 3}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["4"], "command": "go_to_nth_match", "args": {"number": 4}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["5"], "command": "go_to_nth_match", "args": {"number": 5}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["6"], "command": "go_to_nth_match", "args": {"number": 6}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["7"], "command": "go_to_nth_match", "args": {"number": 7}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["8"], "command": "go_to_nth_match", "args": {"number": 8}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["9"], "command": "go_to_nth_match", "args": {"number": 9}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
-{ "keys": ["0"], "command": "go_to_nth_match", "args": {"number": 10}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["a"], "command": "go_to_nth_match", "args": {"number": 1}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["o"], "command": "go_to_nth_match", "args": {"number": 2}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["e"], "command": "go_to_nth_match", "args": {"number": 3}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["u"], "command": "go_to_nth_match", "args": {"number": 4}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["i"], "command": "go_to_nth_match", "args": {"number": 5}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["d"], "command": "go_to_nth_match", "args": {"number": 6}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["h"], "command": "go_to_nth_match", "args": {"number": 7}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["t"], "command": "go_to_nth_match", "args": {"number": 8}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["n"], "command": "go_to_nth_match", "args": {"number": 9}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
+{ "keys": ["s"], "command": "go_to_nth_match", "args": {"number": 10}, "context": [{ "key": "setting.command_mode"}, {"key": "setting.has_stored_search"}] },
 
 
 

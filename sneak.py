@@ -7,7 +7,7 @@ from typing import List, Tuple, Union
 # tuple of (search_string: str, forward: bool, extend: bool)
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
 matches : List[Region] = []
-charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+charlist = ['a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's']
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
     def execute(self, forward: bool, search_string: str, extend: bool) -> None:
