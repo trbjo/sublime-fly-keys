@@ -60,7 +60,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                         regs_to_add.append(Region(region.a, pt -1 + offset))
 
         except ValueError:
-            self.view.show_popup(self.get_html(error=True).format(symbol=search_string if forward else search_string[::-1]),location=self.view.sel()[-1].b)
+            self.view.show_popup(self.get_html(error=True).format(symbol=search_string+'❯' if forward else '❮'+search_string[::-1]),location=self.view.sel()[-1].b)
             return
 
         for reg in regs_to_subtract:
@@ -126,10 +126,12 @@ class ListenForCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, forward: bool, extend: bool=False, single: bool=False) -> None:
         self.view.settings().set(key="waiting_for_char", value=True)
         if single:
+            arrow: str = '_❯' if forward else ' ❮_'
             self.view.settings().set(key="sneak_ready_to_search", value=True)
-            self.view.show_popup(self.get_html().format(symbol='_'),location=self.view.sel()[-1].b)
+            self.view.show_popup(self.get_html().format(symbol=arrow),location=self.view.sel()[-1].b)
         else:
-            self.view.show_popup(self.get_html().format(symbol='__'),location=self.view.sel()[-1].b)
+            arrow: str = '__❯' if forward else ' ❮__'
+            self.view.show_popup(self.get_html().format(symbol=arrow),location=self.view.sel()[-1].b)
             self.view.settings().set(key="sneak_ready_to_search", value=False)
 
         global char_forward_tuple
@@ -190,7 +192,8 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
             self.view.settings().set(key="waiting_for_char", value=False)
         else:
             self.view.settings().set(key="sneak_ready_to_search", value=True)
-            self.view.show_popup(self.get_html().format(symbol=character+'_'),location=self.view.sel()[-1].b)
+            arrow: str = f'{character}_❯' if forward else f'❮{character}_'
+            self.view.show_popup(self.get_html().format(symbol=arrow),location=self.view.sel()[-1].b)
             char_forward_tuple = character, forward, extend
 
 
