@@ -924,6 +924,7 @@
 {"keys": ["enter"], "command": "select", "context": [{"key": "control", "operand": "sidebar_tree"}] },
 {"keys": ["enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context": [
     {"key": "setting.command_mode", "operator": "equal", "operand": false },
+    {"key": "panel_has_focus", "operator": "equal", "operand": false },
      ] },
 
 { "keys": ["enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line in Braces.sublime-macro"}, "context":
@@ -945,7 +946,7 @@
 },
 
 
-{ "keys": ["enter"], "command": "find_next", "context": [{"key": "panel_has_focus"}] },
+{ "keys": ["enter"], "command": "find_next", "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
 { "keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
