@@ -714,7 +714,7 @@
 {"keys": ["escape"], "command": "chain",
     "args": {
         "commands": [
-            {"command": "set_setting", "args": {"setting": "waiting_for_char", "value": false }},
+            {"command": "set_setting", "args": {"setting": "needs_char", "value": false }},
             {"command": "show_at_center" },
         ]
     },
@@ -809,6 +809,7 @@
 /////////////////// Insert Mode: /////////////////////
 /////////////////////////////////////////////////////
 
+{"keys": ["ctrl+h"], "command": "insert_single_char", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["H"], "command": "delete_rest_of_line_and_insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.command_mode"}, ] },
@@ -1002,7 +1003,7 @@
 { "keys": ["enter"],       "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 { "keys": ["shift+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 
-{ "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.waiting_for_char"}, {"key": "setting.command_mode"} ] },
+{ "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.needs_char"}, {"key": "setting.command_mode"} ] },
 
 
 { "keys": ["ctrl+enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context":

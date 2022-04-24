@@ -1,4 +1,4 @@
-from sublime import LAYOUT_INLINE, View, Region, Selection, DRAW_NO_OUTLINE
+from sublime import LAYOUT_INLINE, View, Region, Selection, DRAW_NO_OUTLINE, Edit
 import sublime
 from sublime_api import view_add_phantom, view_add_regions
 import sublime_plugin
@@ -124,7 +124,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
 
 class ListenForCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, _, forward: bool, extend: bool=False, single: bool=False) -> None:
-        self.view.settings().set(key="waiting_for_char", value=True)
+        self.view.settings().set(key="needs_char", value=True)
         if single:
             arrow: str = '_❯' if forward else ' ❮_'
             self.view.settings().set(key="sneak_ready_to_search", value=True)
@@ -176,8 +176,24 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         view.show(sels[0], True)
         return
 
+class InsertSingleChar(sublime_plugin.TextCommand):
+    def run(self, _):
+        self.view.settings().set(key="insert_single_char", value=True)
+        self.view.settings().set(key="needs_char", value=True)
+
+
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, character: str) -> None:
+    def run(self, edit: Edit, character: str) -> None:
+        if self.view.settings().get("insert_single_char", False):
+            self.view.settings().set("insert_single_char", False)
+            self.view.settings().set(key="needs_char", value=False)
+            for reg in reversed(self.view.sel()):
+                if reg.empty():
+                    self.view.insert(edit, reg.a, character)
+                else:
+                    self.view.replace(edit, reg, character)
+            return
+
         global char_forward_tuple
         sneak_ready_to_search: bool = self.view.settings().get(key="sneak_ready_to_search", default=False)
         stored_char, forward, extend = char_forward_tuple
@@ -189,7 +205,7 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
             self.execute(forward, search_string, extend)
             self.view.settings().set(key="has_stored_search", value=True)
             self.view.settings().set(key="sneak_override_find_keybinding", value=True)
-            self.view.settings().set(key="waiting_for_char", value=False)
+            self.view.settings().set(key="needs_char", value=False)
         else:
             self.view.settings().set(key="sneak_ready_to_search", value=True)
             arrow: str = f'{character}_❯' if forward else f'❮{character}_'
@@ -205,7 +221,7 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         view.erase_phantoms("Sneak")
         view.erase_regions("Sneak")
         view.erase_regions("Sneaks")
-        view.settings().set(key="waiting_for_char", value=False)
+        view.settings().set(key="needs_char", value=False)
         view.settings().set(key="has_stored_search", value=False)
 
     def on_text_command(self, view: View, command_name: str, _):
@@ -215,4 +231,4 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         if (command_name != "find_next_character" and command_name != "repeat_find_next_character"
         and command_name != "store_character" and command_name != "revert_selection"):
             view.settings().set(key="has_stored_search", value=False)
-            view.settings().set(key="waiting_for_char", value=False)
+            view.settings().set(key="needs_char", value=False)
