@@ -16,7 +16,7 @@ class CommandModeCommand(WindowCommand):
         if view is None:
             return
         view.settings().set(key="block_caret", value=True)
-        view.settings().set(key="waiting_for_char", value=False)
+        view.settings().set(key="needs_char", value=False)
         view.settings().set(key="command_mode", value=True)
         if view.element() is None:
             if view not in interesting_regions or not interesting_regions[view]:

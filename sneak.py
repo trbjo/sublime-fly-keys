@@ -179,12 +179,16 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
 class InsertSingleChar(sublime_plugin.TextCommand):
     def run(self, _):
         self.view.settings().set(key="insert_single_char", value=True)
+        self.view.settings().set(key="block_caret", value=False)
+        self.view.settings().set(key="command_mode", value=False)
         self.view.settings().set(key="needs_char", value=True)
 
 
 class FindNextCharacterCommand(FindNextCharacterBaseCommand):
     def run(self, edit: Edit, character: str) -> None:
         if self.view.settings().get("insert_single_char", False):
+            self.view.settings().set(key="command_mode", value=True)
+            self.view.settings().set(key="block_caret", value=True)
             self.view.settings().set("insert_single_char", False)
             self.view.settings().set(key="needs_char", value=False)
             for reg in reversed(self.view.sel()):
