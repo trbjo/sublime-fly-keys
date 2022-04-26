@@ -554,10 +554,23 @@
         "args": {
             "commands": [
                 {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+                {"command": "find_all_under"},
+            ]},
+        "context": [
+            {"key": "num_selections", "operator": "equal", "operand": 1 },
+            { "key": "setting.command_mode" },
+     ]
+},
+
+{ "keys": ["ctrl+shift+n"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
                 {"command": "smart_find_word"},
                 {"command": "find_all_under"},
             ]},
         "context": [
+            {"key": "selection_empty", "operator": "equal", "operand": true},
             {"key": "num_selections", "operator": "equal", "operand": 1 },
             { "key": "setting.command_mode" },
      ]
