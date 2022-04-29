@@ -255,12 +255,26 @@
 {"keys": ["a"], "command": "clear_selection", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
 
 
+{ "keys": ["ctrl+a"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move_to", "args": {"to": "hardbol"}},
+            {"command": "move_to", "args": {"to": "bol"}},
+            {"command": "insert_mode"},
+        ]
+    },
+    "context": [
+        { "key": "setting.command_mode" },
+    ]
+},
+
 ////////////////// End of Line/Forward by paragraph:
 {"keys": ["s"], "command": "navigate_by_paragraph_forward", "context":
 [
     {"key": "setting.command_mode"},
 ]
 },
+
 {"keys": ["s"], "command": "move_to", "args": {"to": "eol", "extend": false}, "context":
 [
     {"key": "setting.command_mode"},
@@ -268,6 +282,18 @@
     {"key": "last_command", "operator": "not_equal", "operand": "navigate_by_paragraph_forward" },
     {"key": "last_command", "operator": "not_equal", "operand": "navigate_by_paragraph_backward" },
 ]
+},
+
+{ "keys": ["ctrl+s"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move_to", "args": {"to": "hardeol"}},
+            {"command": "insert_mode"},
+        ]
+    },
+    "context": [
+        { "key": "setting.command_mode" },
+    ]
 },
 
 // clear selection right
@@ -282,8 +308,7 @@
         "commands": [
             {"command": "move_to", "args": {"to": "hardeol"}},
             {"command": "insert", "args": {"characters": "\n"}},
-            {"command": "set_setting", "args": {"setting": "block_caret", "value": false }},
-            {"command": "set_setting", "args": {"setting": "command_mode", "value": false }},
+            {"command": "insert_mode"},
         ]
     },
     "context": [
@@ -297,8 +322,7 @@
             {"command": "move_to", "args": {"to": "hardbol"}},
             {"command": "move", "args": {"by": "characters", "forward": false}},
             {"command": "insert", "args": {"characters": "\n"}},
-            {"command": "set_setting", "args": {"setting": "block_caret", "value": false }},
-            {"command": "set_setting", "args": {"setting": "command_mode", "value": false }},
+            {"command": "insert_mode"},
         ]
     },
     "context": [
@@ -314,8 +338,7 @@
             {"command": "move_to", "args": {"to": "hardbol"}},
             {"command": "insert", "args": {"characters": "\n"}},
             {"command": "move", "args": {"by": "characters", "forward": false}},
-            {"command": "set_setting", "args": {"setting": "block_caret", "value": false }},
-            {"command": "set_setting", "args": {"setting": "command_mode", "value": false }},
+            {"command": "insert_mode"},
         ]
     },
     "context": [
@@ -663,8 +686,8 @@
         ]
 },
 
-{"keys": ["ctrl+s"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+a"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+// {"keys": ["ctrl+s"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+// { "keys": ["ctrl+a"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}]},
 
 
 {"keys": ["ctrl+w"], "command": "select_lines", "args": {"forward": false} , "context": [{"key": "setting.command_mode"}, ] },
