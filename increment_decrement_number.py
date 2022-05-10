@@ -1,4 +1,4 @@
-from sublime import Edit, Region
+from sublime import Edit, Region, set_timeout_async
 import sublime_plugin
 
 import re
@@ -6,6 +6,9 @@ import re
 class NumberCommand(sublime_plugin.TextCommand):
     def op(self, value: int) -> int:
           return value
+
+    def save(self):
+        self.view.run_command('save')
 
     def run(self, edit: Edit) -> None:
         buf = self.view
@@ -70,11 +73,15 @@ class NumberCommand(sublime_plugin.TextCommand):
             except ValueError:
                     pass
 
+        if buf.settings().get(key="save_after_number_change", default=False):
+            set_timeout_async(self.save, 0)
+
+
 
 class IncrementCommand(NumberCommand):
     def op(self, value: int) -> int:
-          return value + 1
+        return value + 1
 
 class DecrementCommand(NumberCommand):
     def op(self, value: int) -> int:
-          return value - 1
+        return value - 1

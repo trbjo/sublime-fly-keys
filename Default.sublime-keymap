@@ -536,6 +536,10 @@
 
 // expand selection to paragraph
 
+{"keys": ["d"], "command": "extended_expand_selection_to_paragraph_forward", "context": [
+    {"key": "setting.command_mode"},
+] },
+
 // this command is intended to be run after a search to mark the whole paragraph
 { "keys": ["d"], "command": "chain",
         "args": {
@@ -544,15 +548,10 @@
                 {"command": "extended_expand_selection_to_paragraph_forward"},
             ]},
         "context": [
-            { "key": "setting.command_mode" },
+            {"key": "setting.command_mode" },
+            {"key": "last_command", "operator": "equal", "operand": "find_next" },
      ]
 },
-
-{"keys": ["d"], "command": "extended_expand_selection_to_paragraph_forward", "context": [
-    {"key": "setting.command_mode"},
-    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
-    {"key": "last_command", "operator": "not_equal", "operand": "" },
-] },
 
 {"keys": ["D"], "command": "extended_expand_selection_to_paragraph_backward", "context": [{"key": "setting.command_mode"},
  ] },

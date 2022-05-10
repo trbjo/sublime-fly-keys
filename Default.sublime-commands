@@ -1,0 +1,12 @@
+[
+    {
+      "caption": "Enable Save After Number Change",
+      "command": "enable_save_after_number_change"
+    },
+
+    {
+      "caption": "Disable Save After Number Change",
+      "command": "disable_save_after_number_change"
+    },
+
+]
