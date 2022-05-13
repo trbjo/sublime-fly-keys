@@ -562,10 +562,6 @@
 ////////////////////////////////////////////////////
 
 
-{"keys": [" ", "n"], "command": "undo_find_under_expand", "context": [
-    {"key": "setting.command_mode"},
-] },
-
 {"keys": [" ", "n"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
     {"key": "setting.command_mode"},
     {"key": "num_selections", "operator": "equal", "operand": 1 },
@@ -625,17 +621,9 @@
      ]
 },
 
-{ "keys": ["ctrl+n"], "command": "chain",
-        "args": {
-            "commands": [
-                {"command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true }},
-            ]},
-            "context": [
-            {"key": "selection_empty", "operator": "equal", "operand": true},
-            {"key": "setting.command_mode", "operator": "equal", "operand": true },
-            {"key": "last_command", "operator": "not_equal", "operand": "find_under_expand" },
-         ]
-    },
+{"keys": ["ctrl+n"], "command": "undo_find_under_expand", "context": [
+    {"key": "setting.command_mode"},
+] },
 
 { "keys": ["ctrl+n"], "command": "chain",
         "args": {
