@@ -522,6 +522,7 @@
   ] },
 
 {"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },
+
 {"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "tag"}, "context": [{"key": "setting.command_mode"}, {"key": "selector", "operator": "equal", "operand": "meta.tag, text.xml" }, ] },
 
 
@@ -561,11 +562,11 @@
 ////////////////////////////////////////////////////
 
 
-{"keys": ["ctrl+n"], "command": "undo_find_under_expand", "context": [
+{"keys": [" ", "n"], "command": "undo_find_under_expand", "context": [
     {"key": "setting.command_mode"},
 ] },
 
-{"keys": ["ctrl+n"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
+{"keys": [" ", "n"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
     {"key": "setting.command_mode"},
     {"key": "num_selections", "operator": "equal", "operand": 1 },
 ] },
@@ -624,7 +625,7 @@
      ]
 },
 
-{ "keys": [" ", "n"], "command": "chain",
+{ "keys": ["ctrl+n"], "command": "chain",
         "args": {
             "commands": [
                 {"command": "move", "args": {"by": "stops", "word_end": true, "empty_line": true, "separators": "", "forward": true, "extend": true }},
@@ -636,7 +637,7 @@
          ]
     },
 
-{ "keys": [" ", "n"], "command": "chain",
+{ "keys": ["ctrl+n"], "command": "chain",
         "args": {
             "commands": [
                 {"command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": true, "separators": "", "forward": false, "extend": false }},
@@ -685,8 +686,21 @@
         ]
 },
 
-// {"keys": ["ctrl+s"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}]},
-// { "keys": ["ctrl+a"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["W"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "expand_selection", "args": {"to": "indentation"}},
+                {"command": "split_selection_into_lines"},
+                {"command": "move_to", "args": {"to": "hardbol"}},
+                {"command": "move_to", "args": {"to": "bol"}},
+            ]},
+        "context": [
+            { "key": "setting.command_mode" },
+        ]
+},
+
+{"keys": ["S"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+{"keys": ["A"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}]},
 
 
 {"keys": ["ctrl+w"], "command": "select_lines", "args": {"forward": false} , "context": [{"key": "setting.command_mode"}, ] },
