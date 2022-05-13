@@ -674,15 +674,7 @@
         ]
 },
 
-{ "keys": ["W"], "command": "chain",
-        "args": {
-            "commands": [
-                {"command": "expand_selection", "args": {"to": "indentation"}},
-                {"command": "split_selection_into_lines"},
-                {"command": "move_to", "args": {"to": "hardbol"}},
-                {"command": "move_to", "args": {"to": "bol"}},
-            ]},
-        "context": [
+{"keys": ["W"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/add_cursors_to_indentatation.sublime-macro"}, "context": [
             { "key": "setting.command_mode" },
         ]
 },
