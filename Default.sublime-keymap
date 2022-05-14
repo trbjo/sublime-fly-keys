@@ -718,6 +718,9 @@
 {"keys": ["shift"], "command": "revert_selection", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true } ] },
 
 {"keys": ["ctrl"], "command": "show_overlay", "args": {"overlay": "command_palette"} },
+
+{"keys": ["`"], "command": "next_view_in_stack" },
+{"keys": ["`"], "command": "insert", "args": {"characters": "`"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 {"keys": ["`"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{ "key": "auto_complete_visible" },{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 
@@ -879,9 +882,6 @@
             {"command": "hide_tabs"},
         ]
     },
-    "context": [
-        {"key": "setting.command_mode"},
-    ]
 },
 
 {"keys": ["5"], "command": "insert", "args": {"characters": "5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
@@ -893,9 +893,6 @@
             {"command": "show_tabs"},
         ]
     },
-    "context": [
-        {"key": "setting.command_mode"},
-    ]
 },
 
 
