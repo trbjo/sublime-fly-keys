@@ -29,7 +29,13 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
             while line_contents[cursor_begin].isspace() and cursor_begin < len(line_contents):
                 cursor_begin+=1
 
-            cursor_end: int = cursor_begin
+            if reg.empty():
+                cursor_end: int = cursor_begin
+            else:
+                cursor_end: int = reg.b - line_indices.a
+                if reg.b != line_indices.b - 1:
+                    cursor_end+=1
+
             while not line_contents[cursor_end].isspace() and cursor_end < len(line_contents):
                 cursor_end+=1
 
@@ -42,7 +48,9 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
             left_abs_pos = line_indices.a + cursor_begin - left_offset
             right_abs_pos = line_indices.a + cursor_end
 
-            sel.subtract(reg)
+            if reg.empty():
+                sel.subtract(reg)
+
             sel.add(Region(left_abs_pos, right_abs_pos))
 
 
