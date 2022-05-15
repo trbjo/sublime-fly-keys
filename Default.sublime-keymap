@@ -374,6 +374,7 @@
 ////////////////////////////////////////////////////////////////
 
 {"keys": ["e"], "command": "right_delete", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+e"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_rest_of_line.sublime-macro"}, "context": [ {"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+backspace"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_subword_backward.sublime-macro"}, "context": [{ "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }, {"key": "setting.command_mode"}, ] },
 
 {"keys": [","], "command": "delete_word", "args": { "forward": false }, "context": [{"key": "setting.command_mode"}, ] },
