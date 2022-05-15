@@ -21,19 +21,24 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
 
             cursor_begin: int = reg.a - line_indices.a
 
-            # handle situation where cursor is at the end of the line:
-            if reg.b == line_indices.b - 1:
-                cursor_begin-= 1
+            if reg.a == reg.b or not line_contents[cursor_begin].isspace():
+                # handle situation where cursor is at the end of the line:
+                if reg.b == line_indices.b - 1:
+                    cursor_begin-= 1
 
-            # we find out if the cursor is already at a word
-            while line_contents[cursor_begin].isspace() and cursor_begin < len(line_contents):
-                cursor_begin+=1
+                # we find out if the cursor is already at a word
+                while line_contents[cursor_begin].isspace() and cursor_begin < len(line_contents):
+                    cursor_begin+=1
 
             if reg.empty():
                 cursor_end: int = cursor_begin
             else:
                 cursor_end: int = reg.b - line_indices.a
+
                 if reg.b != line_indices.b - 1:
+                    cursor_end+=1
+
+                while line_contents[cursor_end].isspace() and cursor_end < len(line_contents) -1:
                     cursor_end+=1
 
             while not line_contents[cursor_end].isspace() and cursor_end < len(line_contents):
