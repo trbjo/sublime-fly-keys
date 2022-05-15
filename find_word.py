@@ -12,13 +12,12 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
         sel = buf.sel()
-        positions: List[int] = []
         for reg in sel:
             line_indices: Region = buf.full_line(reg)
             line_contents = buf.substr(line_indices)
 
             if len(line_contents) <= 1:
-                return
+                continue
 
             cursor_begin: int = reg.a - line_indices.a
 
