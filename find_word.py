@@ -45,10 +45,13 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
                 cursor_end+=1
 
             left_offset: int = 0
-            for i in range(cursor_begin):
+            for i in range(cursor_begin+1):
                 if line_contents[cursor_begin::-1][i].isspace():
                     left_offset = i - 1
                     break
+            else:
+                # match until beginning of line:
+                left_offset = i
 
             left_abs_pos = line_indices.a + cursor_begin - left_offset
             right_abs_pos = line_indices.a + cursor_end
