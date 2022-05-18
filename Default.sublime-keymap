@@ -683,13 +683,6 @@
 // {"keys": ["/"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, ] },
 // {"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["2"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["2"], "command": "lsp_symbol_definition" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
-{"keys": ["2"], "command": "expand_selection_to_sentence", "context": [
-    { "key": "selector", "operator": "equal", "operand": "(text.xml, text.html.markdown) - string - comment", "match_all": true },
-    {"key": "setting.command_mode"}
-] },
-
 {"keys": ["@"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["@"], "command": "lsp_symbol_references" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 {"keys": ["ctrl+shift+f"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
@@ -831,6 +824,8 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["ctrl+h"], "command": "insert_single_char", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+shift+h"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/replace_single_char.sublime-macro"}, "context": [ {"key": "setting.command_mode"}, ] },
+
 {"keys": ["h"], "command": "insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["H"], "command": "delete_rest_of_line_and_insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.command_mode"}, ] },
@@ -857,35 +852,49 @@
 /////////////////// THe number row is not used in command mode, so we can use it for all sorts off cool stuff //////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{"keys": ["#"], "command": "close"},
-{"keys": ["#"], "command": "insert", "args": {"characters": "#"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
-{"keys": ["3"], "command": "save", "args": { "async": true }, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["3"], "command": "lsp_save", "context": [{"key": "setting.lsp_active"}, {"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "textDocumentSync.willSave | textDocumentSync.willSaveWaitUntil | codeActionProvider.codeActionKinds | documentFormattingProvider | documentRangeFormattingProvider"} ] },
-{"keys": ["3"], "command": "prompt_git", "context": [{"key": "selector", "operator": "equal", "operand": "text.git.commit"}, {"key": "setting.command_mode"}, ] },
-
-{"keys": ["5"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "close_pane"},
-            {"command": "hide_tabs"},
-        ]
-    },
+{"keys": ["1"], "command": "build", "args": {"direction": "down"}, "context":
+    [
+        {"key": "setting.command_mode"},
+    ]
 },
 
+
+{"keys": ["!"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["!"], "command": "lsp_symbol_definition" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
+{"keys": ["!"], "command": "expand_selection_to_sentence", "context": [
+    { "key": "selector", "operator": "equal", "operand": "(text.xml, text.html.markdown) - string - comment", "match_all": true },
+    {"key": "setting.command_mode"}
+] },
+
+
+{"keys": ["2"], "command": "save", "args": { "async": true }, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["2"], "command": "lsp_save", "context": [{"key": "setting.lsp_active"}, {"key": "setting.command_mode"}, {"key": "lsp.session_with_capability", "operator": "equal", "operand": "textDocumentSync.willSave | textDocumentSync.willSaveWaitUntil | codeActionProvider.codeActionKinds | documentFormattingProvider | documentRangeFormattingProvider"} ] },
+{"keys": ["2"], "command": "prompt_git", "context": [{"key": "selector", "operator": "equal", "operand": "text.git.commit"}, {"key": "setting.command_mode"}, ] },
+
+{"keys": ["@"], "command": "close"},
+{"keys": ["@"], "command": "insert", "args": {"characters": "#"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
+{"keys": ["3"], "command": "next_bookmark", "args": {"direction": "down"}, "context":
+    [
+        {"key": "setting.command_mode"},
+    ]
+},
+
+{"keys": ["#"], "command": "prev_bookmark", "args": {"direction": "down"}, "context":
+    [
+        {"key": "setting.command_mode"},
+    ]
+},
+
+{"keys": ["4"], "command": "toggle_bookmark", "args": {"direction": "down"}, "context":
+    [
+        {"key": "setting.command_mode"},
+    ]
+},
+{"keys": ["5"], "command": "close_pane" },
 {"keys": ["5"], "command": "insert", "args": {"characters": "5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
-{"keys": ["6"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "new_pane", "args": {"move": true}},
-            {"command": "show_tabs"},
-        ]
-    },
-},
-
-
-
+{"keys": ["6"], "command": "new_pane", "args": {"move": true}},
 
 {"keys": ["6"], "command": "insert", "args": {"characters": "6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
