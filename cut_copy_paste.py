@@ -234,7 +234,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 insert_string = ''
                 initial_indent = None
                 for line in clips:
-                    deindented_line = line.lstrip().rstrip()
+                    deindented_line = line.lstrip()
                     cur_indent = len(line) - len(deindented_line)
                     if initial_indent == None:
                         initial_indent = cur_indent
