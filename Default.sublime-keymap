@@ -982,15 +982,15 @@
 { "keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
-{ "keys": ["m"], "command": "listen_for_character", "args": {"forward": true },                 "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+m"],           "command": "listen_for_character", "args": {"forward": true, "single": true },                 "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["M"], "command": "listen_for_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+shift+m"],     "command": "listen_for_character", "args": {"forward": true, "single": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+m"],       "command": "listen_for_character", "args": {"forward": true },                 "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["m"],            "command": "listen_for_character", "args": {"forward": true, "single": true },                 "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+shift+m"], "command": "listen_for_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["M"],            "command": "listen_for_character", "args": {"forward": true, "single": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
-{ "keys": ["b"], "command": "listen_for_character", "args": {"forward": false },                 "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+b"],           "command": "listen_for_character", "args": {"forward": false, "single": true },                 "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["ctrl+shift+b"],     "command": "listen_for_character", "args": {"forward": false, "single": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["B"], "command": "listen_for_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+b"],       "command": "listen_for_character", "args": {"forward": false },                 "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["b"],            "command": "listen_for_character", "args": {"forward": false, "single": true },                 "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["B"],            "command": "listen_for_character", "args": {"forward": false, "single": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+shift+b"], "command": "listen_for_character", "args": {"forward": false, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 
 {"keys": [" ", "c"], "command": "chain",
     "args": {
