@@ -6,7 +6,7 @@ from typing import List, Tuple, Union
 
 # tuple of (search_string: str, forward: bool, extend: bool)
 char_forward_tuple: Tuple[str, bool, bool] = ('', True, False)
-matches : List[Region] = []
+matches: List[Region] = []
 charlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
 class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
@@ -66,7 +66,7 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         for reg in regs_to_subtract:
             view.sel().subtract(reg)
         view.sel().add_all(regs_to_add)
-        view.show(view.sel()[-1], True)
+        view.show(view.sel()[-1].end(), True)
         view_id = self.view.id()
         try:
             if len(view.sel()) > 1:
@@ -173,7 +173,7 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         else:
             sels.clear()
             sels.add(mymatch.a)
-        view.show(sels[0], True)
+        view.show(sels[0].end(), True)
         return
 
 class InsertSingleChar(sublime_plugin.TextCommand):

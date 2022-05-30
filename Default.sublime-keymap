@@ -505,21 +505,17 @@
 /////////////////// SELECTIONS: /////////////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["f"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+f"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
+// {"keys": ["f"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
+// {"keys": ["ctrl+f"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["f"], "command": "expand_selection_to_string_double",
+{"keys": ["f"], "command": "expand_selection_to_next", "args": {"offset": 0},
     "context": [
     {"key": "setting.command_mode"},
-    {"key": "selector", "operator": "equal", "operand": "string.quoted.double - punctuation.definition.string.begin, meta.string" },
-    {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
+{"keys": ["ctrl+f"], "command": "expand_selection_to_next", "args": {"offset": 1},
 
-{"keys": ["f"], "command": "expand_selection_to_string_single",
     "context": [
     {"key": "setting.command_mode"},
-    {"key": "selector", "operator": "equal", "operand": "string.quoted.single - punctuation.definition.string.begin" },
-    {"key": "last_command", "operator": "not_equal", "operand": "expand_selection_to_string" },
   ] },
 
 {"keys": ["ctrl+d"], "command": "expand_selection", "args": {"to": "indentation"}, "context": [{"key": "setting.command_mode"}, ] },

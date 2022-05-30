@@ -315,7 +315,7 @@ class RevertSelectionCommand(sublime_plugin.TextCommand):
             sel.subtract(reg)
             sel.add(region)
 
-        buf.show(sel[-1], True)
+        buf.show(sel[-1].end(), True)
 
 
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
@@ -324,7 +324,7 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
         reg = buf.sel()[-1]
         buf.sel().clear()
         buf.sel().add(reg)
-        buf.show(reg, True)
+        buf.show(reg.end(), True)
 
 
 class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
@@ -350,7 +350,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
         selection = buf.sel()
 
         if len(selection) == 1:
-            buf.show(selection[0], True)
+            buf.show(selection[0].end(), True)
             return
 
         selected_word = buf.substr(selection[-1])
@@ -360,7 +360,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
         res = buf.find(selected_word, start_pt=max_point)
         if res.begin() != -1:
             selection.subtract(selection[-1])
-            buf.show(selection[-1], True)
+            buf.show(selection[-1].end(), True)
             return
 
         reg = Region(min_point, max_point)
@@ -372,20 +372,20 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
                 # Consider a continue statement here instead.
                 # Depends on what strategy works best
                 selection.subtract(region)
-                buf.show(selection[i-1], True)
+                buf.show(selection[i-1].end(), True)
                 return
             elif region.end() > all_regs[i]:
                 selection.subtract(selection[i-1])
-                buf.show(selection[i-2], True)
+                buf.show(selection[i-2].end(), True)
                 return
             i += 1
 
         selection.subtract(selection[-1])
-        buf.show(selection[-1], True)
+        buf.show(selection[-1].end(), True)
 
 class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         selections = self.view.sel()
         if len(selections) > 1:
             selections.subtract(selections[0])
-            self.view.show(selections[0], True)
+            self.view.show(selections[0].end(), True)
