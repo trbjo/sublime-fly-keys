@@ -75,7 +75,7 @@ class NavigateByParagraphForwardCommand(TextCommand):
         reg = Region(sel_end)
         buf.sel().clear()
         buf.sel().add(reg)
-        buf.show(reg.end(), True)
+        buf.show(reg.b, True)
 
 
 class NavigateByParagraphBackwardCommand(TextCommand):
@@ -89,7 +89,7 @@ class NavigateByParagraphBackwardCommand(TextCommand):
         buf.sel().clear()
         buf.sel().add(reg)
 
-        buf.show(reg.end(), True)
+        buf.show(reg.b, True)
 
 class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
@@ -123,7 +123,7 @@ class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
             regs_dict[sel_begin] = sel_end
 
         buf.sel().add_all(Region(begin,end) for begin,end in regs_dict.items())
-        buf.show(buf.sel()[-1].end(), False)
+        buf.show(buf.sel()[-1].b, False)
 
 
 class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
@@ -160,4 +160,4 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
             regs_dict[sel_begin] = sel_end
 
         buf.sel().add_all(Region(begin, end) for begin,end in regs_dict.items())
-        buf.show(buf.sel()[0].end(), False)
+        buf.show(buf.sel()[0].b, False)
