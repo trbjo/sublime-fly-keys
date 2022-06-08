@@ -418,7 +418,7 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["y"], "command": "undo", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["ctrl+y"], "command": "redo", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+y"], "command": "redo_or_repeat", "context": [{"key": "setting.command_mode"}, ] },
 
 ///////////////////////////////////////////////////
 /////////////////// COMMENT: //////////////////////
