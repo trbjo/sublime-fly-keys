@@ -159,37 +159,6 @@ class DeleteSmartCommand(sublime_plugin.TextCommand):
 
 
 
-class ExpandSelectionToStringCommand(sublime_plugin.TextCommand):
-    def op(self)->str:
-        return ''
-    def run(self, _) -> None:
-        view = self.view
-        for region in view.sel():
-            reg_begin = region.begin() - 1
-            while ((view.substr(reg_begin) not in self.op()) and (reg_begin >= 0)):
-                reg_begin -= 1
-            reg_begin += 1
-            while((view.substr(reg_begin) in string.whitespace) and (reg_begin < view.size())):
-                reg_begin += 1
-
-            reg_end: int = region.end()
-            while((view.substr(reg_end) not in self.op()) and (reg_end < view.size())):
-                reg_end += 1
-            reg_end -= 1
-
-            if(reg_begin != reg_end):
-                view.sel().add(Region(reg_begin, reg_end+1))
-            else:
-                view.sel().add(Region(reg_begin, reg_begin))
-
-class ExpandSelectionToStringDoubleCommand(ExpandSelectionToStringCommand):
-    def op(self) -> str:
-          return '"'
-
-class ExpandSelectionToStringSingleCommand(ExpandSelectionToStringCommand):
-    def op(self) -> str:
-          return "'"
-
 class InsertModeCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
@@ -208,7 +177,7 @@ class InsertModeCommand(sublime_plugin.TextCommand):
 class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
-        if buf.is_read_only() == True:
+        if buf.is_read_only():
             sublime.status_message('Buffer is read only')
             return
 
@@ -315,7 +284,7 @@ class RevertSelectionCommand(sublime_plugin.TextCommand):
             sel.subtract(reg)
             sel.add(region)
 
-        buf.show(sel[-1].end(), True)
+        buf.show(sel[-1].b, True)
 
 
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
@@ -324,7 +293,7 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
         reg = buf.sel()[-1]
         buf.sel().clear()
         buf.sel().add(reg)
-        buf.show(reg.end(), True)
+        buf.show(reg.b, True)
 
 
 class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
@@ -350,7 +319,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
         selection = buf.sel()
 
         if len(selection) == 1:
-            buf.show(selection[0].end(), True)
+            buf.show(selection[0].b, True)
             return
 
         selected_word = buf.substr(selection[-1])
@@ -360,7 +329,7 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
         res = buf.find(selected_word, start_pt=max_point)
         if res.begin() != -1:
             selection.subtract(selection[-1])
-            buf.show(selection[-1].end(), True)
+            buf.show(selection[-1].b, True)
             return
 
         reg = Region(min_point, max_point)
@@ -372,20 +341,20 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
                 # Consider a continue statement here instead.
                 # Depends on what strategy works best
                 selection.subtract(region)
-                buf.show(selection[i-1].end(), True)
+                buf.show(selection[i-1].b, True)
                 return
             elif region.end() > all_regs[i]:
                 selection.subtract(selection[i-1])
-                buf.show(selection[i-2].end(), True)
+                buf.show(selection[i-2].b, True)
                 return
             i += 1
 
         selection.subtract(selection[-1])
-        buf.show(selection[-1].end(), True)
+        buf.show(selection[-1].b, True)
 
 class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         selections = self.view.sel()
         if len(selections) > 1:
             selections.subtract(selections[0])
-            self.view.show(selections[0].end(), True)
+            self.view.show(selections[0].b, True)
