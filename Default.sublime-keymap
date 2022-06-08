@@ -505,15 +505,25 @@
 /////////////////// SELECTIONS: /////////////////////
 /////////////////////////////////////////////////////
 
-// {"keys": ["f"], "command": "expand_selection", "args": {"to": "brackets"}, "context": [{"key": "setting.command_mode"}, ] },
-// {"keys": ["ctrl+f"], "command": "move_to", "args": {"to": "brackets", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
-
-{"keys": ["f"], "command": "expand_selection_to_next", "args": {"offset": 0},
+{"keys": ["f"], "command": "expand_selection_to_next", "args": {"around": false},
     "context": [
     {"key": "setting.command_mode"},
   ] },
-{"keys": ["ctrl+f"], "command": "expand_selection_to_next", "args": {"offset": 1},
 
+
+{"keys": ["ctrl+f"], "command": "expand_selection_to_next", "args": {"from_here": true},
+    "context": [
+    {"key": "setting.command_mode"},
+  ] },
+
+
+{"keys": ["ctrl+shift+f"], "command": "expand_selection_to_next", "args": {"to_here": true},
+    "context": [
+    {"key": "setting.command_mode"},
+  ] },
+
+
+{"keys": ["F"], "command": "expand_selection_to_next", "args": {"around": true},
     "context": [
     {"key": "setting.command_mode"},
   ] },
@@ -681,7 +691,7 @@
 
 {"keys": ["@"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["@"], "command": "lsp_symbol_references" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
-{"keys": ["ctrl+shift+f"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
+// {"keys": ["ctrl+shift+f"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 
 {"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 
