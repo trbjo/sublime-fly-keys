@@ -44,8 +44,9 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             elif index >= 3:
                 chars.append(index)
             elif index <= 2:
-                if chars and chars[-1] == index + 3:
-                    chars.pop()
+                if chars:
+                    if chars[-1] == index + 3:
+                        chars.pop()
                 else:
                     return l_pointer, index
 
@@ -89,8 +90,9 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 chars.append(index)
 
             elif index >= 3:
-                if chars and chars[-1] == index - 3:
-                    chars.pop()
+                if chars:
+                    if chars[-1] == index - 3:
+                        chars.pop()
                 else:
                     return r_pointer, index - 3 # we emulate the offset -3
 
