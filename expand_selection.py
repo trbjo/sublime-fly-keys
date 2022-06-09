@@ -146,7 +146,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                                 l_index = left_indices[i]
                                 break
                             else:
-                                if left_indices[i] + 1 != region.a:
+                                if left_indices[i] + 1 < region.a: # what is the use case here?
                                     l_index = left_indices[i]
                                     break
                 else:
