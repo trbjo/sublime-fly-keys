@@ -27,18 +27,20 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
             if index == -1:
                 continue
-            elif char == '"':
+            elif index == 6:
                 if double_quotes and not local_double_quotes:
-                    new_scope = self.view.scope_name(l_pointer)
-                    if 'string.begin' in new_scope:
+                    if 'string.begin' in self.view.scope_name(l_pointer):
                         return l_pointer, index
-                local_double_quotes = not local_double_quotes
-            elif char == "'":
+                if not single_quotes and not local_single_quotes:
+                    local_double_quotes = not local_double_quotes
+
+            elif index == 7:
                 if single_quotes and not local_single_quotes:
-                    new_scope = self.view.scope_name(l_pointer)
-                    if 'string.begin' in new_scope:
+                    if 'string.begin' in self.view.scope_name(l_pointer):
                         return l_pointer, index
-                local_single_quotes = not local_single_quotes
+                if not double_quotes and not local_double_quotes:
+                    local_single_quotes = not local_single_quotes
+
             elif index >= 3:
                 chars.append(index)
             elif index <= 2:
@@ -71,17 +73,17 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
             elif index == 6:
                 if double_quotes and not local_double_quotes:
-                    new_scope = self.view.scope_name(r_pointer)
-                    if 'string.end' in new_scope:
+                    if 'string.end' in self.view.scope_name(r_pointer):
                         return r_pointer, index
-                local_double_quotes = not local_double_quotes
+                if not single_quotes and not local_single_quotes:
+                    local_double_quotes = not local_double_quotes
 
             elif index == 7:
                 if single_quotes and not local_single_quotes:
-                    new_scope = self.view.scope_name(r_pointer)
-                    if 'string.end' in new_scope:
+                    if 'string.end' in self.view.scope_name(r_pointer):
                         return r_pointer, index
-                local_single_quotes = not local_single_quotes
+                if not double_quotes and not local_double_quotes:
+                    local_single_quotes = not local_single_quotes
 
             elif index <= 2:
                 chars.append(index)
