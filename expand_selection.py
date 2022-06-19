@@ -45,8 +45,13 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 chars.append(index)
             elif index <= 2:
                 if chars:
-                    if chars[-1] == index + 3:
-                        chars.pop()
+                    for i in range(len(chars)):
+                        backward_idx = len(chars) -1 - i
+                        if chars[backward_idx] == index + 3:
+                            chars=chars[0:backward_idx]
+                            break
+                    else:
+                        return l_pointer, index
                 else:
                     return l_pointer, index
 
