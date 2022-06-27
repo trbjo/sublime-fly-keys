@@ -158,7 +158,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                                 l_index = left_indices[i]
                                 break
                             else:
-                                if left_indices[i] + 1 < region.a: # what is the use case here?
+                                if not (region.begin() <= left_indices[i] + 1 or region.end() == r_index):
                                     l_index = left_indices[i]
                                     break
                 else:
@@ -185,7 +185,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                                 r_index = right_indices[i]
                                 break
                             else:
-                                if right_indices[i] != region.b:
+                                if not (region.end() == right_indices[i] or region.begin() <= l_index + 1):
                                     r_index = right_indices[i]
                                     break
 
