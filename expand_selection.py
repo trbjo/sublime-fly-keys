@@ -29,11 +29,13 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 continue
 
             elif index == 6:
-                if double_quotes and not local_double_quotes:
-                    if 'string.begin' in self.view.scope_name(l_pointer):
-                        return l_pointer, index
-                if not single_quotes and not local_single_quotes:
-                    local_double_quotes = not local_double_quotes
+                lscp = self.view.scope_name(l_pointer)
+                if local_double_quotes and 'string.begin' in lscp:
+                    local_double_quotes = False
+                elif 'string.begin' in lscp:
+                    return l_pointer, index
+                else:
+                    local_double_quotes = True
 
             elif index == 7:
                 if single_quotes and not local_single_quotes:
