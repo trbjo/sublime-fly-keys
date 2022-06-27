@@ -20,13 +20,14 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             char: str = self.buf_str[l_pointer]
             index: int = matchers.find(char)
 
-            if local_double_quotes and index != 6:
-                continue
-            if local_single_quotes and index != 7:
-                continue
-
             if index == -1:
                 continue
+
+            elif local_double_quotes and index != 6:
+                continue
+            elif local_single_quotes and index != 7:
+                continue
+
             elif index == 6:
                 if double_quotes and not local_double_quotes:
                     if 'string.begin' in self.view.scope_name(l_pointer):
@@ -68,13 +69,12 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             char: str = self.buf_str[r_pointer]
             index: int = matchers.find(char)
 
-            if local_double_quotes and index != 6:
-                continue
-
-            elif local_single_quotes and index != 7:
-                continue
-
             if index == -1:
+                continue
+
+            elif local_double_quotes and index != 6:
+                continue
+            elif local_single_quotes and index != 7:
                 continue
 
             elif index == 6:
@@ -96,10 +96,15 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
             elif index >= 3:
                 if chars:
-                    if chars[-1] == index - 3:
-                        chars.pop()
+                    for i in range(len(chars)):
+                        backward_idx = len(chars) -1 - i
+                        if chars[backward_idx] == index - 3:
+                            chars=chars[0:backward_idx]
+                            break
+                    else:
+                        return r_pointer, index - 3
                 else:
-                    return r_pointer, index - 3 # we emulate the offset -3
+                    return r_pointer, index - 3
 
         return -3, -3
 
