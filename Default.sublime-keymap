@@ -675,7 +675,36 @@
 },
 
 {"keys": ["S"], "command": "add_cursors_to_end_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+
+{ "keys": ["S"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move", "args": {"by": "characters", "forward": true}},
+            {"command": "insert_mode"},
+        ]
+    },
+    "context": [
+        {"key": "setting.command_mode"},
+        {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }
+    ]
+},
+
+
 {"keys": ["A"], "command": "add_cursors_to_beginning_of_paragraph", "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["A"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move", "args": {"by": "characters", "forward": false}},
+            {"command": "insert_mode"},
+        ]
+    },
+    "context": [
+        {"key": "setting.command_mode"},
+        {"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }
+    ]
+},
+
+
 
 
 {"keys": ["ctrl+w"], "command": "select_lines", "args": {"forward": false} , "context": [{"key": "setting.command_mode"}, ] },
