@@ -1,16 +1,20 @@
-from sublime import View, Region, Selection
-import sublime_plugin
-from typing import Union
 from enum import IntEnum
+from typing import Union
+
+import sublime_plugin
+from sublime import Region, Selection, View
+
 
 class Action(IntEnum):
     DO_NOTHING = 0
     CHANGE_TO_BOL = 1
     EXTEND = 2
 
+
 action: Action = Action.DO_NOTHING
-first_view: Union[View,None] = None
+first_view: Union[View, None] = None
 old_pos: int = -1
+
 
 class GotoInputListener(sublime_plugin.ViewEventListener):
     def on_query_context(self, key: str, _, __: bool, ___):
@@ -28,7 +32,6 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
             action = Action.EXTEND
         return True
 
-
     def on_activated(self):
         global action
         if action == Action.DO_NOTHING:
@@ -39,22 +42,23 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
         global first_view
         if first_view is None:
             return
-        if view.id() != first_view.id():
-            action = Action.DO_NOTHING
-            return
         sels: Selection = view.sel()
         if sels[0].end() == old_pos:
             action = Action.DO_NOTHING
             return
-        if action == Action.EXTEND:
+        if action == Action.EXTEND and view.id() == first_view.id():
             new_pos = view.sel()[0].a
             sels.clear()
             if new_pos > old_pos:
-                view.sel().add(Region(view.line(old_pos).begin(),view.full_line(new_pos).end()))
+                view.sel().add(
+                    Region(view.line(old_pos).begin(), view.full_line(new_pos).end())
+                )
             else:
-                view.sel().add(Region(view.line(new_pos).begin(),view.full_line(old_pos).end()))
-        elif action == Action.CHANGE_TO_BOL:
-            next_res, _ = view.find(r'\S|^$|^\s+$', view.sel()[0].a)
+                view.sel().add(
+                    Region(view.line(new_pos).begin(), view.full_line(old_pos).end())
+                )
+        else:
+            next_res, _ = view.find(r"\S|^$|^\s+$", view.sel()[0].a)
             view.sel().clear()
             view.sel().add(next_res)
 
