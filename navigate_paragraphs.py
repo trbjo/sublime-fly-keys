@@ -21,23 +21,30 @@ class CommandModeCommand(WindowCommand):
         view.settings().set(key="needs_char", value=False)
         view.settings().set(key="command_mode", value=True)
         if view.element() is None:
-            if view not in interesting_regions or not interesting_regions[view]:
+            if (
+                view not in interesting_regions
+                or not interesting_regions[view.buffer_id()]
+            ):
                 sublime.set_timeout(
-                    lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000
+                    lambda: build_or_rebuild_ws_for_buffer(view, immediate=False), 2000
                 )
 
 
-def build_or_rebuild_ws_for_view(view: View, immediate: bool):
+def build_or_rebuild_ws_for_buffer(view: View, immediate: bool):
     if view is None:
         return
     global interesting_regions
     global timeout
+    buf_if = view.buffer_id()
     if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
-        interesting_regions[view] = {}
+        interesting_regions[buf_if] = {}
         try:
             whitespaces: List[Region] = view.find_all(r"\n[\t ]*\n[\t ]*\S")
             size = view.size() + 1
-            interesting_regions[view]["first"], interesting_regions[view]["last"] = zip(
+            (
+                interesting_regions[buf_if]["first"],
+                interesting_regions[buf_if]["last"],
+            ) = zip(
                 *[(-2, -1)]
                 + [(first, last - 1) for first, last in whitespaces]
                 + [(size, size)]
@@ -51,17 +58,17 @@ def get_regions(view: View, part: str, now: bool = False):
     global interesting_regions
 
     if now:
-        interesting_regions[view] = {}
-        build_or_rebuild_ws_for_view(view, immediate=True)
-        myregs: Tuple[int] = interesting_regions[view][part]
+        interesting_regions[view.buffer_id()] = {}
+        build_or_rebuild_ws_for_buffer(view, immediate=True)
+        myregs: Tuple[int] = interesting_regions[view.buffer_id()][part]
         return myregs
 
     try:
-        myregs: Tuple[int] = interesting_regions[view][part]
+        myregs: Tuple[int] = interesting_regions[view.buffer_id()][part]
     except KeyError:
-        interesting_regions[view] = {}
-        build_or_rebuild_ws_for_view(view, immediate=True)
-        myregs: Tuple[int] = interesting_regions[view][part]
+        interesting_regions[view.buffer_id()] = {}
+        build_or_rebuild_ws_for_buffer(view, immediate=True)
+        myregs: Tuple[int] = interesting_regions[view.buffer_id()][part]
     return myregs
 
 
@@ -70,18 +77,18 @@ class ModifiedViewListener(ViewEventListener):
         view: View = self.view
         if view.element() is None:
             global interesting_regions
-            interesting_regions[view] = {}
+            interesting_regions[view.buffer_id()] = {}
             if view.settings().get("command_mode") == True:
                 sublime.set_timeout(
-                    lambda: build_or_rebuild_ws_for_view(view, immediate=False), 2000
+                    lambda: build_or_rebuild_ws_for_buffer(view, immediate=False), 2000
                 )
 
     def on_load_async(self):
         global interesting_regions
         view: View = self.view
         if view not in interesting_regions and view.element() is None:
-            interesting_regions[view] = {}
-            build_or_rebuild_ws_for_view(view, immediate=True)
+            interesting_regions[view.buffer_id()] = {}
+            build_or_rebuild_ws_for_buffer(view, immediate=True)
 
 
 class NavigateByParagraphForwardCommand(TextCommand):
