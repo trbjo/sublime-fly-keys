@@ -9,4 +9,9 @@
       "command": "disable_save_after_number_change"
     },
 
+    {
+      "caption": "Split selection on comma",
+      "command": "split_selection_on_delimiter"
+    },
+
 ]

@@ -1,22 +1,52 @@
-from sublime import Edit, Region
-import sublime_plugin
-import sublime_api
-
 from typing import List, Tuple
+
+import sublime_api
+import sublime_plugin
+from sublime import Edit, Region
 
 matchers: str = """([{)]}"'"""
 
-PositionAndType=Tuple[int,int]
+PositionAndType = Tuple[int, int]
+
+
+class SplitSelectionOnDelimiter(sublime_plugin.TextCommand):
+    def run(self, edit: Edit):
+        self.buf_id = self.view.id()
+
+        for region in self.view.sel():
+            if region.empty():
+                continue
+            self.view.sel().subtract(region)
+            buf_str: str = self.view.substr(region)
+            begin = region.begin()
+            pts: List[int] = [begin]
+
+            for i in range(len(buf_str)):
+                if buf_str[i] == ",":
+                    pts.append(i + begin)
+                    if buf_str[i + 1] == " ":
+                        pts.append(i + 2 + begin)
+                    else:
+                        pts.append(i + 1 + begin)
+
+            pts.append(region.end())
+            regs: List[Region] = []
+            for j in range(0, len(pts), 2):
+                sublime_api.view_selection_add_region(
+                    self.buf_id, pts[j], pts[j + 1], 0.0
+                )
+
 
 class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
-
-    def get_left_point(self, l_pointer: int, single_quotes: bool, double_quotes: bool) -> PositionAndType:
+    def get_left_point(
+        self, l_pointer: int, single_quotes: bool, double_quotes: bool
+    ) -> PositionAndType:
         chars: List[int] = []
         local_double_quotes = False
         local_single_quotes = False
 
         while l_pointer > 0:
-            l_pointer-=1
+            l_pointer -= 1
             char: str = self.buf_str[l_pointer]
             index: int = matchers.find(char)
 
@@ -30,16 +60,16 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
             elif index == 6:
                 lscp = self.view.scope_name(l_pointer)
-                if local_double_quotes and 'string.begin' in lscp:
+                if local_double_quotes and "string.begin" in lscp:
                     local_double_quotes = False
-                elif 'string.begin' in lscp:
+                elif "string.begin" in lscp:
                     return l_pointer, index
                 else:
                     local_double_quotes = True
 
             elif index == 7:
                 if single_quotes and not local_single_quotes:
-                    if 'string.begin' in self.view.scope_name(l_pointer):
+                    if "string.begin" in self.view.scope_name(l_pointer):
                         return l_pointer, index
                 if not double_quotes and not local_double_quotes:
                     local_single_quotes = not local_single_quotes
@@ -49,9 +79,9 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             elif index <= 2:
                 if chars:
                     for i in range(len(chars)):
-                        backward_idx = len(chars) -1 - i
+                        backward_idx = len(chars) - 1 - i
                         if chars[backward_idx] == index + 3:
-                            chars=chars[0:backward_idx]
+                            chars = chars[0:backward_idx]
                             break
                     else:
                         return l_pointer, index
@@ -60,14 +90,15 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
         return -2, -2
 
-
-    def get_right_point(self, r_pointer: int, single_quotes: bool, double_quotes: bool) -> PositionAndType:
+    def get_right_point(
+        self, r_pointer: int, single_quotes: bool, double_quotes: bool
+    ) -> PositionAndType:
         chars: List[int] = []
         local_double_quotes = False
         local_single_quotes = False
 
-        while r_pointer < self.size-1:
-            r_pointer+=1
+        while r_pointer < self.size - 1:
+            r_pointer += 1
             char: str = self.buf_str[r_pointer]
             index: int = matchers.find(char)
 
@@ -81,14 +112,14 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
             elif index == 6:
                 if double_quotes and not local_double_quotes:
-                    if 'string.end' in self.view.scope_name(r_pointer):
+                    if "string.end" in self.view.scope_name(r_pointer):
                         return r_pointer, index
                 if not single_quotes and not local_single_quotes:
                     local_double_quotes = not local_double_quotes
 
             elif index == 7:
                 if single_quotes and not local_single_quotes:
-                    if 'string.end' in self.view.scope_name(r_pointer):
+                    if "string.end" in self.view.scope_name(r_pointer):
                         return r_pointer, index
                 if not double_quotes and not local_double_quotes:
                     local_single_quotes = not local_single_quotes
@@ -99,9 +130,9 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             elif index >= 3:
                 if chars:
                     for i in range(len(chars)):
-                        backward_idx = len(chars) -1 - i
+                        backward_idx = len(chars) - 1 - i
                         if chars[backward_idx] == index - 3:
-                            chars=chars[0:backward_idx]
+                            chars = chars[0:backward_idx]
                             break
                     else:
                         return r_pointer, index - 3
@@ -109,7 +140,6 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                     return r_pointer, index - 3
 
         return -3, -3
-
 
     def looper(self, region: Region) -> None:
 
@@ -121,7 +151,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
         right_indices: List[int] = []
 
         l_index: int = region.b
-        r_index: int = region.b -1
+        r_index: int = region.b - 1
 
         single_quotes = False
         double_quotes = False
@@ -129,19 +159,23 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
         right_type = 100
         left_type = 101
 
-        reg = self.view.expand_to_scope(region.b, "(meta.string, string) - punctuation.definition.string")
+        reg = self.view.expand_to_scope(
+            region.b, "(meta.string, string) - punctuation.definition.string"
+        )
         if reg is not None:
             r_scope = self.view.scope_name(reg.b)
-            if 'string.' in r_scope:
-                if 'string.quoted.double' in r_scope:
+            if "string." in r_scope:
+                if "string.quoted.double" in r_scope:
                     double_quotes = True
-                elif 'string.quoted.single' in r_scope:
+                elif "string.quoted.single" in r_scope:
                     single_quotes = True
 
         while True:
 
             if right_type != -3 and (did_right or left_type == -2):
-                r_index, right_type = self.get_right_point(r_index, single_quotes, double_quotes)
+                r_index, right_type = self.get_right_point(
+                    r_index, single_quotes, double_quotes
+                )
                 did_right = False
 
                 if right_type == -3:
@@ -160,7 +194,10 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                                 l_index = left_indices[i]
                                 break
                             else:
-                                if not (region.begin() <= left_indices[i] + 1 or region.end() == r_index):
+                                if not (
+                                    region.begin() <= left_indices[i] + 1
+                                    or region.end() == r_index
+                                ):
                                     l_index = left_indices[i]
                                     break
                 else:
@@ -169,7 +206,9 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                     continue
 
             elif left_type != -2 and (not did_right or right_type == -3):
-                l_index, left_type = self.get_left_point(l_index, single_quotes, double_quotes)
+                l_index, left_type = self.get_left_point(
+                    l_index, single_quotes, double_quotes
+                )
                 did_right = True
                 if left_type == -2:
                     if not left_types:
@@ -187,7 +226,10 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                                 r_index = right_indices[i]
                                 break
                             else:
-                                if not (region.end() == right_indices[i] or region.begin() <= l_index + 1):
+                                if not (
+                                    region.end() == right_indices[i]
+                                    or region.begin() <= l_index + 1
+                                ):
                                     r_index = right_indices[i]
                                     break
 
@@ -199,15 +241,20 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             else:
                 return
 
-            if r_index - 1 == l_index: # no extent, e.g. ()
+            if r_index - 1 == l_index:  # no extent, e.g. ()
                 left_types = []
                 right_types = []
                 left_indices = []
                 right_indices = []
                 continue
 
-            if (self.buf_str[l_index+1] == self.buf_str[l_index] and # deal with multiple, subsequent parentheses
-               self.buf_str[r_index-1] == self.buf_str[r_index]):
+            if (
+                self.buf_str[l_index + 1] == self.buf_str[l_index]
+                and self.buf_str[  # deal with multiple, subsequent parentheses
+                    r_index - 1
+                ]
+                == self.buf_str[r_index]
+            ):
                 continue
 
             break
@@ -215,12 +262,14 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
         self.view.sel().subtract(region)
 
         if self.around:
-            r_index+=1
-            l_index-=1
-            while (self.buf_str[l_index+1] == self.buf_str[l_index] and
-               self.buf_str[r_index-1] == self.buf_str[r_index]):
-                l_index-=1
-                r_index+=1
+            r_index += 1
+            l_index -= 1
+            while (
+                self.buf_str[l_index + 1] == self.buf_str[l_index]
+                and self.buf_str[r_index - 1] == self.buf_str[r_index]
+            ):
+                l_index -= 1
+                r_index += 1
 
         if self.from_here:
             l_index = region.a - 1
@@ -228,10 +277,13 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             r_index = region.a
 
         if region.b < region.a or self.to_here:
-            sublime_api.view_selection_add_region(self.buf_id, r_index, l_index + 1, 0.0)
+            sublime_api.view_selection_add_region(
+                self.buf_id, r_index, l_index + 1, 0.0
+            )
         else:
-            sublime_api.view_selection_add_region(self.buf_id, l_index + 1, r_index, 0.0)
-
+            sublime_api.view_selection_add_region(
+                self.buf_id, l_index + 1, r_index, 0.0
+            )
 
     def run(self, edit: Edit, around=False, from_here=False, to_here=False):
         self.size: int = self.view.size()

@@ -1,15 +1,23 @@
-from sublime import Edit, View, Region, Selection, get_clipboard, set_clipboard
-import sublime_plugin
 import re
-
 from typing import List, Tuple
+
+import sublime_plugin
+from sublime import Edit, Region, Selection, View, get_clipboard, set_clipboard
+
+
+class CopyBufferCommand(sublime_plugin.TextCommand):
+    def run(self, edit: Edit):
+        buf = self.view
+        set_clipboard(buf.substr(Region(0, buf.size())))
+
+
 class SmartCopyCommand(sublime_plugin.TextCommand):
     def run(self, _, whole_line: bool = False) -> None:
         buf: View = self.view
         sel = buf.sel()
 
         if whole_line:
-            set_clipboard(''.join(buf.substr(buf.full_line(reg)) for reg in sel))
+            set_clipboard("".join(buf.substr(buf.full_line(reg)) for reg in sel))
             reg = sel[-1].b
             sel.clear()
             sel.add(reg)
@@ -26,7 +34,10 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
 
                 line = buf.full_line(region.a)
                 if regions_to_copy:
-                    if regions_to_copy[-1].a != line.a and regions_to_copy[-1].b != line.b:
+                    if (
+                        regions_to_copy[-1].a != line.a
+                        and regions_to_copy[-1].b != line.b
+                    ):
                         regions_to_copy.append(line)
                 else:
                     regions_to_copy.append(line)
@@ -45,9 +56,9 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
             if contiguous_regions:
                 clip = buf.substr(Region(regions_to_copy[0].a, regions_to_copy[-1].b))
             else:
-                clip = ''.join(buf.substr(reg) for reg in regions_to_copy)
+                clip = "".join(buf.substr(reg) for reg in regions_to_copy)
         else:
-            clip = '\n'.join(buf.substr(reg) for reg in regions_to_copy)
+            clip = "\n".join(buf.substr(reg) for reg in regions_to_copy)
 
         if clip.isspace():
             return
@@ -65,9 +76,9 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         return
 
 
-
 class SmartCutCommand(sublime_plugin.TextCommand):
     """docstring for SmartCopyCommand"""
+
     def run(self, edit: Edit) -> None:
         buf: View = self.view
         sel = buf.sel()
@@ -83,7 +94,10 @@ class SmartCutCommand(sublime_plugin.TextCommand):
                 line = buf.full_line(region.begin())
 
                 if regions_to_copy != []:
-                    if regions_to_copy[-1].a != line.a and regions_to_copy[-1].b != line.b:
+                    if (
+                        regions_to_copy[-1].a != line.a
+                        and regions_to_copy[-1].b != line.b
+                    ):
                         regions_to_copy.append(line)
                 else:
                     regions_to_copy.append(line)
@@ -100,16 +114,18 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         if only_empty_selections:
             reg = sel[-1].a
             if contiguous_regions:
-                interesting_region = Region(regions_to_copy[0].begin(), regions_to_copy[-1].end())
+                interesting_region = Region(
+                    regions_to_copy[0].begin(), regions_to_copy[-1].end()
+                )
                 clip = buf.substr(interesting_region)
                 buf.erase(edit, interesting_region)
             else:
-                clip = ''.join(buf.substr(reg) for reg in regions_to_copy)
+                clip = "".join(buf.substr(reg) for reg in regions_to_copy)
                 for reg in reversed(regions_to_copy):
                     buf.erase(edit, reg)
 
         else:
-            clip = '\n'.join(buf.substr(reg) for reg in regions_to_copy)
+            clip = "\n".join(buf.substr(reg) for reg in regions_to_copy)
             for reg in reversed(regions_to_copy):
                 buf.erase(edit, reg)
 
@@ -119,12 +135,13 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         set_clipboard(clip)
         return
 
+
 class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf: View = self.view
         sels: Selection = buf.sel()
         clipboard = get_clipboard()
-        if clipboard.endswith('\n'):
+        if clipboard.endswith("\n"):
             stripped_clipboard = clipboard.strip()
             for region in reversed(sels):
                 if not region.empty():
@@ -141,11 +158,15 @@ class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
             for reg in rev_sel:
                 if not reg.empty():
                     buf.erase(edit, reg)
-                buf.insert(edit, reg.a, ' '.join(clips))
+                buf.insert(edit, reg.a, " ".join(clips))
 
             rev_sel_new: reversed[Region] = reversed(sels)
             for reg in rev_sel_new:
-                sels.add_all(Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] -1) for pos in clip_pos)
+                sels.add_all(
+                    Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] - 1)
+                    for pos in clip_pos
+                )
+
 
 class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
@@ -156,6 +177,7 @@ class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
             buf.erase(edit, region)
             buf.insert(edit, region.begin(), stripped_clipboard)
 
+
 class SmartPasteCommand(sublime_plugin.TextCommand):
     def find_indent(self, cur_line_num: Region, cur_line: str) -> int:
         buf: View = self.view
@@ -163,18 +185,17 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         if buf.size() == 0:
             return 0
         clipboard = get_clipboard()
-        if len(cur_line) == 0 and clipboard.startswith(' '):
+        if len(cur_line) == 0 and clipboard.startswith(" "):
             lines_above, _ = buf.line(cur_line_num.begin())
             for line in range(lines_above):
                 line += 1
                 prev_line = buf.substr(buf.line(cur_line_num.begin() - line))
-                if prev_line.startswith(' '):
+                if prev_line.startswith(" "):
                     break
             indent = len(prev_line) - len(prev_line.lstrip())
         else:
             indent = len(cur_line) - len(cur_line.lstrip())
         return indent
-
 
     def run(self, edit: Edit) -> None:
         buf: View = self.view
@@ -182,7 +203,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         clipboard = get_clipboard()
         clips = clipboard.splitlines()
 
-        if clipboard.endswith('\n'):
+        if clipboard.endswith("\n"):
             has_final_newline = True
         else:
             has_final_newline = False
@@ -199,7 +220,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 if has_final_newline:
                     insert_pos, _ = buf.line(region.begin())
                     indent = self.find_indent(cur_line_num, cur_line)
-                    insert_string = " " * indent + cliplet.lstrip() + '\n'
+                    insert_string = " " * indent + cliplet.lstrip() + "\n"
                 else:
                     insert_string = cliplet
                     insert_pos = region.begin()
@@ -208,7 +229,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                     buf.erase(edit, region)
                 elif has_final_newline and len(sels) > 1:
                     if region.a == buf.size():
-                        reg = buf.full_line(region.begin() -1)
+                        reg = buf.full_line(region.begin() - 1)
                     else:
                         reg = buf.full_line(region.begin())
                     buf.erase(edit, reg)
@@ -220,7 +241,6 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 buf.sel().clear()
                 buf.sel().add(m)
 
-
         # Ok, just regular paste
         elif len(clips) > len(sels):
             rev_sel: reversed[Region] = reversed(sels)
@@ -231,7 +251,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
                 insert_pos, _ = buf.line(region.begin())
                 above_indent = self.find_indent(cur_line_num, cur_line)
-                insert_string = ''
+                insert_string = ""
                 initial_indent = None
                 for line in clips:
                     deindented_line = line.lstrip()
@@ -239,7 +259,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                     if initial_indent == None:
                         initial_indent = cur_indent
                     this_indent = above_indent + cur_indent - initial_indent
-                    insert_string += " " * this_indent  + deindented_line + '\n'
+                    insert_string += " " * this_indent + deindented_line + "\n"
 
                 if region.empty() == False:
                     buf.erase(edit, region)
@@ -287,7 +307,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
                     insert_pos = buf.line(region.begin()).begin()
                     above_indent = self.find_indent(cur_line_num, cur_line)
-                    insert_string = ''
+                    insert_string = ""
                     initial_indent = None
                     for line in clips:
                         deindented_line = line.lstrip().rstrip()
@@ -295,7 +315,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                         if initial_indent == None:
                             initial_indent = cur_indent
                         this_indent = above_indent + cur_indent - initial_indent
-                        insert_string += " " * this_indent  + deindented_line + '\n'
+                        insert_string += " " * this_indent + deindented_line + "\n"
 
                     buf.insert(edit, insert_pos, insert_string)
 
@@ -315,7 +335,7 @@ class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
         line = buf.line(sel[0])
         line_content = buf.substr(line)
 
-        if line_content.startswith('/'):
+        if line_content.startswith("/"):
             set_clipboard(line_content[:-1])
             return
 

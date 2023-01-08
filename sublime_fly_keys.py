@@ -1,12 +1,14 @@
-from sublime import Edit, View, Region, Selection, active_window
-import sublime
-import sublime_plugin
-
-from typing import List, Union
 import re
 import string
+from typing import List, Union
 
-WORDCHARS = r'[-\._\w]+'
+import sublime
+import sublime_plugin
+from sublime import Edit, Region, Selection, View, active_window
+
+WORDCHARS = r"[-\._\w]+"
+SPACES = r"[^\s]"
+
 
 class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
@@ -16,7 +18,9 @@ class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
 
         for region in selections:
             cur_line_num = buf.line(region.begin())
-            orig_whitespace = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            orig_whitespace = (
+                cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            )
             current_pos_on_line = region.begin() - cur_line_num.a
             put_at_soft_bol = orig_whitespace == current_pos_on_line
             put_at_end = region.begin() == cur_line_num.b
@@ -28,21 +32,35 @@ class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
                     while len(prev_line) == 0 and prev_line.b - 1 < 0:
                         has_empty_lines = True
                         prev_line = buf.line(prev_line.a - 1)
-                    mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
-                    if mod_whitespace < orig_whitespace or (has_empty_lines and mod_whitespace == 0):
+                    mod_whitespace = (
+                        prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                    )
+                    if mod_whitespace < orig_whitespace or (
+                        has_empty_lines and mod_whitespace == 0
+                    ):
                         break
                     positions.append(prev_line.a + mod_whitespace)
 
             elif put_at_end == True:
                 prev_line = buf.line(cur_line_num.a - 1)
-                mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
-                while mod_whitespace >= orig_whitespace and prev_line.a != prev_line.b and prev_line.a - 1 > 0:
+                mod_whitespace = (
+                    prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                )
+                while (
+                    mod_whitespace >= orig_whitespace
+                    and prev_line.a != prev_line.b
+                    and prev_line.a - 1 > 0
+                ):
                     positions.append(prev_line.b)
                     prev_line = buf.line(prev_line.a - 1)
-                    mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                    mod_whitespace = (
+                        prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                    )
             else:
                 prev_line = buf.line(cur_line_num.a - 1)
-                mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                mod_whitespace = (
+                    prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                )
                 while len(prev_line) > 0 and prev_line.a - 1 > 0:
                     if prev_line.a + current_pos_on_line > prev_line.b:
                         positions.append(prev_line.b)
@@ -50,10 +68,11 @@ class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
                         positions.append(prev_line.a + current_pos_on_line)
 
                     prev_line = buf.line(prev_line.a - 1)
-                    mod_whitespace = prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                    mod_whitespace = (
+                        prev_line.b - prev_line.a - len(buf.substr(prev_line).lstrip())
+                    )
 
         selections.add_all(positions)
-
 
 
 class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
@@ -65,7 +84,9 @@ class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
 
         for region in selections:
             cur_line_num = buf.line(region.begin())
-            orig_whitespace = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            orig_whitespace = (
+                cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            )
             current_pos_on_line = region.begin() - cur_line_num.a
             put_at_soft_bol = orig_whitespace == current_pos_on_line
             put_at_end = region.begin() == cur_line_num.b
@@ -78,7 +99,9 @@ class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
                         next_line = buf.line(next_line.b + 1)
                         maybe_positions.append(next_line.a - 1)
 
-                    current_white_space = next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                    current_white_space = (
+                        next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                    )
 
                     if current_white_space == orig_whitespace == 0:
                         break
@@ -92,23 +115,39 @@ class AddCursorsToEndOfParagraphCommand(sublime_plugin.TextCommand):
 
             elif put_at_end:
                 next_line = buf.line(cur_line_num.b + 1)
-                current_white_space = next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
-                while current_white_space >= orig_whitespace and next_line.a != next_line.b and next_line.b - 1 < buf.size():
+                current_white_space = (
+                    next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                )
+                while (
+                    current_white_space >= orig_whitespace
+                    and next_line.a != next_line.b
+                    and next_line.b - 1 < buf.size()
+                ):
                     positions.append(next_line.b)
                     next_line = buf.line(next_line.b + 1)
-                    current_white_space = next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                    current_white_space = (
+                        next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                    )
 
             else:
                 next_line = buf.line(cur_line_num.b + 1)
-                current_white_space = next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
-                while current_white_space >= orig_whitespace and len(next_line) > 0 and next_line.b - 1 < buf.size():
+                current_white_space = (
+                    next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                )
+                while (
+                    current_white_space >= orig_whitespace
+                    and len(next_line) > 0
+                    and next_line.b - 1 < buf.size()
+                ):
                     if next_line.a + current_pos_on_line > next_line.b:
                         positions.append(next_line.b)
                     else:
                         positions.append(next_line.a + current_pos_on_line)
 
                     next_line = buf.line(next_line.b + 1)
-                    current_white_space = next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                    current_white_space = (
+                        next_line.b - next_line.a - len(buf.substr(next_line).lstrip())
+                    )
 
         selections.add_all(positions)
 
@@ -129,6 +168,7 @@ class ClearSelectionCommand(sublime_plugin.TextCommand):
             buf.sel().add(reg)
             buf.show(reg, False)
 
+
 class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
@@ -138,13 +178,14 @@ class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
         sel.clear()
         sel.add(Region(line_beg, line_end))
 
+
 class DeleteSmartCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
         for region in reversed(buf.sel()):
             if region.empty():
                 if region.a == buf.size():
-                    reg = buf.full_line(region.begin() -1)
+                    reg = buf.full_line(region.begin() - 1)
                 else:
                     reg = buf.full_line(region.begin())
             else:
@@ -158,12 +199,11 @@ class DeleteSmartCommand(sublime_plugin.TextCommand):
             buf.erase(edit, reg)
 
 
-
 class InsertModeCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
         if buf.is_read_only() == True:
-            sublime.status_message('Buffer is read only')
+            sublime.status_message("Buffer is read only")
             return
 
         for region in reversed(buf.sel()):
@@ -178,7 +218,7 @@ class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
         if buf.is_read_only():
-            sublime.status_message('Buffer is read only')
+            sublime.status_message("Buffer is read only")
             return
 
         sels: Selection = buf.sel()
@@ -243,10 +283,11 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
             if reg_begin <= 1:
                 reg_begin += 1
                 reg_list.append(Region(-2))
-            reg_list += [Region(m.start() + reg_begin) for m in re.finditer(r'\S.*\n', buffer)]
+            reg_list += [
+                Region(m.start() + reg_begin) for m in re.finditer(r"\S.*\n", buffer)
+            ]
         buf.sel().clear()
         buf.sel().add_all(reg_list)
-
 
 
 class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
@@ -261,8 +302,10 @@ class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
                 continue
 
             cur_line_num = buf.line(region.end())
-            indent = cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
-            content = "\n" + indent*" " + "print(f'{"+ buf.substr(region)+ "=}')"
+            indent = (
+                cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+            )
+            content = "\n" + indent * " " + "print(f'{" + buf.substr(region) + "=}')"
             _, insert_pos = buf.line(region.end())
             sel_beg_pos = cur_line_num.b + indent + 10
             sel_beg_end = sel_beg_pos + region.end() - region.begin()
@@ -307,7 +350,30 @@ class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
 
             contents = buf.substr(region)
             begin = region.begin()
-            word_boundaries = [Region(m.start() + begin, m.end() + begin) for m in re.finditer(WORDCHARS, contents)]
+            word_boundaries = [
+                Region(m.start() + begin, m.end() + begin)
+                for m in re.finditer(WORDCHARS, contents)
+            ]
+            if word_boundaries != []:
+                selections.subtract(region)
+                selections.add_all(word_boundaries)
+
+
+class SplitSelectionIntoLinesSpacesCommand(sublime_plugin.TextCommand):
+    def run(self, _) -> None:
+        buf = self.view
+        selections = buf.sel()
+        rev_sels: reversed[Region] = reversed(selections)
+        for region in rev_sels:
+            if region.empty():
+                continue
+
+            contents = buf.substr(region)
+            begin = region.begin()
+            word_boundaries = [
+                Region(m.start() + begin, m.end() + begin)
+                for m in re.finditer(r"[\S]+", contents)
+            ]
             if word_boundaries != []:
                 selections.subtract(region)
                 selections.add_all(word_boundaries)
@@ -333,7 +399,9 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
             return
 
         reg = Region(min_point, max_point)
-        all_regs = [min_point +  m.end() for m in re.finditer(selected_word, buf.substr(reg))]
+        all_regs = [
+            min_point + m.end() for m in re.finditer(selected_word, buf.substr(reg))
+        ]
 
         i = 0
         for region in selection:
@@ -341,16 +409,17 @@ class UndoFindUnderExpandCommand(sublime_plugin.TextCommand):
                 # Consider a continue statement here instead.
                 # Depends on what strategy works best
                 selection.subtract(region)
-                buf.show(selection[i-1].b, True)
+                buf.show(selection[i - 1].b, True)
                 return
             elif region.end() > all_regs[i]:
-                selection.subtract(selection[i-1])
-                buf.show(selection[i-2].b, True)
+                selection.subtract(selection[i - 1])
+                buf.show(selection[i - 2].b, True)
                 return
             i += 1
 
         selection.subtract(selection[-1])
         buf.show(selection[-1].b, True)
+
 
 class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
