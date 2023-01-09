@@ -35,15 +35,15 @@ def build_or_rebuild_ws_for_buffer(view: View, immediate: bool):
         return
     global interesting_regions
     global timeout
-    buf_if = view.buffer_id()
+    buf_id = view.buffer_id()
     if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
-        interesting_regions[buf_if] = {}
+        interesting_regions[buf_id] = {}
         try:
             whitespaces: List[Region] = view.find_all(r"\n[\t ]*\n[\t ]*\S")
             size = view.size() + 1
             (
-                interesting_regions[buf_if]["first"],
-                interesting_regions[buf_if]["last"],
+                interesting_regions[buf_id]["first"],
+                interesting_regions[buf_id]["last"],
             ) = zip(
                 *[(-2, -1)]
                 + [(first, last - 1) for first, last in whitespaces]
