@@ -1,4 +1,5 @@
 import os
+
 import sublime
 import sublime_plugin
 
@@ -31,8 +32,8 @@ def build_comment_data(view, pt):
     # transform the list of dicts into a single dict
     all_vars = {}
     for v in shell_vars:
-        if 'name' in v and 'value' in v:
-            all_vars[v['name']] = v['value']
+        if "name" in v and "value" in v:
+            all_vars[v["name"]] = v["value"]
 
     line_comments = []
     block_comments = []
@@ -45,11 +46,11 @@ def build_comment_data(view, pt):
         disable_indent = all_vars.get("TM_COMMENT_DISABLE_INDENT" + suffix)
 
         if start and end:
-            block_comments.append((start, end, disable_indent == 'yes'))
-            block_comments.append((start.strip(), end.strip(), disable_indent == 'yes'))
+            block_comments.append((start, end, disable_indent == "yes"))
+            block_comments.append((start.strip(), end.strip(), disable_indent == "yes"))
         elif start:
-            line_comments.append((start, disable_indent == 'yes'))
-            line_comments.append((start.strip(), disable_indent == 'yes'))
+            line_comments.append((start, disable_indent == "yes"))
+            line_comments.append((start.strip(), disable_indent == "yes"))
 
     return (line_comments, block_comments)
 
@@ -108,11 +109,11 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
             # embedded-language situations.
             scope = os.path.commonprefix([scope, end_scope])
 
-        index = scope.rfind(' comment.block.')
+        index = scope.rfind(" comment.block.")
         if index == -1:
             return False
 
-        selector = scope[:index + len(' comment.block')]
+        selector = scope[: index + len(" comment.block")]
 
         whole_region = view.expand_to_scope(region.begin(), selector)
 
@@ -123,8 +124,12 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
 
         for c in block_comments:
             (start, end, disable_indent) = c
-            start_region = sublime.Region(whole_region.begin(), whole_region.begin() + len(start))
-            end_region = sublime.Region(whole_region.end() - len(end), whole_region.end())
+            start_region = sublime.Region(
+                whole_region.begin(), whole_region.begin() + len(start)
+            )
+            end_region = sublime.Region(
+                whole_region.end() - len(end), whole_region.end()
+            )
 
             if view.substr(start_region) == start and view.substr(end_region) == end:
                 # It's faster to erase the start region first
@@ -132,7 +137,8 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
 
                 end_region = sublime.Region(
                     end_region.begin() - start_region.size(),
-                    end_region.end() - start_region.size())
+                    end_region.end() - start_region.size(),
+                )
 
                 view.erase(edit, end_region)
                 return True
@@ -140,10 +146,13 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
         return False
 
     def remove_line_comment(self, view, edit, region):
-        start_positions = [advance_to_first_non_white_space_on_line(
-            view, r.begin()) for r in view.lines(region)]
-        start_positions = list(filter(
-            lambda p: has_non_white_space_on_line(view, p), start_positions))
+        start_positions = [
+            advance_to_first_non_white_space_on_line(view, r.begin())
+            for r in view.lines(region)
+        ]
+        start_positions = list(
+            filter(lambda p: has_non_white_space_on_line(view, p), start_positions)
+        )
         if len(start_positions) == 0:
             return False
 
@@ -181,9 +190,9 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
         if region.empty():
             # Silly buggers to ensure the cursor doesn't end up after the end
             # comment token
-            view.replace(edit, sublime.Region(region.end()), 'x')
+            view.replace(edit, sublime.Region(region.end()), "x")
             view.insert(edit, region.end() + 1, end)
-            view.replace(edit, sublime.Region(region.end(), region.end() + 1), '')
+            view.replace(edit, sublime.Region(region.end(), region.end() + 1), "")
             view.insert(edit, region.begin(), start)
         else:
             view.insert(edit, region.end(), end)
@@ -196,8 +205,9 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
 
         # Remove any blank lines from consideration, they make getting the
         # comment start markers to line up challenging
-        non_empty_lines = list(filter(
-            lambda l: has_non_white_space_on_line(view, l.a), lines))
+        non_empty_lines = list(
+            filter(lambda l: has_non_white_space_on_line(view, l.a), lines)
+        )
 
         # If all the lines are blank however, just comment away
         if len(non_empty_lines) != 0:
@@ -230,7 +240,7 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
         return True
 
     def run(self, edit, block=False, variant=0):
-        sel_posterior=-1
+        sel_posterior = -1
         for region in self.view.sel():
             sel_prior = sel_posterior
             sel_posterior, _ = self.view.full_line(region.begin())

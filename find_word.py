@@ -1,12 +1,13 @@
-from sublime import Edit, View, Region, Selection, active_window, load_binary_resource
-import sublime
-import sublime_plugin
-
-from typing import List, Union
 import re
 import string
+from typing import List, Union
 
-WORDCHARS = r'[-\._\w]+'
+import sublime
+import sublime_plugin
+from sublime import Edit, Region, Selection, View, active_window, load_binary_resource
+
+WORDCHARS = r"[-\._\w]+"
+
 
 class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
@@ -24,11 +25,13 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
             if reg.a == reg.b or not line_contents[cursor_begin].isspace():
                 # handle situation where cursor is at the end of the line:
                 if reg.b == line_indices.b - 1:
-                    cursor_begin-= 1
+                    cursor_begin -= 1
 
                 # we find out if the cursor is already at a word
-                while line_contents[cursor_begin].isspace() and cursor_begin < len(line_contents):
-                    cursor_begin+=1
+                while line_contents[cursor_begin].isspace() and cursor_begin < len(
+                    line_contents
+                ):
+                    cursor_begin += 1
 
             if reg.empty():
                 cursor_end: int = cursor_begin
@@ -36,16 +39,21 @@ class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
                 cursor_end: int = reg.b - line_indices.a
 
                 if reg.b != line_indices.b - 1:
-                    cursor_end+=1
+                    cursor_end += 1
 
-                while line_contents[cursor_end].isspace() and cursor_end < len(line_contents) -1:
-                    cursor_end+=1
+                while (
+                    line_contents[cursor_end].isspace()
+                    and cursor_end < len(line_contents) - 1
+                ):
+                    cursor_end += 1
 
-            while not line_contents[cursor_end].isspace() and cursor_end < len(line_contents):
-                cursor_end+=1
+            while not line_contents[cursor_end].isspace() and cursor_end < len(
+                line_contents
+            ):
+                cursor_end += 1
 
             left_offset: int = 0
-            for i in range(cursor_begin+1):
+            for i in range(cursor_begin + 1):
                 if line_contents[cursor_begin::-1][i].isspace():
                     left_offset = i - 1
                     break
@@ -74,15 +82,15 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
                 sel.add(end_pos)
 
             str_after_cur = buf.substr(reg.begin())
-            if str_after_cur.isalnum() or str_after_cur == '_':
+            if str_after_cur.isalnum() or str_after_cur == "_":
                 if len(sel) > 1:
                     positions.append(reg.a)
                     continue
                 else:
                     return
 
-            str_before_cur = buf.substr(reg.begin() -1)
-            if str_before_cur.isalnum() or str_before_cur == '_':
+            str_before_cur = buf.substr(reg.begin() - 1)
+            if str_before_cur.isalnum() or str_before_cur == "_":
                 if len(sel) > 1:
                     positions.append(reg.a)
                     continue
@@ -97,12 +105,12 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
             rev_beg = -1
             for char in reversed(rev_reg_str):
                 if rev_beg == -1:
-                    if (char.isalnum() or char == '_'):
+                    if char.isalnum() or char == "_":
                         rev_beg = i
                         break
                 i += 1
 
-            forw_reg_str = ''
+            forw_reg_str = ""
             if rev_beg > 1 or rev_beg == -1:
                 forw_reg = Region(cur_line_in_points_end, reg.begin())
                 forw_reg_str = buf.substr(forw_reg)
@@ -111,7 +119,7 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
                 forw_beg = -1
                 for char in forw_reg_str:
                     if forw_beg == -1:
-                        if (char.isalnum() or char == '_'):
+                        if char.isalnum() or char == "_":
                             forw_beg = j
                             break
                     j += 1
@@ -130,5 +138,3 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
 
         sel.clear()
         buf.sel().add_all(positions)
-
-
