@@ -73,10 +73,10 @@
             <tspan x="111" y="167">|← ↖&#xFE0E;</tspan>
             <tspan x="177" y="167">←</tspan>
             <tspan x="537" y="167">↓</tspan>
-            <tspan x="588" y="161">Expand</tspan>
-            <tspan x="588" y="174">Under C.</tspan>
-            <tspan x="470" y="161">Insert</tspan>
-            <tspan x="470" y="174">Mode</tspan>
+            <tspan x="590" y="161">Expand</tspan>
+            <tspan x="590" y="174">Under C.</tspan>
+            <tspan x="472" y="161">Insert</tspan>
+            <tspan x="472" y="174">Mode</tspan>
             <tspan x="655" y="167">→| ↘&#xFE0E;</tspan>
             <tspan x="237" y="167">⌦</tspan>
             <tspan x="293" y="167">→</tspan>
@@ -99,8 +99,8 @@
         <tspan x="153" y="107">⌫Word</tspan>
         <tspan x="66" y="41">Goto</tspan>
         <tspan x="66" y="54">def</tspan>
-        <tspan x="124" y="41">Save</tspan>
-        <tspan x="124" y="54">buffer</tspan>
+        <tspan x="126" y="41">Save</tspan>
+        <tspan x="126" y="54">buffer</tspan>
         <tspan x="182" y="41">Next</tspan>
         <tspan x="182" y="54">bookmark</tspan>
         <tspan x="203" y="228">Cut</tspan>
@@ -109,32 +109,34 @@
         <tspan x="242" y="54">bookmark</tspan>
         <tspan x="263" y="228">Copy</tspan>
         <tspan x="275" y="107">⌦Word</tspan>
-        <tspan x="304" y="47">Unsplit</tspan>
+        <tspan x="306" y="41">Unsplit</tspan>
+        <tspan x="306" y="54">window</tspan>
         <tspan x="323" y="228">Paste</tspan>
         <tspan x="337" y="107">Undo</tspan>
         <tspan x="349" y="158">Select</tspan>
         <tspan x="349" y="173">→|</tspan>
-        <tspan x="365" y="47">Split |</tspan>
+        <tspan x="365" y="41">Split</tspan>
+        <tspan x="365" y="54">window</tspan>
         <tspan x="383" y="228">Search</tspan>
         <tspan x="395" y="102">Find</tspan>
         <tspan x="395" y="115">char</tspan>
         <tspan x="411" y="167">Select¶</tspan>
-        <tspan x="424" y="41">Revert</tspan>
-        <tspan x="424" y="54">mod</tspan>
+        <tspan x="426" y="41">Revert</tspan>
+        <tspan x="426" y="54">mod</tspan>
         <tspan x="443" y="228">Sneak ←</tspan>
         <tspan x="457" y="107">Word |←</tspan>
-        <tspan x="483" y="41">Next</tspan>
-        <tspan x="483" y="54">mod</tspan>
+        <tspan x="486" y="41">Next</tspan>
+        <tspan x="486" y="54">mod</tspan>
         <tspan x="503" y="228">Sneak →</tspan>
         <tspan x="531" y="107">↑</tspan>
-        <tspan x="542" y="41">Toggle</tspan>
-        <tspan x="542" y="54">inline diff</tspan>
+        <tspan x="544" y="41">Toggle</tspan>
+        <tspan x="544" y="54">inline diff</tspan>
         <tspan x="563" y="221">Add C.</tspan>
         <tspan x="563" y="234">Below</tspan>
         <tspan x="577" y="107">Word→|</tspan>
         <tspan x="637" y="107">→|Word</tspan>
-        <tspan x="604" y="41">Git add</tspan>
-        <tspan x="604" y="54">hunk</tspan>
+        <tspan x="606" y="41">Git add</tspan>
+        <tspan x="606" y="54">hunk</tspan>
         <tspan x="623" y="228">Next W</tspan>
         <tspan x="710" y="167">␣insert</tspan>
         <tspan x="678" y="228">Duplicate</tspan>
