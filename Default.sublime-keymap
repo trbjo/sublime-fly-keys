@@ -775,7 +775,7 @@
 {"keys": ["escape"], "command": "chain",
     "args": {
         "commands": [
-            {"command": "set_setting", "args": {"setting": "needs_char", "value": false }},
+            {"command": "remove_build_output"},
             {"command": "show_at_center" },
         ]
     },

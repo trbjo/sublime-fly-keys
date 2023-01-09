@@ -30,6 +30,15 @@ class CommandModeCommand(WindowCommand):
                 )
 
 
+class RemoveBuildOutputCommand(WindowCommand):
+    def run(self) -> None:
+        view: Union[View, None] = active_window().active_view()
+        if view is None:
+            return
+        view.erase_regions("exec")
+        view.settings().set(key="needs_char", value=False)
+
+
 def build_or_rebuild_ws_for_buffer(view: View, immediate: bool):
     if view is None:
         return
