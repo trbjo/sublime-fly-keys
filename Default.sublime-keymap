@@ -897,15 +897,15 @@
 /////////////////// THe number row is not used in command mode, so we can use it for all sorts off cool stuff //////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{"keys": ["1"], "command": "build", "args": {"direction": "down"}, "context":
+{"keys": ["!"], "command": "build", "args": {"direction": "down"}, "context":
     [
         {"key": "setting.command_mode"},
     ]
 },
 
 
-{"keys": ["!"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["!"], "command": "lsp_symbol_definition" ,
+{"keys": ["1"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["1"], "command": "lsp_symbol_definition" ,
         "args": {
             "side_by_side": false,
             "force_group": false,
@@ -913,7 +913,7 @@
         },
  "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 
-{"keys": ["!"], "command": "expand_selection_to_sentence", "context": [
+{"keys": ["1"], "command": "expand_selection_to_sentence", "context": [
     { "key": "selector", "operator": "equal", "operand": "(text.xml, text.html.markdown) - string - comment", "match_all": true },
     {"key": "setting.command_mode"}
 ] },

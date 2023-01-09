@@ -73,10 +73,10 @@
             <tspan x="111" y="167">|← ↖&#xFE0E;</tspan>
             <tspan x="177" y="167">←</tspan>
             <tspan x="537" y="167">↓</tspan>
-            <tspan x="588" y="160">Expand</tspan>
-            <tspan x="588" y="175">Under C.</tspan>
-            <tspan x="470" y="160">Insert</tspan>
-            <tspan x="470" y="175">Mode</tspan>
+            <tspan x="588" y="161">Expand</tspan>
+            <tspan x="588" y="174">Under C.</tspan>
+            <tspan x="470" y="161">Insert</tspan>
+            <tspan x="470" y="174">Mode</tspan>
             <tspan x="655" y="167">→| ↘&#xFE0E;</tspan>
             <tspan x="237" y="167">⌦</tspan>
             <tspan x="293" y="167">→</tspan>
@@ -97,50 +97,54 @@
     <text>
         <tspan x="143" y="228">Cmt</tspan>
         <tspan x="153" y="107">⌫Word</tspan>
-        <tspan x="183" y="40">Save</tspan>
-        <tspan x="124" y="40">Goto</tspan>
-        <tspan x="124" y="55">def</tspan>
-        <tspan x="183" y="55">Buffer</tspan>
+        <tspan x="66" y="41">Goto</tspan>
+        <tspan x="66" y="54">def</tspan>
+        <tspan x="124" y="41">Save</tspan>
+        <tspan x="124" y="54">buffer</tspan>
+        <tspan x="182" y="41">Next</tspan>
+        <tspan x="182" y="54">bookmark</tspan>
         <tspan x="203" y="228">Cut</tspan>
         <tspan x="214" y="107">Newline</tspan>
-        <tspan x="242" y="40">Select</tspan>
-        <tspan x="242" y="55">Tag/Ind</tspan>
+        <tspan x="242" y="41">Set</tspan>
+        <tspan x="242" y="54">bookmark</tspan>
         <tspan x="263" y="228">Copy</tspan>
         <tspan x="275" y="107">⌦Word</tspan>
         <tspan x="304" y="47">Unsplit</tspan>
         <tspan x="323" y="228">Paste</tspan>
-        <tspan x="339" y="107">Undo</tspan>
+        <tspan x="337" y="107">Undo</tspan>
         <tspan x="349" y="158">Select</tspan>
         <tspan x="349" y="173">→|</tspan>
         <tspan x="365" y="47">Split |</tspan>
-        <tspan x="383" y="228">Duplct.</tspan>
-        <tspan x="395" y="101">Find</tspan>
-        <tspan x="395" y="116">char</tspan>
+        <tspan x="383" y="228">Search</tspan>
+        <tspan x="395" y="102">Find</tspan>
+        <tspan x="395" y="115">char</tspan>
         <tspan x="411" y="167">Select¶</tspan>
-        <tspan x="424" y="39">Revert</tspan>
-        <tspan x="424" y="55">Mod</tspan>
-        <tspan x="443" y="220">Select</tspan>
-        <tspan x="443" y="235">Bracket</tspan>
-        <tspan x="454" y="107">Word |←</tspan>
-        <tspan x="483" y="40">Next</tspan>
-        <tspan x="483" y="55">mod</tspan>
-        <tspan x="503" y="228">Search</tspan>
+        <tspan x="424" y="41">Revert</tspan>
+        <tspan x="424" y="54">mod</tspan>
+        <tspan x="443" y="228">Sneak ←</tspan>
+        <tspan x="457" y="107">Word |←</tspan>
+        <tspan x="483" y="41">Next</tspan>
+        <tspan x="483" y="54">mod</tspan>
+        <tspan x="503" y="228">Sneak →</tspan>
         <tspan x="531" y="107">↑</tspan>
-        <tspan x="542" y="40">Toggle</tspan>
-        <tspan x="542" y="55">inline diff</tspan>
-        <tspan x="563" y="220">Add C.</tspan>
-        <tspan x="563" y="235">Below</tspan>
-        <tspan x="574" y="107">Word→|</tspan>
-        <tspan x="634" y="107">→|Word</tspan>
-        <tspan x="604" y="40">Git add</tspan>
-        <tspan x="604" y="55">Hunk</tspan>
+        <tspan x="542" y="41">Toggle</tspan>
+        <tspan x="542" y="54">inline diff</tspan>
+        <tspan x="563" y="221">Add C.</tspan>
+        <tspan x="563" y="234">Below</tspan>
+        <tspan x="577" y="107">Word→|</tspan>
+        <tspan x="637" y="107">→|Word</tspan>
+        <tspan x="604" y="41">Git add</tspan>
+        <tspan x="604" y="54">hunk</tspan>
         <tspan x="623" y="228">Next W</tspan>
         <tspan x="710" y="167">␣insert</tspan>
-        <tspan x="683" y="228">Find @</tspan>
+        <tspan x="678" y="228">Duplicate</tspan>
         <tspan x="772" y="167">Find next</tspan>
-        <tspan x="95" y="280">Cmd</tspan>
-        <tspan x="95" y="293">Palette</tspan>
-        <tspan x="8" y="167">Normal mode</tspan>
+        <tspan x="95" y="280">LSP</tspan>
+        <tspan x="95" y="293">Help</tspan>
+        <tspan x="156" y="280">Cmd</tspan>
+        <tspan x="156" y="293">Palette</tspan>
+        <tspan x="8" y="161">Normal mode/</tspan>
+        <tspan x="8" y="174">Center text</tspan>
     </text>
 
     <text style="font-size:20px">
