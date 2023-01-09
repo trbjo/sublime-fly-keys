@@ -36,6 +36,8 @@ class RemoveBuildOutputCommand(WindowCommand):
         if view is None:
             return
         view.erase_regions("exec")
+        active_window().run_command("hide_panel")
+        active_window().run_command("cancel_build")
         view.settings().set(key="needs_char", value=False)
 
 

@@ -23,10 +23,19 @@ class FancyOpenPaneCommand(WindowCommand):
 class FancyClosePaneCommand(WindowCommand):
     def run(self) -> None:
         active_window().run_command("close_pane")
-        if active_window().active_view() is None:
+        active_view = active_window().active_view()
+        if active_view is None:
             return
+
+        primary = active_view.buffer().primary_view()
+        focus_after_close = False
         unique: Set[int] = set()
-        for v in active_window().views():
-            if v.buffer_id() in unique:
+        for v in active_window().views_in_group(active_window().active_group()):
+            if v.buffer_id() in unique and not v.is_primary():
+                if active_view.id() == v.id():
+                    focus_after_close = True
                 v.close()
             unique.add(v.buffer_id())
+
+        if focus_after_close:
+            active_window().focus_view(primary)

@@ -784,7 +784,7 @@
 
 {"keys": ["escape"], "command": "single_selection", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, ] },
 {"keys": ["escape"], "command": "hide_popup", "context": [{"key": "popup_visible", "operator": "equal", "operand": true} ] },
-{"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
+{"keys": ["escape"], "command": "remove_build_output", "context": [
     {"key": "panel", "operand": "output.exec"},
     { "key": "panel_visible", "operator": "equal", "operand": true } ] },
 {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
@@ -897,12 +897,11 @@
 /////////////////// THe number row is not used in command mode, so we can use it for all sorts off cool stuff //////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{"keys": ["!"], "command": "build", "context":
+{"keys": ["ctrl+["], "command": "build", "context":
     [
         {"key": "setting.command_mode"},
     ]
 },
-
 
 {"keys": ["1"], "command": "goto_definition" , "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["1"], "command": "lsp_symbol_definition" ,
