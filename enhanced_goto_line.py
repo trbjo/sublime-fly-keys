@@ -24,11 +24,12 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
         global first_view
         global action
         first_view = view
+        global old_pos
         if view.sel()[0].empty():
+            old_pos = view.sel()[0].b
             action = Action.CHANGE_TO_BOL
         else:
-            global old_pos
-            old_pos = view.sel()[0].end()
+            old_pos = view.sel()[0].a
             action = Action.EXTEND
         return True
 
@@ -63,4 +64,3 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
             view.sel().add(next_res)
 
         action = Action.DO_NOTHING
-        return
