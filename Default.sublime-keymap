@@ -715,7 +715,7 @@
 
 {"keys": ["shift+space"], "command": "auto_complete"},
 
-// {"keys": ["/"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["'"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }] },
 // {"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["@"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
@@ -1075,11 +1075,20 @@
     },
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 
-{"keys": ["ctrl+x"], "command": "chain",
+{"keys": ["ctrl+shift+x"], "command": "chain",
     "args": {
         "commands": [
             {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
             {"command": "show_panel", "args": {"panel": "replace", "reverse": false},},
+        ]
+    },
+"context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+
+{"keys": ["ctrl+x"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+            {"command": "show_panel", "args": {"panel": "find_in_files", "reverse": false},},
         ]
     },
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
