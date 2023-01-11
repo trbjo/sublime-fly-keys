@@ -2,20 +2,50 @@ import sublime
 from sublime import Region, View, active_window
 from sublime_plugin import WindowCommand
 
+MAX_NUM_GROUPS = 3
 
-class FancyOpenPaneCommand(WindowCommand):
+
+class FancyClonePaneCommand(WindowCommand):
     def run(self) -> None:
         w = active_window()
-        orig_view = w.active_view()
-        w.run_command("clone_file")
-        w.run_command("new_pane")
-        if orig_view is None:
+        num_groups = w.num_groups()
+        orig_view: View = w.active_view()
+        next_group = w.active_group() + 1
+        carets = list(orig_view.sel())
+        if num_groups >= MAX_NUM_GROUPS:
             return
-        carets = orig_view.sel()
-        new_view: View = w.active_view()
+        elif num_groups > next_group:
+            for v in w.views_in_group(next_group):
+                if orig_view.buffer_id() == v.buffer_id():
+                    return  # only unique buffers per group
+            w.run_command("clone_file")
+            new_view = w.active_view()
+            w.move_sheets_to_group(sheets=[new_view.sheet()], group=next_group)
+        else:
+            w.run_command("clone_file")
+            new_view = w.active_view()
+            w.run_command("new_pane")
+
         new_view.sel().clear()
         new_view.sel().add_all(carets)
         new_view.show_at_center(carets[0].b)
+
+
+class FancyMovePaneCommand(WindowCommand):
+    def run(self) -> None:
+        w = active_window()
+        num_groups = w.num_groups()
+        view: View = w.active_view()
+        next_group = w.active_group() + 1
+        if num_groups >= MAX_NUM_GROUPS:
+            return
+        elif num_groups > next_group:
+            for v in w.views_in_group(next_group):
+                if view.buffer_id() == v.buffer_id():
+                    return  # only unique buffers per group
+            w.move_sheets_to_group(sheets=[view.sheet()], group=next_group)
+        else:
+            w.run_command("new_pane")
 
 
 class FancyClosePaneCommand(WindowCommand):
@@ -24,21 +54,21 @@ class FancyClosePaneCommand(WindowCommand):
         if w.num_groups() < 2:
             return
 
+        w.run_command("close_pane")
         active_view = w.active_view()
         if active_view is None:
             return
 
-        if active_view.is_dirty():
-            active_view.set_scratch(True)
-
-        w.run_command("close_pane")
-
         buffers = {active_view.buffer_id()}
+        scratch_buffers = set()
         for v in w.views_in_group(w.active_group()):
             if active_view.id() != v.id() and v.buffer_id() in buffers:
+                if not v.is_scratch() and v.is_dirty():
+                    scratch_buffers.add(v.buffer())
+                    v.set_scratch(True)
                 v.close()
             else:
                 buffers.add(v.buffer_id())
 
-        if active_view.is_scratch():
-            active_view.set_scratch(False)
+        for b in scratch_buffers:
+            b.primary_view().set_scratch(False)

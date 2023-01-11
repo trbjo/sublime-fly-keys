@@ -961,9 +961,6 @@
 
 // {"keys": ["2"], "command": "python_formatting" },
 
-{"keys": ["@"], "command": "close"},
-{"keys": ["@"], "command": "insert", "args": {"characters": "@"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
 {"keys": ["3"], "command": "next_bookmark", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["#"], "command": "prev_bookmark", "context": [{"key": "setting.command_mode"}, ] },
@@ -998,9 +995,13 @@
 {"keys": ["5"], "command": "fancy_close_pane" },
 {"keys": ["5"], "command": "insert", "args": {"characters": "5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
-{"keys": ["6"], "command": "new_pane", "args": {"move": true}},
+{"keys": ["%"], "command": "close"},
+{"keys": ["%"], "command": "insert", "args": {"characters": "%"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
+{"keys": ["6"], "command": "fancy_move_pane" },
 {"keys": ["6"], "command": "insert", "args": {"characters": "6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-{"keys": ["^"], "command": "fancy_open_pane", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["^"], "command": "fancy_clone_pane" },
+{"keys": ["^"], "command": "insert", "args": {"characters": "^"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 {"keys": ["7"], "command": "revert_hunk", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["7"], "command": "revert_modification", "context": [{"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }, {"key": "setting.command_mode"}, ] },
