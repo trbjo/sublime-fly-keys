@@ -3,38 +3,45 @@ from typing import List, Tuple
 import sublime_api
 import sublime_plugin
 from sublime import Edit, Region
+from sublime_api import view_selection_subtract_region as subtract_region
+from sublime_plugin import TextInputHandler
 
 matchers: str = """([{)]}"'"""
 
 PositionAndType = Tuple[int, int]
 
 
-class SplitSelectionOnDelimiter(sublime_plugin.TextCommand):
-    def run(self, edit: Edit):
-        self.buf_id = self.view.id()
+class SplitInputByDelimiterCommand(sublime_plugin.TextCommand):
+    def findall(self, pattern, length, string):
+        """Yields all the positions of
+        the pattern p in the string s."""
+        i = string.find(pattern)
+        while i != -1:
+            yield i
+            i = string.find(pattern, i + length)
 
-        for region in self.view.sel():
-            if region.empty():
+    def run(self, _: Edit, **args) -> None:  # type: ignore
+        pattern = args["text"]
+        v = self.view
+        vid = v.id()
+        sels = v.sel()
+        length = len(pattern)
+        for reg in sels:
+            if reg.empty():
                 continue
-            self.view.sel().subtract(region)
-            buf_str: str = self.view.substr(region)
-            begin = region.begin()
-            pts: List[int] = [begin]
+            idx = self.findall(pattern, length, v.substr(reg))
+            [subtract_region(vid, reg.a + i, reg.a + i + length) for i in idx]
 
-            for i in range(len(buf_str)):
-                if buf_str[i] == ",":
-                    pts.append(i + begin)
-                    if buf_str[i + 1] == " ":
-                        pts.append(i + 2 + begin)
-                    else:
-                        pts.append(i + 1 + begin)
+    def input_description(self) -> str:
+        return "Delimiter"
 
-            pts.append(region.end())
-            regs: List[Region] = []
-            for j in range(0, len(pts), 2):
-                sublime_api.view_selection_add_region(
-                    self.buf_id, pts[j], pts[j + 1], 0.0
-                )
+    def is_enabled(self) -> bool:  # type: ignore
+        if self.view is None:
+            return False
+        return any(r.a != r.b for r in self.view.sel())
+
+    def input(self, args: dict) -> TextInputHandler:
+        return TextInputHandler()
 
 
 class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):

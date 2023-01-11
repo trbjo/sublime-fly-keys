@@ -10,8 +10,8 @@
     },
 
     {
-      "caption": "Split selection on comma",
-      "command": "split_selection_on_delimiter"
+      "caption": "Split Selection By Delimiter",
+      "command": "split_input_by_delimiter"
     },
 
 ]
