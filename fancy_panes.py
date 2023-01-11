@@ -8,34 +8,40 @@ from sublime_plugin import TextCommand, ViewEventListener, WindowCommand
 class FancyOpenPaneCommand(WindowCommand):
     def run(self) -> None:
 
-        view: Union[View, None] = active_window().active_view()
+        orig_view: Union[View, None] = active_window().active_view()
         active_window().run_command("clone_file")
         active_window().run_command("new_pane")
-        if view is None:
+        if orig_view is None:
             return
-        old_pointer = view.sel()[0].b
-        view: Union[View, None] = active_window().active_view()
-        view.sel().clear()
-        view.sel().add(old_pointer)
-        view.show_at_center(old_pointer)
+        carets = orig_view.sel()
+        new_view: View = active_window().active_view()
+        new_view.sel().clear()
+        new_view.sel().add_all(carets)
+        new_view.show_at_center(carets[0].b)
 
 
 class FancyClosePaneCommand(WindowCommand):
     def run(self) -> None:
-        active_window().run_command("close_pane")
-        active_view = active_window().active_view()
-        if active_view is None:
+
+        if active_window().num_groups() < 2:
             return
 
-        primary = active_view.buffer().primary_view()
-        focus_after_close = False
-        unique: Set[int] = set()
-        for v in active_window().views_in_group(active_window().active_group()):
-            if v.buffer_id() in unique and not v.is_primary():
-                if active_view.id() == v.id():
-                    focus_after_close = True
-                v.close()
-            unique.add(v.buffer_id())
+        active_view = active_window().active_view()
+        if active_view is None:
+            active_window().run_command("close_pane")
+            return
 
-        if focus_after_close:
-            active_window().focus_view(primary)
+        if active_view.is_dirty():
+            active_view.set_scratch(True)
+
+        active_window().run_command("close_pane")
+
+        buffers = {active_view.buffer_id(): active_view}
+        for v in active_window().views_in_group(active_window().active_group()):
+            if not active_view.id() == v.id() and v.buffer_id() in buffers.keys():
+                v.close()
+            else:
+                buffers[v.buffer_id()] = v
+
+        if active_view.is_scratch():
+            active_view.set_scratch(False)
