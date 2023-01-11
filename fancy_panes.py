@@ -36,12 +36,12 @@ class FancyClosePaneCommand(WindowCommand):
 
         active_window().run_command("close_pane")
 
-        buffers = {active_view.buffer_id(): active_view}
+        buffers = {active_view.buffer_id()}
         for v in active_window().views_in_group(active_window().active_group()):
-            if not active_view.id() == v.id() and v.buffer_id() in buffers.keys():
+            if active_view.id() != v.id() and v.buffer_id() in buffers:
                 v.close()
             else:
-                buffers[v.buffer_id()] = v
+                buffers.add(v.buffer_id())
 
         if active_view.is_scratch():
             active_view.set_scratch(False)
