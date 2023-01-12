@@ -3,45 +3,9 @@ from typing import List, Tuple
 import sublime_api
 import sublime_plugin
 from sublime import Edit, Region
-from sublime_api import view_selection_subtract_region as subtract_region
-from sublime_plugin import TextInputHandler
 
 matchers: str = """([{)]}"'"""
-
 PositionAndType = Tuple[int, int]
-
-
-class SplitInputByDelimiterCommand(sublime_plugin.TextCommand):
-    def findall(self, pattern, length, string):
-        """Yields all the positions of
-        the pattern p in the string s."""
-        i = string.find(pattern)
-        while i != -1:
-            yield i
-            i = string.find(pattern, i + length)
-
-    def run(self, _: Edit, **args) -> None:  # type: ignore
-        pattern = args["text"]
-        v = self.view
-        vid = v.id()
-        sels = v.sel()
-        length = len(pattern)
-        for reg in sels:
-            if reg.empty():
-                continue
-            idx = self.findall(pattern, length, v.substr(reg))
-            [subtract_region(vid, reg.a + i, reg.a + i + length) for i in idx]
-
-    def input_description(self) -> str:
-        return "Delimiter"
-
-    def is_enabled(self) -> bool:  # type: ignore
-        if self.view is None:
-            return False
-        return any(r.a != r.b for r in self.view.sel())
-
-    def input(self, args: dict) -> TextInputHandler:
-        return TextInputHandler()
 
 
 class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):

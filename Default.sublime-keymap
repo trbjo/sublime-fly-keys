@@ -1057,8 +1057,12 @@
 { "keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
-{ "keys": ["ctrl+m"],       "command": "listen_for_character", "args": {"forward": true },                 "context": [{"key": "setting.command_mode"}]},
-{ "keys": ["m"],            "command": "listen_for_character", "args": {"forward": true, "single": true },                 "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+m"], "command": "listen_for_character", "args": {"forward": true },"context": [{"key": "setting.command_mode"}]},
+{ "keys": ["m"],      "command": "listen_for_character", "args": {"forward": true, "single": true }, "context": [{"key": "setting.command_mode"}]},
+{ "keys": ["ctrl+m"], "command": "remove_delimiter_from_selection", "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false}, ] },
+{ "keys": ["m"],      "command": "select_only_delimiter_in_selection", "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false}, ] },
+
+
 { "keys": ["ctrl+shift+m"], "command": "listen_for_character", "args": {"forward": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 { "keys": ["M"],            "command": "listen_for_character", "args": {"forward": true, "single": true, "extend": true }, "context": [{"key": "setting.command_mode"}]},
 

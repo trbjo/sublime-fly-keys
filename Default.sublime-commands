@@ -10,8 +10,13 @@
     },
 
     {
-      "caption": "Split Selection By Delimiter",
-      "command": "split_input_by_delimiter"
+      "caption": "Remove Delimiter From Selection",
+      "command": "remove_delimiter_from_selection"
+    },
+
+    {
+      "caption": "Select Only Delimiter In Selection",
+      "command": "select_only_delimiter_in_selection"
     },
 
 ]
