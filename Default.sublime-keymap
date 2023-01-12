@@ -716,13 +716,8 @@
 {"keys": ["shift+space"], "command": "auto_complete"},
 
 {"keys": ["'"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }] },
-// {"keys": ["ctrl+/"], "command": "lsp_workspace_symbols" , "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["@"], "command": "goto_reference" , "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["@"], "command": "lsp_symbol_references" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
-// {"keys": ["ctrl+shift+f"], "command": "lsp_symbol_implementation" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
-
-{"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename" , "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
+{"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename", "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 
 
 {"keys": ["alt"], "command": "lsp_hover", "context": [{"key": "setting.lsp_active"}, ] },
