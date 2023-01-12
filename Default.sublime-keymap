@@ -20,6 +20,16 @@
         { "key": "auto_complete_visible", "operand": true },
     ]
 },
+
+
+{
+    "keys": ["ctrl+t"],
+    "command": "lsp_signature_help_navigate",
+    "args": {"forward": true},
+    "context": [{"key": "lsp.signature_help_multiple_choices_available"},{"key": "setting.command_mode", "operator": "equal", "operand": false }]
+},
+
+
 {"keys": ["ctrl+c"], "command": "move", "args": {"by": "lines", "forward": false}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 {"keys": ["ctrl+c"], "command": "chain",
     "args": {
@@ -35,6 +45,12 @@
     ]
 },
 
+{
+    "keys": ["ctrl+c"],
+    "command": "lsp_signature_help_navigate",
+    "args": {"forward": false},
+    "context": [{"key": "lsp.signature_help_multiple_choices_available"},{"key": "setting.command_mode", "operator": "equal", "operand": false }]
+},
 
 // navigate side bar
 {"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false}, "context":
