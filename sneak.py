@@ -304,10 +304,10 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
         stored_char, forward, extend = char_forward_tuple
 
         if sneak_ready_to_search:
-            self.view.settings().set(key="sneak_ready_to_search", value=False)
             search_string = stored_char + character
             char_forward_tuple = (search_string, forward, extend)
             self.execute(forward, search_string, extend)
+            self.view.settings().set(key="sneak_ready_to_search", value=False)
             self.view.settings().set(key="has_stored_search", value=True)
             self.view.settings().set(key="sneak_override_find_keybinding", value=True)
             self.view.settings().set(key="needs_char", value=False)
@@ -321,12 +321,12 @@ class FindNextCharacterCommand(FindNextCharacterBaseCommand):
 
 
 class FindNextCharacterListener(sublime_plugin.EventListener):
-    revert_to_normal_mode = {
+    revert_to_normal_mode = [
         "find_next_character",
         "repeat_find_next_character",
         "store_character",
         "revert_selection",
-    }
+    ]
 
     def on_window_command(self, window: sublime.Window, _, __):
         view = window.active_view()
