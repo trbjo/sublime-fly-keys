@@ -10,13 +10,13 @@
     },
 
     {
-      "caption": "Remove Delimiter From Selection",
-      "command": "remove_delimiter_from_selection"
+      "caption": "Split Selection By Delitimer",
+      "command": "select_only_delimiter_in_selection"
     },
 
     {
       "caption": "Select Only Delimiter In Selection",
-      "command": "select_only_delimiter_in_selection"
+      "command": "select_only_delimiter_in_selection", "args": {"include": true}
     },
 
 ]

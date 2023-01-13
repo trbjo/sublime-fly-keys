@@ -253,7 +253,7 @@ class InsertSingleChar(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
         view: View = self.view
         self.view.settings().set(key="insert_single_char", value=True)
-        # self.view.settings().set(key="block_caret", value=False)
+        self.view.settings().set(key="block_caret", value=False)
         self.view.settings().set(key="command_mode", value=False)
         self.view.settings().set(key="needs_char", value=True)
         self.view.settings().set(key="edit_buffer", value=True)
@@ -266,7 +266,7 @@ class ReplaceSingleChar(sublime_plugin.TextCommand):
     def run(self, edit):
         view: View = self.view
         self.view.settings().set(key="insert_single_char", value=True)
-        # self.view.settings().set(key="block_caret", value=False)
+        self.view.settings().set(key="block_caret", value=False)
         self.view.settings().set(key="command_mode", value=False)
         self.view.settings().set(key="needs_char", value=True)
         self.view.settings().set(key="edit_buffer", value=True)
