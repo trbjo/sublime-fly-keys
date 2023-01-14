@@ -2,7 +2,8 @@ from enum import IntEnum
 from typing import Union
 
 import sublime_plugin
-from sublime import Region, Selection, View
+from sublime import Selection, View
+from sublime_api import view_selection_add_region as add_region
 
 
 class Action(IntEnum):
@@ -48,16 +49,15 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
             action = Action.DO_NOTHING
             return
         if action == Action.EXTEND and view.id() == first_view.id():
-            new_pos = view.sel()[0].a
+            new_pos = view.sel()[0].b
             sels.clear()
             if new_pos > old_pos:
-                view.sel().add(
-                    Region(view.line(old_pos).begin(), view.full_line(new_pos).end())
-                )
+                start = view.line(old_pos).begin()
+                end = view.full_line(new_pos).end()
             else:
-                view.sel().add(
-                    Region(view.line(new_pos).begin(), view.full_line(old_pos).end())
-                )
+                start = view.full_line(old_pos).end()
+                end = view.line(new_pos).begin()
+            add_region(view.id(), start, end, 0.0)
         else:
             next_res, _ = view.find(r"\S|^$|^\s+$", view.sel()[0].a)
             view.sel().clear()
