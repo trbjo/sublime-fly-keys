@@ -3,6 +3,8 @@ from typing import Union
 
 import sublime_plugin
 from sublime import Selection, View
+from sublime_api import view_full_line_from_point as full_line
+from sublime_api import view_line_from_point as line
 from sublime_api import view_selection_add_region as add_region
 
 
@@ -48,16 +50,18 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
         if sels[0].end() == old_pos:
             action = Action.DO_NOTHING
             return
-        if action == Action.EXTEND and view.id() == first_view.id():
+
+        vid = view.id()
+        if action == Action.EXTEND and vid == first_view.id():
             new_pos = view.sel()[0].b
             if new_pos > old_pos:
-                start = view.line(old_pos).begin()
-                end = view.full_line(new_pos).end()
+                start = line(vid, old_pos).begin()
+                end = full_line(vid, new_pos).end()
             else:
-                start = view.full_line(old_pos).end()
-                end = view.line(new_pos).begin()
+                start = full_line(vid, old_pos).end()
+                end = line(vid, new_pos).begin()
             sels.clear()
-            add_region(view.id(), start, end, 0.0)
+            add_region(vid, start, end, 0.0)
         else:
             next_res, _ = view.find(r"\S|^$|^\s+$", view.sel()[0].a)
             view.sel().clear()
