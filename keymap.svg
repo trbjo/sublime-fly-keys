@@ -73,7 +73,7 @@
             <tspan x="111" y="167">|← ↖&#xFE0E;</tspan>
             <tspan x="177" y="167">←</tspan>
             <tspan x="537" y="167">↓</tspan>
-            <tspan x="591" y="161">Expand</tspan>
+            <tspan x="591" y="161">Select</tspan>
             <tspan x="591" y="174">Under C.</tspan>
             <tspan x="472" y="161">Insert</tspan>
             <tspan x="472" y="174">Mode</tspan>
@@ -117,8 +117,8 @@
         <tspan x="365" y="41">Split</tspan>
         <tspan x="365" y="54">window</tspan>
         <tspan x="378" y="228">Duplicate</tspan>
-        <tspan x="395" y="102">Find</tspan>
-        <tspan x="395" y="115">char</tspan>
+        <tspan x="397" y="102">Smart</tspan>
+        <tspan x="397" y="115">Select</tspan>
         <tspan x="411" y="167">Select¶</tspan>
         <tspan x="426" y="41">Revert</tspan>
         <tspan x="426" y="54">Hunk</tspan>
