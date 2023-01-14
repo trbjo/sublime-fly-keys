@@ -50,13 +50,13 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
             return
         if action == Action.EXTEND and view.id() == first_view.id():
             new_pos = view.sel()[0].b
-            sels.clear()
             if new_pos > old_pos:
                 start = view.line(old_pos).begin()
                 end = view.full_line(new_pos).end()
             else:
                 start = view.full_line(old_pos).end()
                 end = view.line(new_pos).begin()
+            sels.clear()
             add_region(view.id(), start, end, 0.0)
         else:
             next_res, _ = view.find(r"\S|^$|^\s+$", view.sel()[0].a)
