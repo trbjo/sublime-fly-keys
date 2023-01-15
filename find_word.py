@@ -5,6 +5,7 @@ import sublime_plugin
 from sublime import Region
 from sublime_api import view_cached_substr as view_substr
 from sublime_api import view_selection_add_region as add_region
+from sublime_api import view_selection_subtract_region as subtract_region
 from sublime_api import view_show_point as show_point
 
 WORDCHARS = r"[-\._\w]+"
@@ -12,13 +13,29 @@ WORDCHARS = r"[-\._\w]+"
 found_under_expand_regions = []
 
 
+class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
+    def run(self, _) -> None:
+        selections = self.view.sel()
+        if len(selections) > 1:
+            selections.subtract(selections[0])
+            self.view.show(selections[0].b, True)
+
+
 class UndoSmarterFindUnderExpand(sublime_plugin.TextCommand):
     def run(self, edit) -> None:
         global found_under_expand_regions
         if not found_under_expand_regions:
             return
-        reg = found_under_expand_regions.pop()
+        sels = self.view.sel()
+        if len(sels) == 1:
+            return
         vid = self.view.id()
+        if len(sels) != len(found_under_expand_regions) + 1:
+            found_under_expand_regions = []
+            subtract_region(vid, sels[-1].a, sels[-1].b)
+
+        reg = found_under_expand_regions.pop()
+
         subtract_region(vid, reg[0], reg[1])
         show_point(vid, found_under_expand_regions[-1][-1], True, False, True)
 
