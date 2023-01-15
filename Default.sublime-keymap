@@ -569,11 +569,6 @@
 ////////////////////////////////////////////////////
 
 
-{"keys": [" ", "n"], "command": "move", "args": {"by": "subword_ends", "forward": true, "extend": true}, "context": [
-    {"key": "setting.command_mode"},
-    {"key": "num_selections", "operator": "equal", "operand": 1 },
-] },
-
 {"keys": ["ctrl+shift+n"], "command": "subtract_first_selection", "context": [{"key": "setting.command_mode"}, ] },
 
 { "keys": ["ctrl+shift+n"], "command": "chain",
@@ -618,7 +613,7 @@
         "args": {
             "commands": [
                 {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
-                {"command": "find_under_expand"},
+                {"command": "smarter_find_under_expand", "args": {"forward": true}},
             ]},
         "context": [
             {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
@@ -628,11 +623,28 @@
      ]
 },
 
-{"keys": ["N"], "command": "undo_find_under_expand", "context": [
-    {"key": "setting.command_mode"},
-] },
+{ "keys": ["ctrl+n"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+                {"command": "smarter_find_under_expand", "args": {"forward": false}},
+            ]},
+        "context": [
+            {"key": "setting.command_mode"},
+     ]
+},
 
-{ "keys": ["ctrl+n"], "command": "smart_find_boundary", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
+{ "keys": ["ctrl+n"], "command": "chain",
+        "args": {
+            "commands": [
+                {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
+                {"command": "move", "args": {"by": "characters", "forward": true, "extend": true}},
+            ]},
+        "context": [
+            {"key": "selection_empty", "operator": "equal", "operand": true},
+            {"key": "setting.command_mode"},
+     ]
+},
 
 //////////////////////////////////////////////
 ///////////// EXPAND WITH CONTROL: ///////////

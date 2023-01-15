@@ -1,12 +1,67 @@
 import re
-import string
-from typing import List, Union
+from typing import List
 
-import sublime
 import sublime_plugin
-from sublime import Edit, Region, Selection, View, active_window, load_binary_resource
+from sublime import Region
+from sublime_api import view_cached_substr as view_substr
+from sublime_api import view_selection_add_region as add_region
+from sublime_api import view_show_point as show_point
 
 WORDCHARS = r"[-\._\w]+"
+
+
+class SmarterFindUnderExpand(sublime_plugin.TextCommand):
+    def run(self, edit, forward: bool = False) -> None:
+        vid = self.view.id()
+        if forward:
+            starting_point = self.view.sel()[-1].end()
+            buf: str = view_substr(vid, starting_point, self.view.size())
+            begin = self.view.sel()[0].begin()
+            end = self.view.sel()[0].end()
+        else:
+            starting_point = self.view.sel()[0].begin()
+            buf: str = view_substr(vid, 0, starting_point)[::-1]
+            begin = self.view.sel()[-1].begin()
+            end = self.view.sel()[-1].end()
+
+        wlength = end - begin
+        word = view_substr(vid, begin, end)
+        word_surrounds = view_substr(vid, begin - 1, end + 1)
+
+        # imitate find under expand's boundary detection
+        myregex = r"\W" + word + r"\W"
+        orig_is_boundary = re.match(myregex, word_surrounds)
+
+        look_for = word if forward else word[::-1]
+
+        rev_idx = -1
+        while True:
+            rev_idx = buf.find(look_for, rev_idx + 1)
+
+            if rev_idx == -1:
+                return
+
+            if forward:
+                candidate_start = starting_point + rev_idx
+                candidate_end = candidate_start + wlength
+            else:
+                candidate_end = starting_point - rev_idx
+                candidate_start = candidate_end - wlength
+
+            if not orig_is_boundary:
+                break
+
+            if wlength == candidate_end:  # beginning of the buffer
+                boundary_word = view_substr(vid, candidate_start, candidate_end + 1)
+                myregex = word + r"\W"
+            else:
+                boundary_word = view_substr(vid, candidate_start - 1, candidate_end + 1)
+
+            if re.match(myregex, boundary_word):
+                break
+
+        add_region(vid, candidate_start, candidate_end, 0.0)
+        show_point(vid, candidate_end, True, False, True)
 
 
 class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
