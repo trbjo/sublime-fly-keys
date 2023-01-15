@@ -9,6 +9,19 @@ from sublime_api import view_show_point as show_point
 
 WORDCHARS = r"[-\._\w]+"
 
+found_under_expand_regions = []
+
+
+class UndoSmarterFindUnderExpand(sublime_plugin.TextCommand):
+    def run(self, edit) -> None:
+        global found_under_expand_regions
+        if not found_under_expand_regions:
+            return
+        reg = found_under_expand_regions.pop()
+        vid = self.view.id()
+        subtract_region(vid, reg[0], reg[1])
+        show_point(vid, found_under_expand_regions[-1][-1], True, False, True)
+
 
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
     def run(self, edit, forward: bool = False) -> None:

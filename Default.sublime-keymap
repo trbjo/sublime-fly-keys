@@ -570,6 +570,7 @@
 
 
 {"keys": ["ctrl+shift+n"], "command": "subtract_first_selection", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["N"], "command": "undo_smarter_find_under_expand", "context": [{"key": "setting.command_mode"}, ] },
 
 { "keys": ["ctrl+shift+n"], "command": "chain",
         "args": {
