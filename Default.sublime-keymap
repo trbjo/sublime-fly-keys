@@ -569,8 +569,9 @@
 ////////////////////////////////////////////////////
 
 
-{"keys": ["ctrl+shift+n"], "command": "subtract_first_selection", "context": [{"key": "setting.command_mode"}, ] },
-{"keys": ["N"], "command": "undo_smarter_find_under_expand", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+shift+n"], "command": "subtract_selection", "args": {"last": false}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["N"], "command": "subtract_selection", "args": {"last": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["N"], "command": "smart_find_boundary" , "context": [{"key": "setting.command_mode"}, {"key": "num_selections", "operator": "equal", "operand": 1 },] },
 
 { "keys": ["ctrl+shift+n"], "command": "chain",
         "args": {
@@ -1031,7 +1032,7 @@
 
 {"keys": ["ctrl+shift+enter"], "command": "insert_snippet", "args": {"contents": "\n${0:$SELECTION}\n"}, "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode"}, ]},
 {"keys": ["ctrl+enter"], "command": "find_all", "args": {"close_panel": true}, "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
-{"keys": ["shift+enter"], "command": "insert", "args": {"characters": "\n"}, "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
+{"keys": ["ctrl+shift+enter"], "command": "insert", "args": {"characters": "\n"}, "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
 {"keys": ["ctrl+shift+enter"], "command": "replace_all", "args": {"close_panel": true}, "context": [{"key": "panel", "operand": "replace"}, {"key": "panel_has_focus"} ] },
 
 // because we use enter as fallback we must include all the default keybindings as well

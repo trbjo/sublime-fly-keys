@@ -10,34 +10,14 @@ from sublime_api import view_show_point as show_point
 
 WORDCHARS = r"[-\._\w]+"
 
-found_under_expand_regions = []
 
-
-class SubtractFirstSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
+class SubtractSelectionCommand(sublime_plugin.TextCommand):
+    def run(self, _, last=False) -> None:
         selections = self.view.sel()
         if len(selections) > 1:
-            selections.subtract(selections[0])
-            self.view.show(selections[0].b, True)
-
-
-class UndoSmarterFindUnderExpand(sublime_plugin.TextCommand):
-    def run(self, edit) -> None:
-        global found_under_expand_regions
-        if not found_under_expand_regions:
-            return
-        sels = self.view.sel()
-        if len(sels) == 1:
-            return
-        vid = self.view.id()
-        if len(sels) != len(found_under_expand_regions) + 1:
-            found_under_expand_regions = []
-            subtract_region(vid, sels[-1].a, sels[-1].b)
-
-        reg = found_under_expand_regions.pop()
-
-        subtract_region(vid, reg[0], reg[1])
-        show_point(vid, found_under_expand_regions[-1][-1], True, False, True)
+            sel = -1 if last else 0
+            selections.subtract(selections[sel])
+            self.view.show(selections[sel].b, True)
 
 
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
