@@ -5,6 +5,11 @@
     },
 
     {
+      "caption": "Copy Whole File",
+      "command": "copy_buffer",
+    },
+
+    {
       "caption": "Disable Save After Number Change",
       "command": "disable_save_after_number_change"
     },
