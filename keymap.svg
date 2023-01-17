@@ -95,7 +95,7 @@
     </g>
 
     <text>
-        <tspan x="143" y="228">Cmt</tspan>
+        <tspan x="137" y="228">Comment</tspan>
         <tspan x="153" y="107">⌫Word</tspan>
         <tspan x="66" y="41">Goto</tspan>
         <tspan x="66" y="54">def</tspan>
@@ -103,7 +103,7 @@
         <tspan x="126" y="54">buffer</tspan>
         <tspan x="186" y="41">Next</tspan>
         <tspan x="186" y="54">Mark</tspan>
-        <tspan x="203" y="228">Cut</tspan>
+        <tspan x="201" y="228">Cut</tspan>
         <tspan x="214" y="107">Newline</tspan>
         <tspan x="246" y="41">Set</tspan>
         <tspan x="246" y="54">Mark</tspan>
@@ -170,10 +170,10 @@
         <tspan x="66" y="21">1</tspan>
         <tspan x="97" y="81">'</tspan>
         <tspan x="126" y="21">2</tspan>
-        <tspan x="143" y="201">;</tspan>
+        <tspan x="141" y="201">;</tspan>
         <tspan x="157" y="81">,</tspan>
         <tspan x="186" y="21">3</tspan>
-        <tspan x="203" y="201">Q</tspan>
+        <tspan x="201" y="201">Q</tspan>
         <tspan x="217" y="81">.</tspan>
         <tspan x="246" y="21">4</tspan>
         <tspan x="263" y="201">J</tspan>
