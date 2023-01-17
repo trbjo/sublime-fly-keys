@@ -1005,13 +1005,13 @@
     ]
 },
 
-{"keys": ["5"], "command": "fancy_close_pane" },
+{"keys": ["5"], "command": "fancy_move_buffer_to_prev_pane","args": {"close": false} },
 {"keys": ["5"], "command": "insert", "args": {"characters": "5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 {"keys": ["%"], "command": "close"},
 {"keys": ["%"], "command": "insert", "args": {"characters": "%"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
-{"keys": ["6"], "command": "fancy_move_pane" },
+{"keys": ["6"], "command": "fancy_move_buffer_to_next_pane" },
 {"keys": ["6"], "command": "insert", "args": {"characters": "6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 {"keys": ["^"], "command": "fancy_clone_pane" },
 {"keys": ["^"], "command": "insert", "args": {"characters": "^"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },

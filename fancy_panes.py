@@ -12,32 +12,34 @@ class FancyClonePaneCommand(WindowCommand):
         orig_view: View = w.active_view()
         next_group = w.active_group() + 1
         carets = list(orig_view.sel())
-        if num_groups >= MAX_NUM_GROUPS:
-            return
-        elif num_groups > next_group:
+        if num_groups > next_group:
             for v in w.views_in_group(next_group):
                 if orig_view.buffer_id() == v.buffer_id():
                     return  # only unique buffers per group
             w.run_command("clone_file")
             new_view = w.active_view()
             w.move_sheets_to_group(sheets=[new_view.sheet()], group=next_group)
-        else:
+        elif num_groups < MAX_NUM_GROUPS:
             w.run_command("clone_file")
-            new_view = w.active_view()
             w.run_command("new_pane")
 
+        new_view = w.active_view()
+        if new_view is None:
+            return
         new_view.sel().clear()
         new_view.sel().add_all(carets)
         new_view.show_at_center(carets[0].b)
 
 
-class FancyMovePaneCommand(WindowCommand):
+class FancyMoveBufferToNextPaneCommand(WindowCommand):
     def run(self) -> None:
         w = active_window()
+        if len(w.views_in_group(w.active_group())) < 2:
+            return
         num_groups = w.num_groups()
         view: View = w.active_view()
         next_group = w.active_group() + 1
-        if num_groups >= MAX_NUM_GROUPS:
+        if next_group >= MAX_NUM_GROUPS:
             return
         elif num_groups > next_group:
             for v in w.views_in_group(next_group):
@@ -48,13 +50,23 @@ class FancyMovePaneCommand(WindowCommand):
             w.run_command("new_pane")
 
 
-class FancyClosePaneCommand(WindowCommand):
-    def run(self) -> None:
+class FancyMoveBufferToPrevPaneCommand(WindowCommand):
+    def run(self, close: bool = False) -> None:
         w = active_window()
         if w.num_groups() < 2:
             return
 
-        w.run_command("close_pane")
+        active_view = w.active_view()
+        if active_view is None:
+            return
+
+        active_group = w.active_group()
+        if close or len(w.views_in_group(active_group)) < 2 or active_group == 0:
+            w.run_command("close_pane")
+        else:
+            prev_group = w.active_group() - 1
+            w.move_sheets_to_group(sheets=[active_view.sheet()], group=prev_group)
+
         active_view = w.active_view()
         if active_view is None:
             return
