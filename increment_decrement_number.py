@@ -14,7 +14,7 @@ class NumberCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
         selection = buf.sel()
-        for region in selection:
+        for region in reversed(selection):
             if region.empty() == False:
                 mystr = buf.substr(region)
                 if mystr.isdigit() or mystr.startswith("-") and mystr[1:].isdigit():
