@@ -897,11 +897,17 @@
 ////////////// Focus neighbor groups: ////////////////
 /////////////////////////////////////////////////////
 
+{"keys": ["V"], "command": "fancy_move_buffer_to_prev_pane","args": {"close": false} },
+
+{"keys": ["ctrl+v"], "command": "fancy_move_buffer_to_next_pane" },
+{"keys": ["^"], "command": "insert", "args": {"characters": "^"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
+
+
+{"keys": ["ctrl+shift+v"], "command": "fancy_clone_pane" },
 
 {"keys": ["v"], "command": "focus_neighboring_group"},
 {"keys": ["v"], "command": "insert", "args": {"characters": "v"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
-{"keys": ["ctrl+v"], "command": "focus_neighboring_group", "args": {"forward": false}},
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////// THe number row is not used in command mode, so we can use it for all sorts off cool stuff //////////////////////
@@ -972,6 +978,12 @@
 
 {"keys": ["2"], "command": "prompt_git", "context": [{"key": "selector", "operator": "equal", "operand": "text.git.commit"}, {"key": "setting.command_mode"}, ] },
 
+
+{"keys": ["@"], "command": "close"},
+{"keys": ["@"], "command": "insert", "args": {"characters": "@"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+
+
+
 // {"keys": ["2"], "command": "python_formatting" },
 
 {"keys": ["3"], "command": "next_bookmark", "context": [{"key": "setting.command_mode"}, ] },
@@ -1004,17 +1016,6 @@
         {"key": "setting.command_mode"},
     ]
 },
-
-{"keys": ["5"], "command": "fancy_move_buffer_to_prev_pane","args": {"close": false} },
-{"keys": ["5"], "command": "insert", "args": {"characters": "5"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
-{"keys": ["%"], "command": "close"},
-{"keys": ["%"], "command": "insert", "args": {"characters": "%"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
-{"keys": ["6"], "command": "fancy_move_buffer_to_next_pane" },
-{"keys": ["6"], "command": "insert", "args": {"characters": "6"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-{"keys": ["^"], "command": "fancy_clone_pane" },
-{"keys": ["^"], "command": "insert", "args": {"characters": "^"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 {"keys": ["7"], "command": "revert_hunk", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["7"], "command": "revert_modification", "context": [{"key": "selection_empty", "operator": "equal", "operand": false, "match_all": true }, {"key": "setting.command_mode"}, ] },
