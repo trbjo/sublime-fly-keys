@@ -905,11 +905,10 @@
 /////////////////////////////////////////////////////
 
 {"keys": ["V"], "command": "fancy_move_buffer_to_prev_pane","args": {"close": false} },
+{"keys": ["V"], "command": "insert", "args": {"characters": "V"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 {"keys": ["ctrl+v"], "command": "fancy_move_buffer_to_next_pane" },
-{"keys": ["^"], "command": "insert", "args": {"characters": "^"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
-
-
+{"keys": ["ctrl+v"], "command": "paste", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ]},
 
 {"keys": ["ctrl+shift+v"], "command": "fancy_clone_pane" },
 
