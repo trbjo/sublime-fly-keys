@@ -904,7 +904,7 @@
 ////////////// Focus neighbor groups: ////////////////
 /////////////////////////////////////////////////////
 
-{"keys": ["V"], "command": "fancy_move_buffer_to_prev_pane","args": {"close": false} },
+{"keys": ["V"], "command": "fancy_move_buffer_to_prev_pane" },
 {"keys": ["V"], "command": "insert", "args": {"characters": "V"}, "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 {"keys": ["ctrl+v"], "command": "fancy_move_buffer_to_next_pane" },
