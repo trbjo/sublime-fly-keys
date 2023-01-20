@@ -249,11 +249,18 @@
 
 
 ////////////////// Beginning of line/Backward by Paragraph:
-{"keys": ["a"], "command": "move_to", "args": { "to": "bol" }, "context":
-[
-    {"key": "setting.command_mode"},
-]
+{ "keys": ["a"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "move_to", "args": {"to": "hardbol"}},
+            {"command": "move_to", "args": {"to": "bol"}},
+        ]
+    },
+    "context": [
+        { "key": "setting.command_mode" },
+    ]
 },
+
 {"keys": ["a"], "command": "navigate_by_paragraph_backward", "context":
 [
     {"key": "following_text", "operator": "regex_contains", "operand": "^$|^\\S", "match_all": true},
@@ -273,7 +280,7 @@
 ]
 },
 
-{"keys": ["s"], "command": "move_to", "args": {"to": "eol", "extend": false}, "context":
+{"keys": ["s"], "command": "move_to", "args": {"to": "hardeol", "extend": false}, "context":
 [
     {"key": "setting.command_mode"},
     {"key": "following_text", "operator": "not_regex_match", "operand": "^$"},
