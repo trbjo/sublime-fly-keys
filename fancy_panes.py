@@ -1,4 +1,4 @@
-from sublime import View, active_window
+from sublime import active_window
 from sublime_plugin import WindowCommand
 
 MAX_NUM_GROUPS = 3
@@ -9,31 +9,43 @@ class FancyClonePaneCommand(WindowCommand):
         w = active_window()
 
         num_groups = w.num_groups()
-        view: View = w.active_view()
-        v_bid = view.buffer_id()
         next_group = w.active_group() + 1
 
-        carets = list(view.sel())
+        view = w.active_view()
+        v_bid = view.buffer_id()
+
+        carets = list(view.sel()) or [0]
+
         if num_groups > next_group:
             for v in w.views_in_group(next_group):
                 if v_bid == v.buffer_id():
                     return  # only unique buffers per group
+
             w.run_command("clone_file")
+
             new_view = w.active_view()
+            if new_view is None:
+                return
 
             w.move_sheets_to_group(sheets=[new_view.sheet()], group=next_group)
+
+            sels = new_view.sel()
+            sels.clear()
+            (sels.add(c) for c in carets)
+            new_view.show_at_center(carets[0])
 
         elif num_groups < MAX_NUM_GROUPS:
             w.run_command("clone_file")
             w.run_command("new_pane")
 
-        new_view = w.active_view()
-        if new_view is None:
-            return
+            new_view = w.active_view()
+            if new_view is None:
+                return
 
-        new_view.sel().clear()
-        new_view.sel().add_all(carets)
-        new_view.show_at_center(carets[0].b)
+            sels = new_view.sel()
+            sels.clear()
+            (sels.add(c) for c in carets)
+            new_view.show_at_center(carets[0])
 
 
 class FancyMoveBufferToNextPaneCommand(WindowCommand):
@@ -44,9 +56,10 @@ class FancyMoveBufferToNextPaneCommand(WindowCommand):
             return
 
         num_groups = w.num_groups()
-        view: View = w.active_view()
-        v_bid = view.buffer_id()
         next_group = w.active_group() + 1
+
+        view = w.active_view()
+        v_bid = view.buffer_id()
 
         if num_groups > next_group:
             for v in w.views_in_group(next_group):
