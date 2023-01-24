@@ -10,6 +10,14 @@ WORDCHARS = r"[-\._\w]+"
 SPACES = r"[^\s]"
 
 
+class BlockCursorOnStartupListener(sublime_plugin.EventListener):
+    def on_init(self, views):
+        for v in views:
+            command_mode = v.settings().get(key="command_mode")
+            if command_mode:
+                v.settings().set(key="block_caret", value=True)
+
+
 class AddCursorsToBeginningOfParagraphCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
         buf = self.view
