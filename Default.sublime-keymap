@@ -1049,7 +1049,7 @@
 
 // because we use enter as fallback we must include all the default keybindings as well
 {"keys": ["enter"], "command": "find_next", "context": [{"key": "setting.command_mode"} ] },
-{"keys": ["enter"], "command": "find_under_expand_skip", "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.command_mode"} ] },
+{"keys": ["enter"], "command": "smarter_find_under_expand", "args": {"forward": true, "skip": true}, "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.command_mode"} ] },
 
 {"keys": ["enter"], "command": "select", "context": [{"key": "control", "operand": "sidebar_tree"}] },
 {"keys": ["enter"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Add Line.sublime-macro"}, "context": [
@@ -1122,6 +1122,8 @@
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 
 { "keys": ["shift+enter"], "command": "find_prev", "context": [{"key": "setting.command_mode"} ] },
+{"keys": ["shift+enter"], "command": "smarter_find_under_expand", "args": {"forward": false, "skip": true}, "context": [{"key": "num_selections", "operator": "not_equal", "operand": 1 }, {"key": "setting.command_mode"} ] },
+
 { "keys": ["ctrl+enter"],   "command": "replace_next", "context": [{"key": "panel", "operand": "replace"},{"key": "panel_visible", "operator": "equal", "operand": true}] },
 { "keys": ["enter"],       "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 { "keys": ["shift+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},

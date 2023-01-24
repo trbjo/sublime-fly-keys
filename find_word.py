@@ -21,7 +21,7 @@ class SubtractSelectionCommand(sublime_plugin.TextCommand):
 
 
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
-    def run(self, edit, forward: bool = False) -> None:
+    def run(self, edit, forward: bool = False, skip: bool = False) -> None:
         vid = self.view.id()
         if forward:
             starting_point = self.view.sel()[-1].end()
@@ -69,6 +69,10 @@ class SmarterFindUnderExpand(sublime_plugin.TextCommand):
 
             if re.match(myregex, boundary_word):
                 break
+
+        if skip:
+            del_reg = self.view.sel()[-1 if forward else 0]
+            subtract_region(vid, del_reg.a, del_reg.b)
 
         add_region(vid, candidate_start, candidate_end, 0.0)
         show_point(vid, candidate_end, True, False, True)
