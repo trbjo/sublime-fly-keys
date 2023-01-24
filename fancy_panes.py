@@ -1,4 +1,3 @@
-from sublime import active_window
 from sublime_plugin import WindowCommand
 
 MAX_NUM_GROUPS = 3
@@ -6,7 +5,8 @@ MAX_NUM_GROUPS = 3
 
 class FancyClonePaneCommand(WindowCommand):
     def run(self) -> None:
-        w = active_window()
+
+        w = self.window
 
         num_groups = w.num_groups()
         next_group = w.active_group() + 1
@@ -31,7 +31,7 @@ class FancyClonePaneCommand(WindowCommand):
 
             sels = new_view.sel()
             sels.clear()
-            (sels.add(c) for c in carets)
+            [sels.add(c) for c in carets]
             new_view.show_at_center(carets[0])
 
         elif num_groups < MAX_NUM_GROUPS:
@@ -44,13 +44,13 @@ class FancyClonePaneCommand(WindowCommand):
 
             sels = new_view.sel()
             sels.clear()
-            (sels.add(c) for c in carets)
+            [sels.add(c) for c in carets]
             new_view.show_at_center(carets[0])
 
 
 class FancyMoveBufferToNextPaneCommand(WindowCommand):
     def run(self) -> None:
-        w = active_window()
+        w = self.window
 
         if len(w.views_in_group(w.active_group())) < 2:
             return
@@ -74,7 +74,7 @@ class FancyMoveBufferToNextPaneCommand(WindowCommand):
 
 class FancyMoveBufferToPrevPaneCommand(WindowCommand):
     def run(self) -> None:
-        w = active_window()
+        w = self.window
         if w.num_groups() < 2:
             return
 
