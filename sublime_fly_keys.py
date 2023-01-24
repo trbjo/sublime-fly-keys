@@ -1,10 +1,9 @@
 import re
-import string
-from typing import List, Union
+from typing import List
 
 import sublime
 import sublime_plugin
-from sublime import Edit, Region, Selection, View, active_window
+from sublime import Edit, Region, Selection
 
 WORDCHARS = r"[-\._\w]+"
 SPACES = r"[^\s]"
