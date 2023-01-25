@@ -23,56 +23,63 @@ class SubtractSelectionCommand(sublime_plugin.TextCommand):
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
     def run(self, edit, forward: bool = False, skip: bool = False) -> None:
         vid = self.view.id()
+        sels = self.view.sel()
+        first_cur = sels[0].begin()
+        last_cur = sels[-1].end()
+
         if forward:
-            starting_point = self.view.sel()[-1].end()
-            buf: str = view_substr(vid, starting_point, self.view.size())
-            begin = self.view.sel()[0].begin()
-            end = self.view.sel()[0].end()
+            buf: str = view_substr(vid, first_cur - 1, self.view.size())
+            wlength = sels[0].end() - sels[0].begin()
+            begin = sels[0].begin()
+            end = begin - 2
         else:
-            starting_point = self.view.sel()[0].begin()
-            buf: str = view_substr(vid, 0, starting_point)[::-1]
-            begin = self.view.sel()[-1].begin()
-            end = self.view.sel()[-1].end()
+            buf: str = view_substr(vid, 0, last_cur + 1)[::-1]
+            wlength = sels[-1].end() - sels[-1].begin()
+            begin = sels[-1].begin()
+            end = sels[-1].end() + wlength + 2
 
-        wlength = end - begin
-        word = view_substr(vid, begin, end)
-        word_surrounds = view_substr(vid, begin - 1, end + 1)
-
+        word = buf[1 : wlength + 1]
+        regex = r"\W" + re.escape(word) + r"\W"
         # imitate find under expand's boundary detection
-        myregex = r"\W" + word + r"\W"
-        orig_is_boundary = re.match(myregex, word_surrounds)
+        boundary_selection = all(
+            re.match(
+                regex,
+                buf[abs(ws.begin() - begin) : abs(ws.end() - end)],
+            )
+            for ws in sels
+            if not ws.empty()
+        )
 
-        look_for = word if forward else word[::-1]
-
-        rev_idx = -1
+        buffer_length = len(buf)
+        idx = last_cur - first_cur
         while True:
-            rev_idx = buf.find(look_for, rev_idx + 1)
+            idx = buf.find(word, idx + 1)
 
-            if rev_idx == -1:
+            if idx == -1:
                 return
 
-            if forward:
-                candidate_start = starting_point + rev_idx
-                candidate_end = candidate_start + wlength
-            else:
-                candidate_end = starting_point - rev_idx
-                candidate_start = candidate_end - wlength
-
-            if not orig_is_boundary:
+            if not boundary_selection:
                 break
 
-            if wlength == candidate_end:  # beginning of the buffer
-                boundary_word = view_substr(vid, candidate_start, candidate_end + 1)
-                myregex = word + r"\W"
+            if wlength + idx == buffer_length:  # beginning/end of the buffer
+                boundary_word = buf[idx - 1 : idx + wlength]
+                regex = re.escape(word) + r"\W"
             else:
-                boundary_word = view_substr(vid, candidate_start - 1, candidate_end + 1)
+                boundary_word = buf[idx - 1 : idx + wlength + 1]
 
-            if re.match(myregex, boundary_word):
+            if re.match(regex, boundary_word):
                 break
 
         if skip:
-            del_reg = self.view.sel()[-1 if forward else 0]
+            del_reg = sels[-1 if forward else 0]
             subtract_region(vid, del_reg.a, del_reg.b)
+
+        if forward:
+            candidate_start = first_cur + idx - 1
+            candidate_end = candidate_start + wlength
+        else:
+            candidate_end = last_cur - idx + 1
+            candidate_start = candidate_end - wlength
 
         add_region(vid, candidate_start, candidate_end, 0.0)
         show_point(vid, candidate_end, True, False, True)
