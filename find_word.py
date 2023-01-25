@@ -8,8 +8,6 @@ from sublime_api import view_selection_add_region as add_region
 from sublime_api import view_selection_subtract_region as subtract_region
 from sublime_api import view_show_point as show_point
 
-WORDCHARS = r"[-\._\w]+"
-
 
 class SubtractSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _, last=False) -> None:
