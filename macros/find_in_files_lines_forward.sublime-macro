@@ -1,7 +1,7 @@
 [
     {"command": "move_to", "args": {"to": "hardeol", "extend": false}},
-    {"command": "move", "args": {"by": "stops", "empty_line": true, "forward": true} },
     {"command": "move", "args": {"by": "characters", "forward": true}},
-    {"command": "scroll_to_top_of_viewport"},
+    {"command": "move", "args": {"by": "characters", "forward": true}},
+    {"command": "move_to", "args": {"to": "hardbol", "extend": false}},
     {"command": "find_in_files_goto", "args":{"preview": true}}
 ]

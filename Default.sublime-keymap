@@ -86,6 +86,8 @@
 ]
 },
 
+{"keys": ["c"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_lines_backward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
+
 ////////////////// Down:
 {"keys": ["t"], "command": "move", "args": {"by": "lines", "forward": true}, "context": [ {"key": "setting.command_mode"}, ] },
 {"keys": ["t"], "command": "move", "args": {"by": "lines", "forward": true, "extend": true}, "context":
@@ -100,6 +102,8 @@
     {"key": "last_command", "operator": "not_equal", "operand": "" },
 ]
 },
+
+{"keys": ["t"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_lines_forward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
 
 ////////////////// Right:
 {"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
@@ -1081,7 +1085,22 @@
 
 
 { "keys": ["enter"], "command": "find_next", "context": [{"key": "panel", "operand": "find"}, {"key": "panel_has_focus"}] },
-{ "keys": ["enter"], "command": "find_all", "context": [{"key": "panel", "operand": "find_in_files"}, {"key": "panel_has_focus"} ] },
+
+{"keys": ["enter"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "find_all"},
+            {"command": "focus_panel", "args": {"panel":"find_results"}},
+        ]
+    },
+"context": [
+        {"key": "panel", "operand": "find_in_files"},
+        {"key": "panel_has_focus"}
+    ]
+},
+{ "keys": ["6"], "command": "focus_panel", "args": {"panel":"find_results"}, "context": [{"key": "setting.command_mode"} ] },
+
+
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
 { "keys": ["ctrl+m"], "command": "listen_for_character", "args": {"forward": true },"context": [{"key": "setting.command_mode"}]},
