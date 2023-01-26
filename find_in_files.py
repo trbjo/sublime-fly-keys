@@ -6,6 +6,16 @@ import sublime
 from sublime import Region, View, active_window
 from sublime_plugin import EventListener, TextCommand, WindowCommand
 
+from .navigate_paragraphs import build_or_rebuild_ws_for_buffer
+
+
+class ScrollToTopOfViewportCommand(TextCommand):
+    def run(self, _):
+        reg = self.view.sel()[0]
+        text_point = self.view.text_to_layout(reg.a)
+        target_viewpoint = (0.0, text_point[1])
+        self.view.set_viewport_position(target_viewpoint)
+
 
 class SetReadOnly(EventListener):
     def on_new_async(self, view: View):
@@ -24,8 +34,17 @@ class FocusPanelCommand(WindowCommand):
 
         view = self.window.find_output_panel(panel)
         if view:
+            build_or_rebuild_ws_for_buffer(view=view, immediate=True)
             view.set_read_only(True)
+            if sublime.ui_info()["theme"]["style"] == "dark":
+                view.settings().set("color_scheme", "dark.sublime-color-scheme")
+            else:
+                view.settings().set("color_scheme", "Light_dim.sublime-color-scheme")
             self.window.focus_view(view)
+            hej = view.viewport_position()
+            vp = (400.0, 500.0)
+            view.set_viewport_position(vp)
+            print(f"{hej=}")
 
 
 class FindInFilesGotoCommand(TextCommand):

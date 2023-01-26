@@ -2,5 +2,6 @@
     {"command": "move", "args": {"by": "characters", "forward": false}},
     {"command": "move", "args": {"by": "stops", "empty_line": true, "forward": false} },
     {"command": "move", "args": {"by": "characters", "forward": true}},
-    {"command": "move_to", "args": {"to": "hardbol"}}
+    {"command": "move_to", "args": {"to": "hardbol"}},
+    {"command": "scroll_to_top_of_viewport"},
 ]
