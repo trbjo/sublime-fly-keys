@@ -3,14 +3,29 @@ from os import getenv, path
 from typing import Union
 
 import sublime
-from sublime import View
-from sublime_plugin import EventListener, TextCommand
+from sublime import Region, View, active_window
+from sublime_plugin import EventListener, TextCommand, WindowCommand
 
 
 class SetReadOnly(EventListener):
     def on_new_async(self, view: View):
         if view.element() == "find_in_files:output":
             view.set_read_only(True)
+
+
+class FocusPanelCommand(WindowCommand):
+    """
+    Focus the given output panel, optionally also ensuring that it is open.
+    """
+
+    def run(self, panel, show=True):
+        if show:
+            self.window.run_command("show_panel", {"panel": f"output.{panel}"})
+
+        view = self.window.find_output_panel(panel)
+        if view:
+            view.set_read_only(True)
+            self.window.focus_view(view)
 
 
 class FindInFilesGotoCommand(TextCommand):
@@ -21,16 +36,15 @@ class FindInFilesGotoCommand(TextCommand):
         window: Union[sublime.Window, None] = view.window()
         if window is None:
             return
-        if view.name() == "Find Results":
-            line_no = self.get_line_no()
-            file_name = self.get_file()
-            if line_no is not None and file_name is not None:
-                caretpos = view.sel()[0].begin()
-                (_, col) = view.rowcol(caretpos)
-                file_loc = "%s:%s:%s" % (file_name, line_no, col - 6)
-                window.open_file(file_loc, sublime.ENCODED_POSITION)
-            elif file_name is not None:
-                window.open_file(file_name)
+        line_no = self.get_line_no()
+        file_name = self.get_file()
+        if line_no is not None and file_name is not None:
+            caretpos = view.sel()[0].begin()
+            (_, col) = view.rowcol(caretpos)
+            file_loc = "%s:%s:%s" % (file_name, line_no, col - 6)
+            new_view = window.open_file(file_loc, sublime.ENCODED_POSITION)
+        elif file_name is not None:
+            new_view = window.open_file(file_name)
 
     def get_line_no(self):
         view = self.view
