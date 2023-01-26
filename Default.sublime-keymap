@@ -269,6 +269,8 @@
 ]
 },
 
+{"keys": ["a"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_backward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
+
 // clear selection left
 {"keys": ["a"], "command": "clear_selection", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
 {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": true}, "context": [{"key": "setting.command_mode"} ] },
@@ -290,6 +292,8 @@
 },
 
 {"keys": ["ctrl+s"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
+
+{"keys": ["s"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_forward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
 
 // clear selection right
 {"keys": ["s"], "command": "clear_selection", "args": {"forward": true}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },

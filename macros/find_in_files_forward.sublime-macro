@@ -1,0 +1,5 @@
+[
+    {"command": "move_to", "args": {"to": "hardeol", "extend": false}},
+    {"command": "move", "args": {"by": "stops", "empty_line": true, "forward": true} },
+    {"command": "move", "args": {"by": "characters", "forward": true}},
+]
