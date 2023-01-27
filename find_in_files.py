@@ -169,7 +169,6 @@ class FindInFilesGotoCommand(TextCommand):
             file_loc = "%s:%s:%s" % (file_name, line_no, col)
         elif file_name is not None:
             file_loc = "%s:%s:%s" % (file_name, 1, 1)
-        print(f"{file_loc=}")
 
         params = sublime.ENCODED_POSITION
         if new_tab:
