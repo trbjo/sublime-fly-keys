@@ -1138,7 +1138,7 @@
     "args": {
         "commands": [
             {"command": "find_all"},
-            {"command": "focus_panel", "args": {"panel":"find_results"}},
+            {"command": "open_find_results"},
         ]
     },
 "context": [
@@ -1146,8 +1146,26 @@
         {"key": "panel_has_focus"}
     ]
 },
-{ "keys": ["6"], "command": "focus_panel", "args": {"panel":"find_results"}, "context": [{"key": "setting.command_mode"} ] },
 
+{"keys": ["enter"], "command": "find_in_files_goto", "args":{"preview": false}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+
+
+{"keys": ["5"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command":"open_find_results"},
+            {"command": "find_in_files_goto", "args": {"preview": true}},
+        ]
+    },
+"context": [
+        {"key": "setting.command_mode"}
+    ]
+},
+
+{"keys": ["5"], "command": "close_transient_view", "context": [
+    { "key": "panel", "operand": "output.find_results"},
+    { "key": "panel_visible", "operator": "equal", "operand": true }
+] },
 
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 

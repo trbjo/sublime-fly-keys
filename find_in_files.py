@@ -113,19 +113,6 @@ class ScrollToTopOfViewportCommand(TextCommand):
         self.view.set_viewport_position(target_viewpoint)
 
 
-class FocusPanelCommand(WindowCommand):
-    """
-    Focus the given output panel, optionally also ensuring that it is open.
-    """
-
-    def run(self, panel, show=True):
-        if show:
-            self.window.run_command("show_panel", {"panel": f"output.{panel}"})
-
-        if view := self.window.find_output_panel(panel):
-            self.window.focus_view(view)
-
-
 class OpenFindResultsCommand(WindowCommand):
     def run(self, show=True):
         if (view_before_search := self.window.active_view()) is not None:
