@@ -91,7 +91,6 @@
         "commands": [
             {"command": "line_up_find_in_files"},
             {"command": "find_in_files_goto", "args":{"preview": true}},
-            {"command": "focus_panel", "args": {"panel":"find_results"}},
         ]
     },
     "context": [
@@ -120,7 +119,6 @@
         "commands": [
             {"command": "line_down_find_in_files"},
             {"command": "find_in_files_goto", "args":{"preview": true}},
-            {"command": "focus_panel", "args": {"panel":"find_results"}},
         ]
     },
     "context": [
@@ -955,7 +953,7 @@
 {"keys": ["h"], "command": "insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["H"], "command": "delete_rest_of_line_and_insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.command_mode"}, ] },
-{"keys": ["h"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+{"keys": ["h"], "command": "find_in_files_goto", "args":{"preview": false}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 {"keys": ["h"], "command": "noop", "context":
     [
         {"key": "panel", "operand": "output.exec"},

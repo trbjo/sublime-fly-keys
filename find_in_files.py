@@ -166,24 +166,27 @@ class FindInFilesGotoCommand(TextCommand):
         if line_no is not None and file_name is not None:
             caretpos = view.sel()[0].begin()
             (_, col) = view.rowcol(caretpos)
-            file_loc = "%s:%s:%s" % (file_name, line_no, col - 6)
+            col -= 6
+            if col < 1:
+                col = 1
+            file_loc = "%s:%s:%s" % (file_name, line_no, col)
         elif file_name is not None:
             file_loc = "%s:%s:%s" % (file_name, 1, 1)
+        print(f"{file_loc=}")
 
         params = sublime.ENCODED_POSITION
-        if preview:
-            params += NewFileFlags.TRANSIENT
-
         if new_tab:
             params += NewFileFlags.FORCE_CLONE
+
+        if preview:
+            params += NewFileFlags.TRANSIENT
+        else:
+            self.view.window().run_command("hide_panel", {"cancel": True})
 
         window.open_file(fname=file_loc, flags=params)  # type: ignore
 
         if new_tab:
             window.run_command("new_pane")
-
-        if not preview:
-            self.view.window().run_command("hide_panel", {"cancel": True})
 
         elif target_line is not None:
             target_tp = self.view.text_to_layout(target_line.a)[1]
