@@ -1,10 +1,13 @@
 import re
 from os import getenv, path
-from typing import List
+from typing import Dict, List, Tuple
 
 import sublime
-from sublime import NewFileFlags
+import sublime_plugin
+from sublime import NewFileFlags, Region, View, active_window
 from sublime_api import view_cached_substr as view_substr
+from sublime_api import view_selection_add_region as add_region
+from sublime_api import view_set_viewport_position as set_vp
 from sublime_plugin import TextCommand, WindowCommand
 
 from .navigate_paragraphs import build_or_rebuild_ws_for_buffer
@@ -67,23 +70,39 @@ class LineUpFindInFilesCommand(TextCommand):
                 return
 
 
+class FindInFilesListener(sublime_plugin.EventListener):
+    def on_activated(self, view: View):
+        views = active_window().views()
+        if view.element() == "find_in_files:output":
+            v_n_s = {str(v.id()): [tuple(reg) for reg in v.sel()] for v in views}
+            viewport_positions = {str(v.id()): v.viewport_position() for v in views}
+            active_window().settings().set(key="ViewsBeforeSearch", value=v_n_s)
+            active_window().settings().set(
+                key="viewport_positions", value=viewport_positions
+            )
+
+
 class CloseTransientViewCommand(WindowCommand):
     def run(self):
         self.window.run_command("hide_panel", {"cancel": True})
 
         group = self.window.active_group()
         if (transient := self.window.transient_view_in_group(group)) is not None:
-            views: List[int] = self.window.settings().get("views_before_search", [])
-            if transient.id() not in views:
+            views: Dict[str, List[List[int]]] = self.window.settings().get(
+                "ViewsBeforeSearch", {}
+            )
+            viewport_pos: Dict[str, Tuple[float, float]] = self.window.settings().get(
+                "viewport_positions", {}
+            )
+            if str(transient.id()) not in views.keys():
                 transient.close()
-            else:
-                if (
-                    focus_view := self.window.settings().get("view_before_search")
-                ) is not None:
-                    for v in self.window.views():
-                        if v.id() == focus_view:
-                            self.window.focus_view(v)
-                            return
+            prior_v = self.window.settings().get("view_before_search")
+            for v in self.window.views():
+                v.sel().clear()
+                [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+                set_vp(v.id(), viewport_pos[str(v.id())], False)
+                if v.id() == prior_v:
+                    self.window.focus_view(v)
 
 
 class ScrollToTopOfViewportCommand(TextCommand):
@@ -109,12 +128,10 @@ class FocusPanelCommand(WindowCommand):
 
 class OpenFindResultsCommand(WindowCommand):
     def run(self, show=True):
-        views = [v.id() for v in self.window.views()]
-        self.window.settings().set(key="views_before_search", value=views)
-        view_before_search = self.window.active_view()
-        self.window.settings().set(
-            key="view_before_search", value=view_before_search.id()
-        )
+        if (view_before_search := self.window.active_view()) is not None:
+            self.window.settings().set(
+                key="view_before_search", value=view_before_search.id()
+            )
 
         if show:
             self.window.run_command("show_panel", {"panel": "output.find_results"})
@@ -147,12 +164,26 @@ class FindInFilesGotoCommand(TextCommand):
         if file_name is None:
             group = window.active_group()
             if (transient := window.transient_view_in_group(group)) is not None:
-                views: List[int] = window.settings().get("views_before_search", [])
-                if transient.id() not in views:
+                views: Dict[str, Tuple[int, int]] = window.settings().get(
+                    "ViewsBeforeSearch", {}
+                )
+                if str(transient.id()) not in views.keys():
                     transient.close()
             if not preview:
                 self.view.window().run_command("hide_panel", {"cancel": True})
             return None
+
+        views: Dict[str, List[List[int]]] = window.settings().get(
+            "ViewsBeforeSearch", {}
+        )
+        viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
+            "viewport_positions", {}
+        )
+
+        for v in window.views():
+            v.sel().clear()
+            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+            set_vp(v.id(), viewport_pos[str(v.id())], False)
 
         if line_no is not None and file_name is not None:
             caretpos = view.sel()[0].begin()
