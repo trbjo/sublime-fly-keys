@@ -10,8 +10,6 @@ from sublime_api import view_selection_add_region as add_region
 from sublime_api import view_set_viewport_position as set_vp
 from sublime_plugin import TextCommand, WindowCommand
 
-from .navigate_paragraphs import build_or_rebuild_ws_for_buffer
-
 VIEWPORT_MARGIN = 2
 
 
@@ -124,7 +122,6 @@ class OpenFindResultsCommand(WindowCommand):
             self.window.run_command("show_panel", {"panel": "output.find_results"})
 
         if view := self.window.find_output_panel("find_results"):
-            build_or_rebuild_ws_for_buffer(view=view, immediate=True)
             view.set_read_only(True)
             if sublime.ui_info()["theme"]["style"] == "dark":
                 view.settings().set("color_scheme", "dark.sublime-color-scheme")
