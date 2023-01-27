@@ -149,15 +149,6 @@ class FindInFilesGotoCommand(TextCommand):
         file_name, target_line = self.get_file()
 
         if file_name is None:
-            group = window.active_group()
-            if (transient := window.transient_view_in_group(group)) is not None:
-                views: Dict[str, Tuple[int, int]] = window.settings().get(
-                    "ViewsBeforeSearch", {}
-                )
-                if str(transient.id()) not in views.keys():
-                    transient.close()
-            if not preview:
-                self.view.window().run_command("hide_panel", {"cancel": True})
             return None
 
         views: Dict[str, List[List[int]]] = window.settings().get(
