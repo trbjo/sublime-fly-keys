@@ -86,7 +86,19 @@
 ]
 },
 
-{"keys": ["c"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_lines_backward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
+{ "keys": ["c"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "line_up_find_in_files"},
+            {"command": "find_in_files_goto", "args":{"preview": true}},
+            {"command": "focus_panel", "args": {"panel":"find_results"}},
+        ]
+    },
+    "context": [
+        { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
+        { "key": "setting.command_mode" },
+    ]
+},
 
 ////////////////// Down:
 {"keys": ["t"], "command": "move", "args": {"by": "lines", "forward": true}, "context": [ {"key": "setting.command_mode"}, ] },
@@ -103,7 +115,19 @@
 ]
 },
 
-{"keys": ["t"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_lines_forward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
+{ "keys": ["t"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "line_down_find_in_files"},
+            {"command": "find_in_files_goto", "args":{"preview": true}},
+            {"command": "focus_panel", "args": {"panel":"find_results"}},
+        ]
+    },
+    "context": [
+        { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
+        { "key": "setting.command_mode" },
+    ]
+},
 
 ////////////////// Right:
 {"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
@@ -273,7 +297,20 @@
 ]
 },
 
-{"keys": ["a"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_backward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
+{ "keys": ["a"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "navigate_backward_find_in_files"},
+            {"command": "find_in_files_goto", "args":{"preview": true}},
+        ]
+    },
+    "context": [
+        { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
+        { "key": "setting.command_mode" },
+    ]
+},
+
+
 
 // clear selection left
 {"keys": ["a"], "command": "clear_selection", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
@@ -297,7 +334,18 @@
 
 {"keys": ["ctrl+s"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["s"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/find_in_files_forward.sublime-macro"}, "context": [{"key": "selector","operator": "equal", "operand": "text.find-in-files"}, {"key": "setting.command_mode"}, ] },
+{ "keys": ["s"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command": "navigate_forward_find_in_files"},
+            {"command": "find_in_files_goto", "args":{"preview": true}},
+        ]
+    },
+    "context": [
+        { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
+        { "key": "setting.command_mode" },
+    ]
+},
 
 // clear selection right
 {"keys": ["s"], "command": "clear_selection", "args": {"forward": true}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
