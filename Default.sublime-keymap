@@ -880,6 +880,12 @@
  ]
 },
 
+{"keys": ["escape"], "command": "close_transient_view", "context": [
+    { "key": "panel", "operand": "output.find_results"},
+    { "key": "panel_visible", "operator": "equal", "operand": true }
+] },
+
+
 {"keys": ["escape"], "command": "command_mode", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, {"key": "setting.is_widget", "operator": "equal", "operand": false} ] },
 {"keys": ["escape"], "command": "clear_fields", "context": [{"key": "has_next_field", "operator": "equal", "operand": true} ] },
 {"keys": ["escape"], "command": "clear_fields", "context": [{"key": "has_prev_field", "operator": "equal", "operand": true} ] },
@@ -1226,6 +1232,9 @@
         { "key": "overlay_has_focus", "operator": "equal", "operand": false }
     ]
 },
+
+{"keys": ["ctrl+enter"], "command": "find_in_files_goto", "args":{"preview": false, "new_tab": true}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+
 
 /////////////////////////////////////////////////////
 //////////////////// SEARCH AND REPLACE /////////////

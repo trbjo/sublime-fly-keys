@@ -44,7 +44,7 @@ class LineDownFindInFilesCommand(TextCommand):
             s = v.sel()
             line = v.line(v.line(reg.b + 1).b + 1)
             while line.end() + 1 < v.size():
-                if line.empty():
+                if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
                     line = v.line(line.b + 1)
                     continue
                 s.clear()
@@ -61,7 +61,7 @@ class LineUpFindInFilesCommand(TextCommand):
             s = v.sel()
             line = v.line(v.line(reg.a - 1).a)
             while line.begin() > 1:
-                if line.empty():
+                if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
                     line = v.line(line.a - 1)
                     continue
                 s.clear()
