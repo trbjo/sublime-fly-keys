@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Optional
 
 import sublime
 import sublime_plugin
@@ -7,6 +7,18 @@ from sublime import Edit, Region, Selection
 
 WORDCHARS = r"[-\._\w]+"
 SPACES = r"[^\s]"
+
+
+class CommandModeCommand(WindowCommand):
+    def run(self) -> None:
+        view: Optional[View] = active_window().active_view()
+        active_window().run_command("hide_popup")
+        if view is None:
+            return
+        view.settings().set(key="block_caret", value=True)
+        view.settings().set(key="command_mode", value=True)
+        view.settings().set(key="needs_char", value=False)
+        maybe_rebuild(view)
 
 
 class BlockCursorOnStartupListener(sublime_plugin.EventListener):
