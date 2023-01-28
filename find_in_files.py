@@ -124,36 +124,34 @@ class FindInFilesGotoCommand(TextCommand):
             window.run_command("new_pane")
 
         elif target_line is not None:
-            target_tp = self.view.text_to_layout(target_line.a)[1]
-            cursor_tp = self.view.text_to_layout(view.sel()[0].a)[1]
+            target_tp = view.text_to_layout(target_line.a)[1]
+            cursor_tp = view.text_to_layout(view.sel()[0].a)[1]
             padding = view.line_height()
             if cursor_tp + padding - target_tp < view.viewport_extent()[1]:
                 target_viewpoint = (0.0, target_tp - VIEWPORT_MARGIN)
-                self.view.set_viewport_position(target_viewpoint)
+                view.set_viewport_position(target_viewpoint)
 
     def get_line_no(self):
-        view = self.view
-        if len(view.sel()) == 1:
-            line_text = view.substr(view.line(view.sel()[0]))
-            match = re.match(r"\s*(\d+):.+", line_text)
-            if match:
-                return match.group(1)
+        v = self.view
+        line_text = v.substr(v.line(v.sel()[0]))
+        match = re.match(r"\s*(\d+):.+", line_text)
+        if match:
+            return match.group(1)
         return None
 
     def get_file(self):
-        view = self.view
-        if len(view.sel()) == 1:
-            line = view.line(view.sel()[0])
-            if line.empty() or line.b + 1 == self.view.size() or line.a == 1:
-                return None, None
-            while line.begin() > 0:
-                line_text = view.substr(line)
-                match = re.match(r"^(\S.+):$", line_text)
-                if match:
-                    normalized_path = match.group(1).replace("~", HOME)
-                    if path.exists(normalized_path):
-                        return normalized_path, line
-                line = view.line(line.begin() - 1)
+        v = self.view
+        line = v.line(v.sel()[0])
+        if line.empty() or line.b + 1 <= v.size() or line.a == 1:
+            return None, None
+        while line.begin() > 1:
+            line_text = v.substr(line)
+            match = re.match(r"^(\S.+):$", line_text)
+            if match:
+                normalized_path = match.group(1).replace("~", HOME)
+                if path.exists(normalized_path):
+                    return normalized_path, line
+            line = v.line(line.begin() - 1)
         return None, None
 
     def get_next_pos(self, show: Optional[str]) -> int:
