@@ -5,19 +5,19 @@ from typing import Dict, List, Optional, Tuple
 import sublime
 import sublime_plugin
 from sublime import NewFileFlags, View, active_window
-from sublime_api import view_cached_substr as view_substr
-from sublime_api import view_selection_add_region as add_region
-from sublime_api import view_set_viewport_position as set_vp
+from sublime_api import view_cached_substr as view_substr  # pyright: ignore
+from sublime_api import view_selection_add_region as add_region  # pyright: ignore
+from sublime_api import view_set_viewport_position as set_vp  # pyright: ignore
 from sublime_plugin import TextCommand, WindowCommand
 
 VIEWPORT_MARGIN = 2
-HOME = getenv("HOME")
+HOME: str = getenv("HOME")  # pyright: ignore
 
 
 class FindInFilesListener(sublime_plugin.EventListener):
     def on_activated(self, view: View):
-        views = active_window().views()
         if view.element() == "find_in_files:output":
+            views = active_window().views()
             v_n_s = {str(v.id()): [tuple(reg) for reg in v.sel()] for v in views}
             vps = {str(v.id()): v.viewport_position() for v in views}
             active_window().settings().set(key="ViewsBeforeSearch", value=v_n_s)
@@ -32,10 +32,10 @@ class CloseTransientViewCommand(WindowCommand):
         if (transient := self.window.transient_view_in_group(group)) is not None:
             views: Dict[str, List[List[int]]] = self.window.settings().get(
                 "ViewsBeforeSearch", {}
-            )  # type: ignore
+            )  # pyright: ignore
             viewport_pos: Dict[str, Tuple[float, float]] = self.window.settings().get(
                 "viewport_positions", {}
-            )  # type: ignore
+            )  # pyright: ignore
             if str(transient.id()) not in views.keys():
                 transient.close()
             prior_v = self.window.settings().get("view_before_search")
@@ -85,7 +85,7 @@ class FindInFilesGotoCommand(TextCommand):
         line_no = self.get_line_no()
         file_name, target_line = self.get_file()
 
-        if file_name is None:
+        if file_name is None or target_line is None:
             return None
 
         if line_no is not None and file_name is not None:
@@ -115,10 +115,10 @@ class FindInFilesGotoCommand(TextCommand):
         else:
             views: Dict[str, List[List[int]]] = window.settings().get(
                 "ViewsBeforeSearch", {}
-            )  # type: ignore
+            )  # pyright: ignore
             viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
                 "viewport_positions", {}
-            )  # type: ignore
+            )  # pyright: ignore
 
             for v in window.views():
                 v.sel().clear()
@@ -126,7 +126,7 @@ class FindInFilesGotoCommand(TextCommand):
                 set_vp(v.id(), viewport_pos[str(v.id())], False)
             window.run_command("hide_panel")
 
-        window.open_file(fname=file_loc, flags=params)  # type: ignore
+        window.open_file(fname=file_loc, flags=params)  # pyright: ignore
 
         if new_tab:
             window.run_command("new_pane")
