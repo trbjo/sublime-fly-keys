@@ -1,71 +1,17 @@
 import re
 from os import getenv, path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
-from sublime import NewFileFlags, Region, View, active_window
+from sublime import NewFileFlags, View, active_window
 from sublime_api import view_cached_substr as view_substr
 from sublime_api import view_selection_add_region as add_region
 from sublime_api import view_set_viewport_position as set_vp
 from sublime_plugin import TextCommand, WindowCommand
 
 VIEWPORT_MARGIN = 2
-
-
-class NavigateForwardFindInFilesCommand(TextCommand):
-    def run(self, _):
-        v = self.view
-        reg = self.view.sel()[0]
-        match = v.find(r"\n\n.+:\n", reg.a)
-        if match.a == -1:
-            return
-        v.sel().clear()
-        v.sel().add(match.a + 2)
-
-
-class NavigateBackwardFindInFilesCommand(TextCommand):
-    def run(self, _):
-        v = self.view
-        reg = self.view.sel()[0]
-        buffer = view_substr(v.id(), 0, reg.b)[::-1]
-        if match := re.search(r"\n:.+\S\n\n", buffer):
-            v.sel().add(reg.b - match.end() + 2)
-            v.sel().subtract(reg)
-
-
-class LineDownFindInFilesCommand(TextCommand):
-    def run(self, _):
-        v = self.view
-        if len(v.sel()) == 1:
-            reg = v.sel()[0]
-            s = v.sel()
-            line = v.line(v.line(reg.b + 1).b + 1)
-            while line.end() + 1 < v.size():
-                if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
-                    line = v.line(line.b + 1)
-                    continue
-                s.clear()
-                s.add(line.a)
-                v.show(line.a)
-                return
-
-
-class LineUpFindInFilesCommand(TextCommand):
-    def run(self, _):
-        v = self.view
-        if len(v.sel()) == 1:
-            reg = v.sel()[0]
-            s = v.sel()
-            line = v.line(v.line(reg.a - 1).a)
-            while line.begin() > 1:
-                if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
-                    line = v.line(line.a - 1)
-                    continue
-                s.clear()
-                s.add(line.a)
-                v.show(line.a)
-                return
+HOME = getenv("HOME")
 
 
 class FindInFilesListener(sublime_plugin.EventListener):
@@ -73,11 +19,9 @@ class FindInFilesListener(sublime_plugin.EventListener):
         views = active_window().views()
         if view.element() == "find_in_files:output":
             v_n_s = {str(v.id()): [tuple(reg) for reg in v.sel()] for v in views}
-            viewport_positions = {str(v.id()): v.viewport_position() for v in views}
+            vps = {str(v.id()): v.viewport_position() for v in views}
             active_window().settings().set(key="ViewsBeforeSearch", value=v_n_s)
-            active_window().settings().set(
-                key="viewport_positions", value=viewport_positions
-            )
+            active_window().settings().set(key="viewport_positions", value=vps)
 
 
 class CloseTransientViewCommand(WindowCommand):
@@ -88,10 +32,10 @@ class CloseTransientViewCommand(WindowCommand):
         if (transient := self.window.transient_view_in_group(group)) is not None:
             views: Dict[str, List[List[int]]] = self.window.settings().get(
                 "ViewsBeforeSearch", {}
-            )
+            )  # type: ignore
             viewport_pos: Dict[str, Tuple[float, float]] = self.window.settings().get(
                 "viewport_positions", {}
-            )
+            )  # type: ignore
             if str(transient.id()) not in views.keys():
                 transient.close()
             prior_v = self.window.settings().get("view_before_search")
@@ -101,14 +45,6 @@ class CloseTransientViewCommand(WindowCommand):
                 set_vp(v.id(), viewport_pos[str(v.id())], False)
                 if v.id() == prior_v:
                     self.window.focus_view(v)
-
-
-class ScrollToTopOfViewportCommand(TextCommand):
-    def run(self, _):
-        reg = self.view.sel()[0]
-        text_point = self.view.text_to_layout(reg.a)
-        target_viewpoint = (0.0, text_point[1])
-        self.view.set_viewport_position(target_viewpoint)
 
 
 class OpenFindResultsCommand(WindowCommand):
@@ -131,34 +67,26 @@ class OpenFindResultsCommand(WindowCommand):
 
 
 class FindInFilesGotoCommand(TextCommand):
-    def run(self, _, preview=False, new_tab=False) -> None:
-
+    def run(self, _, new_tab=False, show=None) -> None:
         if (view := self.view) is None:
             return
-
         if (window := view.window()) is None:
             return
-
         if view != window.find_output_panel("find_results"):
             return
+
+        if (next_position := self.get_next_pos(show)) == -1:
+            return None  # no matches were found
+        elif next_position > 0:
+            view.sel().clear()
+            view.sel().add(next_position)
+            view.show(next_position)
 
         line_no = self.get_line_no()
         file_name, target_line = self.get_file()
 
         if file_name is None:
             return None
-
-        views: Dict[str, List[List[int]]] = window.settings().get(
-            "ViewsBeforeSearch", {}
-        )
-        viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
-            "viewport_positions", {}
-        )
-
-        for v in window.views():
-            v.sel().clear()
-            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-            set_vp(v.id(), viewport_pos[str(v.id())], False)
 
         if line_no is not None and file_name is not None:
             caretpos = view.sel()[0].begin()
@@ -174,10 +102,21 @@ class FindInFilesGotoCommand(TextCommand):
         if new_tab:
             params += NewFileFlags.FORCE_CLONE
 
-        if preview:
+        if show:
             params += NewFileFlags.TRANSIENT
         else:
-            self.view.window().run_command("hide_panel", {"cancel": True})
+            views: Dict[str, List[List[int]]] = window.settings().get(
+                "ViewsBeforeSearch", {}
+            )  # type: ignore
+            viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
+                "viewport_positions", {}
+            )  # type: ignore
+
+            for v in window.views():
+                v.sel().clear()
+                [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+                set_vp(v.id(), viewport_pos[str(v.id())], False)
+            window.run_command("hide_panel")
 
         window.open_file(fname=file_loc, flags=params)  # type: ignore
 
@@ -211,8 +150,38 @@ class FindInFilesGotoCommand(TextCommand):
                 line_text = view.substr(line)
                 match = re.match(r"^(\S.+):$", line_text)
                 if match:
-                    normalized_path = match.group(1).replace("~", getenv("HOME"))
+                    normalized_path = match.group(1).replace("~", HOME)
                     if path.exists(normalized_path):
                         return normalized_path, line
                 line = view.line(line.begin() - 1)
         return None, None
+
+    def get_next_pos(self, show: Optional[str]) -> int:
+        v = self.view
+        reg = v.sel()[0]
+        if show == "prev_line":
+            line = v.line(v.line(reg.a - 1).a)
+            while line.begin() > 1:
+                if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
+                    line = v.line(line.a - 1)
+                    continue
+                return line.a
+        elif show == "next_line":
+            line = v.line(v.line(reg.b + 1).b + 1)
+            while line.end() + 1 < v.size():
+                if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
+                    line = v.line(line.b + 1)
+                    continue
+                return line.a
+        elif show == "next_paragraph":
+            match = v.find(r"\n\n.+:\n", reg.a)
+            if match.a != -1:
+                return match.a + 2
+        elif show == "prev_paragraph":
+            buffer = view_substr(v.id(), 0, reg.b)[::-1]
+            if match := re.search(r"\n:.+\S\n\n", buffer):
+                return reg.b - match.end() + 2
+        else:
+            return 0
+
+        return -1
