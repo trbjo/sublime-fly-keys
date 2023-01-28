@@ -142,7 +142,7 @@ class FindInFilesGotoCommand(TextCommand):
     def get_file(self):
         v = self.view
         line = v.line(v.sel()[0])
-        if line.empty() or line.b + 1 <= v.size() or line.a == 1:
+        if line.empty() or line.b + 1 == v.size() or line.a == 1:
             return None, None
         while line.begin() > 1:
             line_text = v.substr(line)
