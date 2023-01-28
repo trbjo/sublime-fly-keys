@@ -1,4 +1,4 @@
-import datetime
+import time
 from bisect import bisect
 from typing import Dict, List, Tuple, Union
 
@@ -6,28 +6,8 @@ import sublime
 from sublime import Region, View, active_window
 from sublime_plugin import TextCommand, ViewEventListener, WindowCommand
 
-interesting_regions: Dict[View, Dict[str, Tuple[int]]] = {}
-timeout = datetime.datetime.now()
-
-
-class CommandModeCommand(WindowCommand):
-    def run(self) -> None:
-        view: Union[View, None] = active_window().active_view()
-        active_window().run_command("hide_popup")
-        # active_window().run_command('hide_panel')
-        if view is None:
-            return
-        view.settings().set(key="block_caret", value=True)
-        view.settings().set(key="needs_char", value=False)
-        view.settings().set(key="command_mode", value=True)
-        if view.element() is None:
-            if (
-                view not in interesting_regions
-                or not interesting_regions[view.buffer_id()]
-            ):
-                sublime.set_timeout(
-                    lambda: build_or_rebuild_ws_for_buffer(view, immediate=False), 2000
-                )
+interesting_regions: Dict[int, Dict[str, Tuple[int]]] = {}
+timeouts: Dict[int, float] = {}
 
 
 class RemoveBuildOutputCommand(WindowCommand):
@@ -41,13 +21,23 @@ class RemoveBuildOutputCommand(WindowCommand):
         view.settings().set(key="needs_char", value=False)
 
 
-def build_or_rebuild_ws_for_buffer(view: View, immediate: bool):
+def maybe_rebuild(view: View):
+
+    if view.element() is not None:
+        return
+
+    global timeouts
+    timeouts[view.buffer_id()] = time.time()
+    sublime.set_timeout(lambda: build_or_rebuild_ws_for_buffer(view, False), 2000)
+
+
+def build_or_rebuild_ws_for_buffer(view: View, now: bool):
     if view is None:
         return
-    global interesting_regions
-    global timeout
+    global timeouts
     buf_id = view.buffer_id()
-    if (datetime.datetime.now() - timeout).total_seconds() > 2 or immediate == True:
+    if now or (time.time() - timeouts.get(buf_id, 0) >= 2):
+        global interesting_regions
         interesting_regions[buf_id] = {}
         try:
             whitespaces: List[Region] = view.find_all(r"\n[\t ]*\n[\t ]*\S")
@@ -62,23 +52,21 @@ def build_or_rebuild_ws_for_buffer(view: View, immediate: bool):
             )
         except ValueError:
             pass
-    timeout = datetime.datetime.now()
+        timeouts[view.buffer_id()] = time.time()
 
 
 def get_regions(view: View, part: str, now: bool = False):
     global interesting_regions
 
     if now:
-        interesting_regions[view.buffer_id()] = {}
-        build_or_rebuild_ws_for_buffer(view, immediate=True)
+        build_or_rebuild_ws_for_buffer(view, now=True)
         myregs: Tuple[int] = interesting_regions[view.buffer_id()][part]
         return myregs
 
     try:
         myregs: Tuple[int] = interesting_regions[view.buffer_id()][part]
     except KeyError:
-        interesting_regions[view.buffer_id()] = {}
-        build_or_rebuild_ws_for_buffer(view, immediate=True)
+        build_or_rebuild_ws_for_buffer(view, now=True)
         myregs: Tuple[int] = interesting_regions[view.buffer_id()][part]
     return myregs
 
@@ -89,17 +77,14 @@ class ModifiedViewListener(ViewEventListener):
         if view.element() is None:
             global interesting_regions
             interesting_regions[view.buffer_id()] = {}
-            if view.settings().get("command_mode") == True:
-                sublime.set_timeout(
-                    lambda: build_or_rebuild_ws_for_buffer(view, immediate=False), 2000
-                )
+            if view.settings().get("command_mode"):
+                maybe_rebuild(view)
 
     def on_load_async(self):
         global interesting_regions
         view: View = self.view
-        if view not in interesting_regions and view.element() is None:
-            interesting_regions[view.buffer_id()] = {}
-            build_or_rebuild_ws_for_buffer(view, immediate=True)
+        if view.buffer_id() not in interesting_regions and view.element() is None:
+            build_or_rebuild_ws_for_buffer(view, now=True)
 
 
 class NavigateByParagraphForwardCommand(TextCommand):
