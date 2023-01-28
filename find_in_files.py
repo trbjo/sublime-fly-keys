@@ -104,6 +104,14 @@ class FindInFilesGotoCommand(TextCommand):
 
         if show:
             params += NewFileFlags.TRANSIENT
+
+            target_tp = view.text_to_layout(target_line.a)[1]
+            cursor_tp = view.text_to_layout(view.sel()[0].a)[1]
+            padding = view.line_height()
+            if cursor_tp + padding - target_tp < view.viewport_extent()[1]:
+                target_viewpoint = (0.0, target_tp - VIEWPORT_MARGIN)
+                view.set_viewport_position(target_viewpoint)
+
         else:
             views: Dict[str, List[List[int]]] = window.settings().get(
                 "ViewsBeforeSearch", {}
@@ -122,14 +130,6 @@ class FindInFilesGotoCommand(TextCommand):
 
         if new_tab:
             window.run_command("new_pane")
-
-        elif target_line is not None:
-            target_tp = view.text_to_layout(target_line.a)[1]
-            cursor_tp = view.text_to_layout(view.sel()[0].a)[1]
-            padding = view.line_height()
-            if cursor_tp + padding - target_tp < view.viewport_extent()[1]:
-                target_viewpoint = (0.0, target_tp - VIEWPORT_MARGIN)
-                view.set_viewport_position(target_viewpoint)
 
     def get_line_no(self):
         v = self.view
