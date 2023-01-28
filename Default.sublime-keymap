@@ -117,6 +117,8 @@
 
 ////////////////// Right:
 {"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+u"], "command": "move", "args": {"by": "characters", "forward": true}, "context": [{"key": "setting.command_mode","operator": "equal", "operand": false}, ] },
+
 {"keys": ["ctrl+u"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_subword_forward.sublime-macro"}, "context": [ {"key": "setting.command_mode"}, ] },
 
 {"keys": ["u"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true}, "context":
@@ -130,6 +132,7 @@
 
 ////////////////// Left:
 {"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false}, "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+o"], "command": "move", "args": {"by": "characters", "forward": false}, "context": [{"key": "setting.command_mode","operator": "equal", "operand": false}, ] },
 {"keys": ["ctrl+o"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_subword_backward.sublime-macro"}, "context": [ {"key": "setting.command_mode"}, ] },
 
 {"keys": ["o"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true}, "context":
@@ -160,6 +163,12 @@
 
 { "keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": false }, "context": [
     {"key": "setting.command_mode", "operator": "equal", "operand": true },
+]
+},
+
+{ "keys": ["ctrl+r"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": true, "extend": false }, "context": [
+    { "key": "panel_visible", "operator": "equal", "operand": true } ,
+    {"key": "setting.command_mode", "operator": "equal", "operand": false },
 ]
 },
 
@@ -223,6 +232,12 @@
 
 { "keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": false, "extend": false }, "context": [
     {"key": "setting.command_mode", "operator": "equal", "operand": true },
+]
+},
+
+{ "keys": ["ctrl+g"], "command": "move", "args": {"by": "stops", "word_begin": true, "empty_line": false, "separators": "", "forward": false, "extend": false }, "context": [
+    { "key": "panel_visible", "operator": "equal", "operand": true } ,
+    {"key": "setting.command_mode", "operator": "equal", "operand": false },
 ]
 },
 
@@ -481,16 +496,9 @@
 /////////////////// COPY: //////////////////////
 //////////////////////////////////////////////////
 
-// this command is intended to be run after a search to copy the whole line
-{"keys": ["j"], "command": "smart_copy", "args": {"whole_line": true}, "context": [
-    {"key": "setting.command_mode"},
-] },
+{"keys": ["ctrl+j"], "command": "copy"},
 
-{"keys": ["j"], "command": "smart_copy", "context": [
-    {"key": "setting.command_mode"},
-    {"key": "last_command", "operator": "not_equal", "operand": "" },
-    {"key": "last_command", "operator": "not_equal", "operand": "find_next" },
-] },
+{"keys": ["j"], "command": "smart_copy", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["j"], "command": "copy_in_find_in_files", "context": [
     {"key": "setting.command_mode"},
@@ -502,7 +510,9 @@
 /////////////////// PASTE: //////////////////////
 //////////////////////////////////////////////////
 
-{"keys": ["alt+k"], "command": "smart_paste_cut_newlines_or_whitespace", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+k"], "command": "paste", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
+{"keys": ["ctrl+k"], "command": "smart_paste_cut_newlines_or_whitespace", "context": [{"key": "setting.command_mode"}, ] },
+
 {"keys": ["k"], "command": "smart_paste", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["k"], "command": "smart_paste_cut_whitespace", "context": [
@@ -517,6 +527,7 @@
 ///////////////////////////////////////////////////
 
 {"keys": ["ctrl+z"], "command": "delete_smart", "context": [{"key": "setting.command_mode"}, ] },
+
 // this command is intended to be run after a search to mark the whole word
 { "keys": ["x"], "command": "chain",
         "args": {
@@ -799,8 +810,6 @@
 
 {"keys": ["ctrl+q"], "command": "cut"},
 {"keys": ["ctrl+q"], "command": "delete_smart","context": [{"key": "setting.command_mode", "operator": "equal", "operand": true },]},
-{"keys": ["ctrl+j"], "command": "copy"},
-{"keys": ["ctrl+k"], "command": "paste", "context": [{"key": "setting.command_mode", "operator": "equal", "operand": false }, ] },
 
 /////////////////////////////////////////////////
 /////////////////// ESCAPE: /////////////////////
@@ -840,7 +849,7 @@
     {"key": "panel", "operand": "find"},
     { "key": "panel_visible", "operator": "equal", "operand": true } ] },
 {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
-    {"key": "panel", "operand": "replace"},
+    { "key": "panel", "operand": "replace"},
     { "key": "panel_visible", "operator": "equal", "operand": true } ] },
 {"keys": ["escape"], "command": "hide_panel", "args": {"cancel": true}, "context": [
     {"key": "panel", "operand": "find_in_files"},
@@ -927,7 +936,7 @@
 {"keys": ["h"], "command": "insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["H"], "command": "delete_rest_of_line_and_insert_mode", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["h"], "command": "multiple_cursors_from_selection", "context": [{"key": "text", "operator": "regex_contains", "operand": "\n"}, {"key": "setting.command_mode"}, ] },
-{"keys": ["h"], "command": "find_in_files_goto", "args":{"preview": false}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+{"keys": ["h"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 {"keys": ["h"], "command": "noop", "context":
     [
         {"key": "panel", "operand": "output.exec"},
