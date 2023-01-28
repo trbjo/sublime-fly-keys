@@ -86,13 +86,7 @@
 ]
 },
 
-{ "keys": ["c"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "line_up_find_in_files"},
-            {"command": "find_in_files_goto", "args":{"preview": true}},
-        ]
-    },
+{ "keys": ["c"], "command": "find_in_files_goto", "args":{"show":"prev_line"},
     "context": [
         { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
         { "key": "setting.command_mode" },
@@ -114,13 +108,7 @@
 ]
 },
 
-{ "keys": ["t"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "line_down_find_in_files"},
-            {"command": "find_in_files_goto", "args":{"preview": true}},
-        ]
-    },
+{ "keys": ["t"], "command": "find_in_files_goto", "args":{ "show":"next_line"},
     "context": [
         { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
         { "key": "setting.command_mode" },
@@ -295,20 +283,12 @@
 ]
 },
 
-{ "keys": ["a"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "navigate_backward_find_in_files"},
-            {"command": "find_in_files_goto", "args":{"preview": true}},
-        ]
-    },
+{ "keys": ["a"], "command": "find_in_files_goto", "args":{ "show": "prev_paragraph"},
     "context": [
         { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
         { "key": "setting.command_mode" },
     ]
 },
-
-
 
 // clear selection left
 {"keys": ["a"], "command": "clear_selection", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
@@ -332,13 +312,7 @@
 
 {"keys": ["ctrl+s"], "command": "move_to", "args": {"to": "eol", "extend": true}, "context": [{"key": "setting.command_mode"}, ] },
 
-{ "keys": ["s"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "navigate_forward_find_in_files"},
-            {"command": "find_in_files_goto", "args":{"preview": true}},
-        ]
-    },
+{ "keys": ["s"], "command": "find_in_files_goto", "args":{ "show":"next_paragraph"},
     "context": [
         { "key": "selector","operator": "equal", "operand": "text.find-in-files"},
         { "key": "setting.command_mode" },
@@ -1151,14 +1125,14 @@
     ]
 },
 
-{"keys": ["enter"], "command": "find_in_files_goto", "args":{"preview": false}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+{"keys": ["enter"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 
 
 {"keys": ["5"], "command": "chain",
     "args": {
         "commands": [
             {"command":"open_find_results"},
-            {"command": "find_in_files_goto", "args": {"preview": true}},
+            {"command": "find_in_files_goto", "args": {"show": "same"}},
         ]
     },
 "context": [
@@ -1231,7 +1205,7 @@
     ]
 },
 
-{"keys": ["ctrl+enter"], "command": "find_in_files_goto", "args":{"preview": false, "new_tab": true}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
+{"keys": ["ctrl+enter"], "command": "find_in_files_goto", "args":{"new_tab": true}, "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 
 
 /////////////////////////////////////////////////////
