@@ -85,18 +85,16 @@ class FindInFilesGotoCommand(TextCommand):
         line_no = self.get_line_no()
         file_name, target_line = self.get_file()
 
-        if file_name is None or target_line is None:
-            return None
-
         if line_no is not None and file_name is not None:
-            caretpos = view.sel()[0].begin()
-            (_, col) = view.rowcol(caretpos)
-            col -= 6
+            caretpos = view.sel()[0].b
+            col = view.rowcol(caretpos)[1] - 6
             if col < 1:
                 col = 1
-            file_loc = "%s:%s:%s" % (file_name, line_no, col)
+            file_loc = f"{file_name}:{line_no}:{col}"
         elif file_name is not None:
-            file_loc = "%s:%s:%s" % (file_name, 1, 1)
+            file_loc = f"{file_name}:1:1"
+        else:
+            return None
 
         params = sublime.ENCODED_POSITION
         if new_tab:
@@ -158,7 +156,7 @@ class FindInFilesGotoCommand(TextCommand):
         v = self.view
         reg = v.sel()[0]
         if show == "prev_line":
-            line = v.line(v.line(reg.a - 1).a)
+            line = v.line(v.line(reg.b - 1).a)
             while line.begin() > 1:
                 if line.empty() or re.match(r"^(\S.+):$", v.substr(line)):
                     line = v.line(line.a - 1)
@@ -172,9 +170,8 @@ class FindInFilesGotoCommand(TextCommand):
                     continue
                 return line.a
         elif show == "next_paragraph":
-            match = v.find(r"\n\n.+:\n", reg.a)
-            if match.a != -1:
-                return match.a + 2
+            if (match := v.find(r"\n\n.+:\n", reg.b).a) != -1:
+                return match + 2
         elif show == "prev_paragraph":
             buffer = view_substr(v.id(), 0, reg.b)[::-1]
             if match := re.search(r"\n:.+\S\n\n", buffer):
