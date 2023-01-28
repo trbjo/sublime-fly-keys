@@ -3,7 +3,10 @@ from typing import List, Optional
 
 import sublime
 import sublime_plugin
-from sublime import Edit, Region, Selection
+from sublime import Edit, Region, Selection, View, active_window
+from sublime_plugin import WindowCommand
+
+from .navigate_paragraphs import maybe_rebuild
 
 WORDCHARS = r"[-\._\w]+"
 SPACES = r"[^\s]"
