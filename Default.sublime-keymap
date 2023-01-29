@@ -278,17 +278,7 @@
 
 
 ////////////////// Beginning of line/Backward by Paragraph:
-{ "keys": ["a"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command": "move_to", "args": {"to": "hardbol"}},
-            {"command": "move_to", "args": {"to": "bol"}},
-        ]
-    },
-    "context": [
-        { "key": "setting.command_mode" },
-    ]
-},
+{ "keys": ["a"], "command": "go_to_soft_bol", "context": [{ "key": "setting.command_mode" }, ] },
 
 {"keys": ["a"], "command": "navigate_by_paragraph_backward", "context":
 [
@@ -306,7 +296,6 @@
 },
 
 // clear selection left
-{"keys": ["a"], "command": "clear_selection", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
 {"keys": ["ctrl+a"], "command": "move_to", "args": {"to": "bol", "extend": true}, "context": [{"key": "setting.command_mode"} ] },
 
 ////////////////// End of Line/Forward by paragraph:
@@ -316,7 +305,7 @@
 ]
 },
 
-{"keys": ["s"], "command": "move_to", "args": {"to": "hardeol", "extend": false}, "context":
+{"keys": ["s"], "command": "go_to_hard_eol", "context":
 [
     {"key": "setting.command_mode"},
     {"key": "following_text", "operator": "not_regex_match", "operand": "^$"},
@@ -334,9 +323,6 @@
     ]
 },
 
-// clear selection right
-{"keys": ["s"], "command": "clear_selection", "args": {"forward": true}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
-
 /////////////////////////////////////////////////////
 /////////////////// insert line: ////////////////////
 /////////////////////////////////////////////////////
@@ -353,6 +339,11 @@
         { "key": "setting.command_mode" },
     ]
 },
+
+// clear selection right
+{"keys": ["."], "command": "clear_selection", "args": {"forward": true}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
+
+
 
 { "keys": ["ctrl+."], "command": "chain",
     "args": {
@@ -386,6 +377,8 @@
     ]
 },
 
+{"keys": ["ctrl+."], "command": "clear_selection", "args": {"forward": false}, "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": false }, ] },
+
 
 /////////////////////////////////////////////////////
 ////////////////// insert space: ////////////////////
@@ -413,7 +406,7 @@
 /////////////////// Delete left/right: //////////////////////
 ////////////////////////////////////////////////////////////////
 
-{"keys": ["e"], "command": "right_delete", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["e"], "command": "smart_delete", "context": [{"key": "setting.command_mode"}, ] },
 {"keys": ["ctrl+e"], "command": "replace_single_char", "context": [{"key": "setting.command_mode"}, ] },
 
 {"keys": ["ctrl+backspace"], "command": "run_macro_file", "args": {"file": "res://Packages/sublime-fly-keys/macros/delete_subword_backward.sublime-macro"}, "context": [{ "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }, {"key": "setting.command_mode"}, ] },
@@ -490,7 +483,7 @@
 
 {"keys": ["q"], "command": "smart_cut" , "context": [{"key": "setting.command_mode"}, ] },
 
-{"keys": ["backspace"], "command": "delete_smart", "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode"} ] },
+{"keys": ["backspace"], "command": "smart_delete_line", "context": [{"key": "selection_empty", "operator": "equal", "operand": false }, {"key": "setting.command_mode"} ] },
 
 //////////////////////////////////////////////////
 /////////////////// COPY: //////////////////////
@@ -526,7 +519,7 @@
 /////////////////// DUPLICATE: //////////////////////
 ///////////////////////////////////////////////////
 
-{"keys": ["ctrl+z"], "command": "delete_smart", "context": [{"key": "setting.command_mode"}, ] },
+{"keys": ["ctrl+z"], "command": "smart_delete", "context": [{"key": "setting.command_mode"}, ] },
 
 // this command is intended to be run after a search to mark the whole word
 { "keys": ["x"], "command": "chain",
@@ -780,8 +773,6 @@
 
 {"keys": ["shift+space"], "command": "auto_complete"},
 
-{"keys": ["'"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }] },
-
 {"keys": ["ctrl+shift+l"], "command": "lsp_symbol_rename", "context": [{"key": "setting.command_mode"}, {"key": "setting.lsp_active"}, ] },
 
 
@@ -809,7 +800,7 @@
 ] },
 
 {"keys": ["ctrl+q"], "command": "cut"},
-{"keys": ["ctrl+q"], "command": "delete_smart","context": [{"key": "setting.command_mode", "operator": "equal", "operand": true },]},
+{"keys": ["ctrl+q"], "command": "smart_delete","context": [{"key": "setting.command_mode", "operator": "equal", "operand": true },]},
 
 /////////////////////////////////////////////////
 /////////////////// ESCAPE: /////////////////////
@@ -1134,26 +1125,6 @@
     ]
 },
 
-{"keys": ["enter"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
-
-
-{"keys": ["5"], "command": "chain",
-    "args": {
-        "commands": [
-            {"command":"open_find_results"},
-            {"command": "find_in_files_goto", "args": {"show": "same"}},
-        ]
-    },
-"context": [
-        {"key": "setting.command_mode"}
-    ]
-},
-
-{"keys": ["5"], "command": "close_transient_view", "context": [
-    { "key": "panel", "operand": "output.find_results"},
-    { "key": "panel_visible", "operator": "equal", "operand": true }
-] },
-
 { "keys": ["enter"], "command": "select", "context": [{ "key": "overlay_has_focus", "operator": "equal", "operand": true }, { "key": "overlay_name", "operator": "equal", "operand" : "goto" } ], },
 
 { "keys": ["ctrl+m"], "command": "listen_for_character", "args": {"forward": true },"context": [{"key": "setting.command_mode"}]},
@@ -1179,7 +1150,7 @@
     },
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 
-{"keys": ["ctrl+shift+i"], "command": "chain",
+{"keys": ["ctrl+i"], "command": "chain",
     "args": {
         "commands": [
             {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
@@ -1188,7 +1159,28 @@
     },
 "context": [{"key": "setting.command_mode", "operator": "equal", "operand": true }, ] },
 
-{"keys": ["ctrl+i"], "command": "chain",
+// {"keys": ["'"], "command": "goto_symbol_in_project" , "context": [{"key": "setting.command_mode"}, {"key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }] },
+
+{"keys": ["'"], "command": "chain",
+    "args": {
+        "commands": [
+            {"command":"open_find_results"},
+            {"command": "find_in_files_goto", "args": {"show": "same"}},
+        ]
+    },
+"context": [
+        {"key": "setting.command_mode"}
+    ]
+},
+
+{"keys": ["'"], "command": "close_transient_view", "context": [
+    { "key": "panel", "operand": "output.find_results"},
+    { "key": "panel_visible", "operator": "equal", "operand": true }
+] },
+
+
+
+{"keys": ["ctrl+'"], "command": "chain",
     "args": {
         "commands": [
             {"command": "set_setting", "args": {"setting": "sneak_override_find_keybinding", "value": false }},
@@ -1202,6 +1194,7 @@
 
 { "keys": ["ctrl+enter"],   "command": "replace_next", "context": [{"key": "panel", "operand": "replace"},{"key": "panel_visible", "operator": "equal", "operand": true}] },
 { "keys": ["enter"],       "command": "repeat_find_next_character", "args": {"forward": true},  "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
+{"keys": ["enter"], "command": "find_in_files_goto", "context": [{  "key": "selector","operator": "equal", "operand": "text.find-in-files"} ] },
 { "keys": ["shift+enter"], "command": "repeat_find_next_character", "args": {"forward": false}, "context": [{"key": "setting.sneak_override_find_keybinding"}, {"key": "setting.command_mode"}]},
 
 { "keys": ["<character>"], "command": "find_next_character", "args": {"character": "<character>"}, "context": [{"key": "setting.needs_char"} ] },

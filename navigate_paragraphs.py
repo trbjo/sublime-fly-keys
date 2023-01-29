@@ -3,7 +3,11 @@ from bisect import bisect
 from typing import Dict, List, Tuple, Union
 
 import sublime
-from sublime import Region, View, active_window
+from sublime import DRAW_OUTLINED, Region, View, active_window
+from sublime_api import view_add_regions  # pyright: ignore
+from sublime_api import view_selection_add_point as add_point
+from sublime_api import view_selection_add_region as add_region  # pyright: ignore
+from sublime_api import view_selection_subtract_region as subtract_region
 from sublime_plugin import TextCommand, ViewEventListener, WindowCommand
 
 interesting_regions: Dict[int, Dict[str, Tuple[int]]] = {}
@@ -87,22 +91,82 @@ class ModifiedViewListener(ViewEventListener):
             build_or_rebuild_ws_for_buffer(view, now=True)
 
 
+class GoToHardEolCommand(TextCommand):
+    def run(self, _) -> None:
+        v = self.view
+        s = self.view.sel()
+        regs = []
+        vid = v.id()
+        for r in s:
+            line_end = v.line(r.end()).b
+            regs.append(Region(r.a, line_end))
+            s.subtract(r)
+            subtract_region(vid, r.a, r.b)
+            add_region(vid, line_end, line_end, 0.0)
+
+        view_add_regions(
+            vid,
+            "transient_selection",
+            regs,
+            "foreground",
+            "",
+            DRAW_OUTLINED,
+            [],
+            "",
+            None,
+            None,
+        )
+
+
 class NavigateByParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
-        buf = self.view
-        region = buf.sel()[-1].begin()
+        v = self.view
+        region = v.sel()[-1].begin()
         try:
-            myregs = get_regions(buf, "last")
+            myregs = get_regions(v, "last")
             bisect_res = bisect(myregs, region)
             sel_end = myregs[bisect_res]
         except IndexError:
-            myregs = get_regions(view=buf, part="last", now=True)
+            myregs = get_regions(view=v, part="last", now=True)
             bisect_res = bisect(myregs, region)
             sel_end = myregs[bisect_res]
         reg = Region(sel_end)
-        buf.sel().clear()
-        buf.sel().add(reg)
-        buf.show(reg.b, True)
+        v.sel().clear()
+        v.sel().add(reg)
+        v.show(reg.b, True)
+
+
+class GoToSoftBolCommand(TextCommand):
+    def get_soft_bol(self, r: Region) -> int:
+        line_reg = self.view.line(r.begin())
+        substr = self.view.substr(line_reg)
+        return line_reg.a + (len(substr) - len(substr.lstrip()))
+
+    def run(self, _) -> None:
+        v = self.view
+        s = v.sel()
+        regs = []
+        vid = v.id()
+        for r in s:
+            line_begin = self.get_soft_bol(r)
+            if r.a > line_begin:
+                regs.append(Region(r.a, line_begin))
+            s.subtract(r)
+            subtract_region(vid, r.a, r.b)
+            add_point(vid, line_begin)
+
+        view_add_regions(
+            vid,
+            "transient_selection",
+            regs,
+            "foreground",
+            "",
+            DRAW_OUTLINED,
+            [],
+            "",
+            None,
+            None,
+        )
 
 
 class NavigateByParagraphBackwardCommand(TextCommand):

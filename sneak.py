@@ -328,17 +328,24 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         "revert_selection",
     ]
 
+    no_erase_region = ["smart_copy", "smart_cut", "smart_delete"]
+
     def on_window_command(self, window: sublime.Window, _, __):
         view = window.active_view()
         if view is None:
             return
         view.erase_phantoms("Sneak")
         view.erase_regions("Sneak")
+        view.erase_regions("transient_selection")
         view.erase_regions("Sneaks")
         view.settings().set(key="needs_char", value=False)
         view.settings().set(key="has_stored_search", value=False)
 
     def on_text_command(self, view: View, command_name: str, _):
+        if not command_name in self.no_erase_region:
+            print("lol")
+            view.erase_regions("transient_selection")
+
         view.erase_regions("Sneak")
         view.erase_regions("Sneaks")
         view.erase_phantoms("Sneak")

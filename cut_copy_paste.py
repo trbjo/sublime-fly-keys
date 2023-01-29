@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, get_clipboard, set_clipboard
+from sublime_api import view_erase
 
 
 class CopyBufferCommand(sublime_plugin.TextCommand):
@@ -13,18 +14,26 @@ class CopyBufferCommand(sublime_plugin.TextCommand):
 
 class SmartCopyCommand(sublime_plugin.TextCommand):
     def run(self, _, whole_line: bool = False) -> None:
-        buf: View = self.view
-        sel = buf.sel()
+        v: View = self.view
+        sel = v.sel()
+
+        if has_regions := v.get_regions("transient_selection"):
+            to_copy = ("\n" if len(has_regions) > 1 else "").join(
+                v.substr(r) for r in has_regions
+            )
+            set_clipboard(to_copy)
+            v.erase_regions("transient_selection")
+            return
 
         if whole_line:
-            set_clipboard("".join(buf.substr(buf.full_line(reg)) for reg in sel))
+            set_clipboard("".join(v.substr(v.full_line(reg)) for reg in sel))
             reg = sel[-1].b
             sel.clear()
             sel.add(reg)
             return
 
         regions_to_copy: List[Region] = []
-        end = buf.full_line(sel[0].a).a
+        end = v.full_line(sel[0].a).a
 
         only_empty_selections = True
         contiguous_regions = True
@@ -32,7 +41,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         for region in sel:
             if region.empty():
 
-                line = buf.full_line(region.a)
+                line = v.full_line(region.a)
                 if regions_to_copy:
                     if (
                         regions_to_copy[-1].a != line.a
@@ -54,21 +63,21 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
 
         if only_empty_selections:
             if contiguous_regions:
-                clip = buf.substr(Region(regions_to_copy[0].a, regions_to_copy[-1].b))
+                clip = v.substr(Region(regions_to_copy[0].a, regions_to_copy[-1].b))
             else:
-                clip = "".join(buf.substr(reg) for reg in regions_to_copy)
+                clip = "".join(v.substr(reg) for reg in regions_to_copy)
         else:
-            clip = "\n".join(buf.substr(reg) for reg in regions_to_copy)
+            clip = "\n".join(v.substr(reg) for reg in regions_to_copy)
 
         if clip.isspace():
             return
 
         if only_empty_selections and contiguous_regions:
-            reg = sel[-1].a
+            reg = sel[-1].b
             sel.clear()
             sel.add(reg)
         else:
-            pos = [reg.end() for reg in sel]
+            pos = [reg.b for reg in sel]
             sel.clear()
             sel.add_all(pos)
 
@@ -80,18 +89,30 @@ class SmartCutCommand(sublime_plugin.TextCommand):
     """docstring for SmartCopyCommand"""
 
     def run(self, edit: Edit) -> None:
-        buf: View = self.view
-        sel = buf.sel()
+        v: View = self.view
+        sel = v.sel()
+
+        if has_regions := v.get_regions("transient_selection"):
+            to_copy = ("\n" if len(has_regions) > 1 else "").join(
+                v.substr(r) for r in has_regions
+            )
+            vid = v.id()
+            for r in reversed(has_regions):
+                view_erase(vid, edit.edit_token, r)
+
+            set_clipboard(to_copy)
+            v.erase_regions("transient_selection")
+            return
 
         regions_to_copy: List[Region] = []
-        end = buf.full_line(sel[0].begin()).begin()
+        end = v.full_line(sel[0].begin()).begin()
 
         only_empty_selections = True
         contiguous_regions = True
 
         for region in sel:
             if region.empty():
-                line = buf.full_line(region.begin())
+                line = v.full_line(region.begin())
 
                 if regions_to_copy != []:
                     if (
@@ -117,17 +138,17 @@ class SmartCutCommand(sublime_plugin.TextCommand):
                 interesting_region = Region(
                     regions_to_copy[0].begin(), regions_to_copy[-1].end()
                 )
-                clip = buf.substr(interesting_region)
-                buf.erase(edit, interesting_region)
+                clip = v.substr(interesting_region)
+                v.erase(edit, interesting_region)
             else:
-                clip = "".join(buf.substr(reg) for reg in regions_to_copy)
+                clip = "".join(v.substr(reg) for reg in regions_to_copy)
                 for reg in reversed(regions_to_copy):
-                    buf.erase(edit, reg)
+                    v.erase(edit, reg)
 
         else:
-            clip = "\n".join(buf.substr(reg) for reg in regions_to_copy)
+            clip = "\n".join(v.substr(reg) for reg in regions_to_copy)
             for reg in reversed(regions_to_copy):
-                buf.erase(edit, reg)
+                v.erase(edit, reg)
 
         if clip.isspace():
             return
@@ -197,7 +218,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
             indent = len(cur_line) - len(cur_line.lstrip())
         return indent
 
-    def run(self, edit: Edit) -> None:
+    def run(self, edit: Edit, above: bool = False) -> None:
         buf: View = self.view
         sels: Selection = buf.sel()
         clipboard = get_clipboard()
@@ -213,12 +234,14 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
             rev_sel: reversed[Region] = reversed(sels)
             for region, cliplet in zip(rev_sel, reversed(clips)):
+                pos_before = region.a
 
                 cur_line_num = buf.line(region.begin())
                 cur_line = buf.substr(cur_line_num)
 
                 if has_final_newline:
-                    insert_pos, _ = buf.line(region.begin())
+                    prior, posterior = buf.full_line(region.begin())
+                    insert_pos = prior if above else posterior
                     indent = self.find_indent(cur_line_num, cur_line)
                     insert_string = " " * indent + cliplet.lstrip() + "\n"
                 else:
@@ -234,12 +257,20 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                         reg = buf.full_line(region.begin())
                     buf.erase(edit, reg)
 
-                buf.insert(edit, insert_pos, insert_string)
+                if has_final_newline:
+                    buf.insert(edit, insert_pos, insert_string)
+                    sels.subtract(region)
+                    if above:
+                        sels.add(pos_before)
+                    else:
+                        sels.add(insert_pos + indent)
+                else:
+                    buf.insert(edit, insert_pos, insert_string)
 
             if has_final_newline and len(sels) > 1:
                 m = buf.sel()[-1]
                 buf.sel().clear()
-                buf.sel().add(m)
+                buf.sel().add(pos_before)
 
         # Ok, just regular paste
         elif len(clips) > len(sels):
@@ -263,8 +294,15 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
                 if region.empty() == False:
                     buf.erase(edit, region)
+                else:
+                    sels.subtract(region)
 
                 buf.insert(edit, insert_pos, insert_string)
+                sels.subtract(region)
+                if above:
+                    sels.add(insert_pos)
+                else:
+                    sels.add(insert_pos + above_indent)
 
         # we can use the selections as markers of where to cut
         # but only if it is clear that we want to do that.

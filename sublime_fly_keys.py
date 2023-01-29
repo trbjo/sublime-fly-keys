@@ -4,6 +4,7 @@ from typing import List, Optional
 import sublime
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, active_window
+from sublime_api import view_erase
 from sublime_plugin import WindowCommand
 
 from .navigate_paragraphs import maybe_rebuild
@@ -201,7 +202,23 @@ class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
         sel.add(Region(line_beg, line_end))
 
 
-class DeleteSmartCommand(sublime_plugin.TextCommand):
+class SmartDeleteCommand(sublime_plugin.TextCommand):
+    def run(self, edit: Edit) -> None:
+        v = self.view
+        vid = v.id()
+        if has_regions := v.get_regions("transient_selection"):
+            for r in reversed(has_regions):
+                view_erase(vid, edit.edit_token, r)
+            v.erase_regions("transient_selection")
+            return
+
+        for reg in reversed(v.sel()):
+            if reg.empty():
+                reg = Region(reg.a, reg.a + 1)
+            v.erase(edit, reg)
+
+
+class SmartDeleteLineCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         buf = self.view
         for region in reversed(buf.sel()):
