@@ -342,8 +342,7 @@ class FindNextCharacterListener(sublime_plugin.EventListener):
         view.settings().set(key="has_stored_search", value=False)
 
     def on_text_command(self, view: View, command_name: str, _):
-        if not command_name in self.no_erase_region:
-            print("lol")
+        if command_name not in self.no_erase_region:
             view.erase_regions("transient_selection")
 
         view.erase_regions("Sneak")
