@@ -5,12 +5,28 @@ import sublime
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, active_window
 from sublime_api import view_erase
+from sublime_api import view_selection_add_point as add_point
 from sublime_plugin import WindowCommand
 
 from .navigate_paragraphs import maybe_rebuild
 
 WORDCHARS = r"[-\._\w]+"
 SPACES = r"[^\s]"
+
+
+class BolEolCommand(sublime_plugin.TextCommand):
+    def run(self, edit: Edit, forward: bool):
+        v = self.view
+        s = v.sel()
+        vid = v.id()
+        if forward:
+            pts = [v.line(r.end()).b for r in s]
+        else:
+            pat = r"\s*(?=\S)"
+            pts = [v.find(pat, v.line(r.begin()).begin()).b for r in s]
+
+        s.clear()
+        [add_point(vid, r) for r in pts]
 
 
 class CommandModeCommand(WindowCommand):

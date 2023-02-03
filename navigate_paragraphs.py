@@ -91,33 +91,6 @@ class ModifiedViewListener(ViewEventListener):
             build_or_rebuild_ws_for_buffer(view, now=True)
 
 
-class GoToHardEolCommand(TextCommand):
-    def run(self, _) -> None:
-        v = self.view
-        s = self.view.sel()
-        regs = []
-        vid = v.id()
-        for r in s:
-            line_end = v.line(r.end()).b
-            regs.append(Region(r.a, line_end))
-            s.subtract(r)
-            subtract_region(vid, r.a, r.b)
-            add_region(vid, line_end, line_end, 0.0)
-
-        view_add_regions(
-            vid,
-            "transient_selection",
-            regs,
-            "accent",
-            "",
-            DRAW_OUTLINED,
-            [],
-            "",
-            None,
-            None,
-        )
-
-
 class NavigateByParagraphForwardCommand(TextCommand):
     def run(self, _) -> None:
         v = self.view
@@ -134,39 +107,6 @@ class NavigateByParagraphForwardCommand(TextCommand):
         v.sel().clear()
         v.sel().add(reg)
         v.show(reg.b, True)
-
-
-class GoToSoftBolCommand(TextCommand):
-    def get_soft_bol(self, r: Region) -> int:
-        line_reg = self.view.line(r.begin())
-        substr = self.view.substr(line_reg)
-        return line_reg.a + (len(substr) - len(substr.lstrip()))
-
-    def run(self, _) -> None:
-        v = self.view
-        s = v.sel()
-        regs = []
-        vid = v.id()
-        for r in s:
-            line_begin = self.get_soft_bol(r)
-            if r.a > line_begin:
-                regs.append(Region(r.a, line_begin))
-            s.subtract(r)
-            subtract_region(vid, r.a, r.b)
-            add_point(vid, line_begin)
-
-        view_add_regions(
-            vid,
-            "transient_selection",
-            regs,
-            "accent",
-            "",
-            DRAW_OUTLINED,
-            [],
-            "",
-            None,
-            None,
-        )
 
 
 class NavigateByParagraphBackwardCommand(TextCommand):
