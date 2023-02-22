@@ -1,4 +1,0 @@
-[
-    {"command": "move_to", "args": {"to": "hardeol", "extend": true}},
-    { "command": "left_delete" },
-]

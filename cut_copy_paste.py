@@ -1,9 +1,13 @@
-import re
+import itertools
 from typing import List, Tuple
 
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, get_clipboard, set_clipboard
-from sublime_api import view_erase
+from sublime_api import view_cached_substr as ssubstr
+from sublime_api import view_erase as erase
+from sublime_api import view_selection_add_point as add_pt
+from sublime_api import view_selection_add_region as add_region
+from sublime_api import view_selection_subtract_region as subtract
 
 
 class CopyBufferCommand(sublime_plugin.TextCommand):
@@ -12,77 +16,65 @@ class CopyBufferCommand(sublime_plugin.TextCommand):
         set_clipboard(buf.substr(Region(0, buf.size())))
 
 
+class SmartCopyWholeLineCommand(sublime_plugin.TextCommand):
+    def run(self, _) -> None:
+        v: View = self.view
+        sel = v.sel()
+        set_clipboard("".join(v.substr(v.full_line(reg)) for reg in sel))
+        reg = sel[-1].b
+        sel.clear()
+        sel.add(reg)
+        v.show(sel[-1].b)
+        return
+
+
 class SmartCopyCommand(sublime_plugin.TextCommand):
     def run(self, _, whole_line: bool = False) -> None:
         v: View = self.view
+        vi = v.id()
         sel = v.sel()
 
-        if has_regions := v.get_regions("transient_selection"):
-            to_copy = ("\n" if len(has_regions) > 1 else "").join(
-                v.substr(r) for r in has_regions
-            )
-            set_clipboard(to_copy)
-            v.erase_regions("transient_selection")
-            return
-
-        if whole_line:
-            set_clipboard("".join(v.substr(v.full_line(reg)) for reg in sel))
-            reg = sel[-1].b
-            sel.clear()
-            sel.add(reg)
-            return
-
-        regions_to_copy: List[Region] = []
+        future_cb: List[Region] = []
         end = v.full_line(sel[0].a).a
 
-        only_empty_selections = True
         contiguous_regions = True
 
-        for region in sel:
-            if region.empty():
-
-                line = v.full_line(region.a)
-                if regions_to_copy:
-                    if (
-                        regions_to_copy[-1].a != line.a
-                        and regions_to_copy[-1].b != line.b
-                    ):
-                        regions_to_copy.append(line)
+        for r in sel:
+            if r.a != r.b:
+                future_cb.append(r)
+            else:
+                line = v.full_line(r.a)
+                if future_cb:
+                    if future_cb[-1].a != line.a and future_cb[-1].b != line.b:
+                        future_cb.append(line)
                 else:
-                    regions_to_copy.append(line)
+                    future_cb.append(line)
 
-                if contiguous_regions == True:
+                if contiguous_regions:
                     if end == line.a:
                         end = line.b
                     else:
                         contiguous_regions = False
 
-            else:
-                only_empty_selections = False
-                regions_to_copy.append(region)
-
-        if only_empty_selections:
+        if only_empty_selections := all(r.b == r.a for r in sel):
             if contiguous_regions:
-                clip = v.substr(Region(regions_to_copy[0].a, regions_to_copy[-1].b))
+                clip = v.substr(Region(future_cb[0].a, future_cb[-1].b))
             else:
-                clip = "".join(v.substr(reg) for reg in regions_to_copy)
+                clip = "".join(v.substr(reg) for reg in future_cb)
         else:
-            clip = "\n".join(v.substr(reg) for reg in regions_to_copy)
+            clip = "\n".join(v.substr(reg) for reg in future_cb)
 
         if clip.isspace():
             return
 
         if only_empty_selections and contiguous_regions:
-            reg = sel[-1].b
-            sel.clear()
-            sel.add(reg)
+            regs = [sel[-1].b]
         else:
-            pos = [reg.b for reg in sel]
-            sel.clear()
-            sel.add_all(pos)
+            regs = [reg.b for reg in sel]
 
+        sel.clear()
+        [add_pt(vi, p) for p in regs]
         set_clipboard(clip)
-        return
 
 
 class SmartCutCommand(sublime_plugin.TextCommand):
@@ -91,18 +83,6 @@ class SmartCutCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         v: View = self.view
         sel = v.sel()
-
-        if has_regions := v.get_regions("transient_selection"):
-            to_copy = ("\n" if len(has_regions) > 1 else "").join(
-                v.substr(r) for r in has_regions
-            )
-            vid = v.id()
-            for r in reversed(has_regions):
-                view_erase(vid, edit.edit_token, r)
-
-            set_clipboard(to_copy)
-            v.erase_regions("transient_selection")
-            return
 
         regions_to_copy: List[Region] = []
         end = v.full_line(sel[0].begin()).begin()
@@ -191,194 +171,106 @@ class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
 
 class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
-        buf: View = self.view
+        v: View = self.view
         stripped_clipboard = get_clipboard().strip()
-        sels: Selection = buf.sel()
-        for region in reversed(sels):
-            buf.erase(edit, region)
-            buf.insert(edit, region.begin(), stripped_clipboard)
+        s: Selection = v.sel()
+        for r in reversed(s):
+            v.erase(edit, r)
+            v.insert(edit, r.begin(), stripped_clipboard)
+
+
+def find_indent(v: View, line: Region, above: bool = False) -> int:
+    vi = v.id()
+    if line.a == line.b:
+        if above:
+            l_beg = line.b
+            while l_beg > 1:
+                l_beg, l_end = v.line(l_beg - 1)
+                if (prev_line := ssubstr(vi, l_beg, l_end)).startswith(" "):
+                    return len(prev_line) - len(prev_line.lstrip())
+        else:
+            l_end = line.b
+            while l_end < v.size():
+                l_beg, l_end = v.line(l_end + 1)
+                if (next_line := ssubstr(vi, l_beg, l_end)) != "":
+                    return len(next_line) - len(next_line.lstrip())
+        return 0
+    else:
+        cur_line_contents = v.substr(line)
+        if cur_line_contents.isspace():
+            return len(cur_line_contents)
+
+        if above:
+            line_contents = cur_line_contents
+        else:
+            line_contents = v.substr(v.line(line.b + 1))
+            if line_contents == "":
+                line_contents = cur_line_contents
+
+        return len(line_contents) - len(line_contents.lstrip())
 
 
 class SmartPasteCommand(sublime_plugin.TextCommand):
-    def find_indent(self, cur_line_num: Region, cur_line: str) -> int:
-        buf: View = self.view
-        # if we have a new, empty file:
-        if buf.size() == 0:
-            return 0
-        clipboard = get_clipboard()
-        if len(cur_line) == 0 and clipboard.startswith(" "):
-            lines_above, _ = buf.line(cur_line_num.begin())
-            for line in range(lines_above):
-                line += 1
-                prev_line = buf.substr(buf.line(cur_line_num.begin() - line))
-                if prev_line.startswith(" "):
-                    break
-            indent = len(prev_line) - len(prev_line.lstrip())
-        else:
-            indent = len(cur_line) - len(cur_line.lstrip())
-        return indent
+    def selections_match_clipboard(self, s: Selection, clips: List[str]) -> bool:
+        vi = self.view.id()
+        return all(not r.empty() for r in s) and len(set(clips)) == len(
+            set(ssubstr(vi, r.a, r.b) for r in s)
+        )
 
-    def run(self, edit: Edit, above: bool = False) -> None:
-        buf: View = self.view
-        sels: Selection = buf.sel()
+    def run(self, edit: Edit, above: bool = False, replace=True) -> None:
+        v: View = self.view
+        s: Selection = v.sel()
         clipboard = get_clipboard()
         clips = clipboard.splitlines()
+        vi = v.id()
+        is_whole_line = clipboard.endswith("\n")
 
-        if clipboard.endswith("\n"):
-            has_final_newline = True
+        if replace:
+            [erase(vi, edit.edit_token, r) for r in s if r.a != r.b]
         else:
-            has_final_newline = False
+            [(subtract(vi, r.begin(), r.end()), add_pt(vi, r.b)) for r in s]
 
-        # means we need to match the selections with the clips
-        if len(clips) == len(sels):
-
-            rev_sel: reversed[Region] = reversed(sels)
-            for region, cliplet in zip(rev_sel, reversed(clips)):
-                pos_before = region.a
-
-                cur_line_num = buf.line(region.begin())
-                cur_line = buf.substr(cur_line_num)
-
-                if has_final_newline:
-                    prior, posterior = buf.full_line(region.begin())
-                    insert_pos = prior if above else posterior
-                    indent = self.find_indent(cur_line_num, cur_line)
+        if len(clips) == len(s) or self.selections_match_clipboard(s, clips):
+            if is_whole_line:
+                for r, cliplet in zip(s, itertools.cycle(clips)):
+                    line_reg = v.line(r.begin())
+                    insert_pos = line_reg.begin() if above else line_reg.end() + 1
+                    indent = find_indent(v, line_reg, above)
                     insert_string = " " * indent + cliplet.lstrip() + "\n"
-                else:
+
+                    s.subtract(r)
+                    v.insert(edit, insert_pos, insert_string)
+                    add_pt(vi, insert_pos + indent)
+
+            else:
+                for r, cliplet in zip(s, itertools.cycle(clips)):
                     insert_string = cliplet
-                    insert_pos = region.begin()
+                    insert_pos = r.begin() if above else r.end()
+                    v.insert(edit, insert_pos, insert_string)
+                    add_region(vi, insert_pos, insert_pos + len(insert_string), 0.0)
 
-                if region.empty() == False:
-                    buf.erase(edit, region)
-                elif has_final_newline and len(sels) > 1:
-                    if region.a == buf.size():
-                        reg = buf.full_line(region.begin() - 1)
-                    else:
-                        reg = buf.full_line(region.begin())
-                    buf.erase(edit, reg)
+        else:
+            if is_whole_line:
+                for r in s:
+                    line_reg = v.line(r.begin())
+                    insert_pos = line_reg.begin() if above else line_reg.end() + 1
+                    indent = find_indent(v, line_reg, above)
 
-                if has_final_newline:
-                    buf.insert(edit, insert_pos, insert_string)
-                    sels.subtract(region)
-                    if above:
-                        sels.add(pos_before)
-                    else:
-                        sels.add(insert_pos + indent)
-                else:
-                    buf.insert(edit, insert_pos, insert_string)
-
-            if has_final_newline and len(sels) > 1:
-                m = buf.sel()[-1]
-                buf.sel().clear()
-                buf.sel().add(pos_before)
-
-        # Ok, just regular paste
-        elif len(clips) > len(sels):
-            rev_sel: reversed[Region] = reversed(sels)
-            for region in rev_sel:
-
-                cur_line_num = buf.line(region.begin())
-                cur_line = buf.substr(cur_line_num)
-
-                insert_pos, _ = buf.line(region.begin())
-                above_indent = self.find_indent(cur_line_num, cur_line)
-                insert_string = ""
-                initial_indent = None
-                for line in clips:
-                    deindented_line = line.lstrip()
-                    cur_indent = len(line) - len(deindented_line)
-                    if initial_indent == None:
-                        initial_indent = cur_indent
-                    this_indent = above_indent + cur_indent - initial_indent
-                    insert_string += " " * this_indent + deindented_line + "\n"
-
-                if region.empty() == False:
-                    buf.erase(edit, region)
-                else:
-                    sels.subtract(region)
-
-                buf.insert(edit, insert_pos, insert_string)
-                sels.subtract(region)
-                if above:
-                    sels.add(insert_pos)
-                else:
-                    sels.add(insert_pos + above_indent)
-
-        # we can use the selections as markers of where to cut
-        # but only if it is clear that we want to do that.
-        # We have two criteria:
-        # 1. they must belong to consecutive lines, and
-        # 2. the selections must not be on the border of words
-        elif len(clips) < len(sels):
-
-            if has_final_newline:
-
-                regions_to_remove: List[List[int]] = []
-                # It has to be
-                end: int = -1
-
-                # first we just loop over all the regions, collecting consecutive lines regions
-                i = -1
-                for region in sels:
-                    line = buf.full_line(region.begin())
-                    if end == line.a:
-                        regions_to_remove[i].append(line.end())
-                    else:
-                        i += 1
-                        regions_to_remove.append([line.begin()])
-
-                    end = line.end()
-
-                # Now we have the regions, and we now if we should delete anything
-                # on the lines. We can now do the loop again where we modify the buffer
-                # regions to be deleted will be those with more than two elements in the
-                # inner list
-                for regs in reversed(regions_to_remove):
-                    if len(regs) > 1:
-                        buf.erase(edit, Region(regs[0], regs[-1]))
-
-                # now we can start inserting:
-                rev_sel: reversed[Region] = reversed(sels)
-                for region in rev_sel:
-                    cur_line_num = buf.line(region.begin())
-                    cur_line = buf.substr(cur_line_num)
-
-                    insert_pos = buf.line(region.begin()).begin()
-                    above_indent = self.find_indent(cur_line_num, cur_line)
                     insert_string = ""
                     initial_indent = None
                     for line in clips:
-                        deindented_line = line.lstrip().rstrip()
+                        deindented_line = line.lstrip()
                         cur_indent = len(line) - len(deindented_line)
                         if initial_indent == None:
                             initial_indent = cur_indent
-                        this_indent = above_indent + cur_indent - initial_indent
+                        this_indent = indent + cur_indent - initial_indent
                         insert_string += " " * this_indent + deindented_line + "\n"
 
-                    buf.insert(edit, insert_pos, insert_string)
-
+                    s.subtract(r)
+                    v.insert(edit, insert_pos, insert_string)
+                    s.add(insert_pos + indent)
             else:
-                rev_sel: reversed[Region] = reversed(sels)
-                for region in rev_sel:
-                    if not region.empty():
-                        buf.erase(edit, region)
-                    insert_pos = region.begin()
-                    buf.insert(edit, insert_pos, clipboard)
-
-
-class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        buf: View = self.view
-        sel = buf.sel()
-        line = buf.line(sel[0])
-        line_content = buf.substr(line)
-
-        if line_content.startswith("/"):
-            set_clipboard(line_content[:-1])
-            return
-
-        line_match = re.match(r"^\s+\d+", line_content)
-        if line_match:
-            offset = line_match.end() + 2
-            set_clipboard(line_content[offset:])
-            return
+                for r in s:
+                    insert_pos = r.begin() if above else r.end()
+                    v.insert(edit, insert_pos, clipboard)
+                    add_region(vi, insert_pos, insert_pos + len(clipboard), 0.0)

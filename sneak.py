@@ -4,15 +4,20 @@ import sublime
 import sublime_plugin
 from sublime import DRAW_NO_OUTLINE, LAYOUT_INLINE, Edit, Region, Selection, View
 from sublime_api import view_add_phantom, view_add_regions
+from sublime_api import view_selection_add_point as add_point
+from sublime_api import view_selection_subtract_region as subtract_region
 
-# tuple of (search_string: str, forward: bool, extend: bool)
-char_forward_tuple: Tuple[str, bool, bool] = ("", True, False)
-matches: List[Region] = []
-charlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+from .base import Purpose, char_listener, charlist, listen_for_char
 
 
-class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
-    def execute(self, forward: bool, search_string: str, extend: bool) -> None:
+class NextCharacterBaseCommand(sublime_plugin.TextCommand):
+    def execute(
+        self,
+        search_string: str,
+        forward: bool,
+        extend: bool,
+        append_selection: bool = False,
+    ) -> None:
         view = self.view
         global matches
         matches = []
@@ -82,9 +87,9 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
                 location=self.view.sel()[-1].b,
             )
             return
-
-        for reg in regs_to_subtract:
-            view.sel().subtract(reg)
+        if not append_selection:
+            for reg in regs_to_subtract:
+                view.sel().subtract(reg)
         view.sel().add_all(regs_to_add)
         view.show(view.sel()[-1].b, True)
         view_id = self.view.id()
@@ -188,38 +193,60 @@ class FindNextCharacterBaseCommand(sublime_plugin.TextCommand):
         )
 
 
-class ListenForCharacterCommand(FindNextCharacterBaseCommand):
-    def run(self, _, forward: bool, extend: bool = False, single: bool = False) -> None:
-        self.view.settings().set(key="needs_char", value=True)
-        if single:
+class ListenForCharacterCommand(NextCharacterBaseCommand):
+    def run(
+        self,
+        _,
+        forward: bool,
+        extend: bool = False,
+        purpose: Purpose = Purpose.Nop,
+        append_selection=False,
+    ) -> None:
+        """
+        Sets the buffer ready for search
+        """
+
+        char_listener(
+            "",
+            forward,
+            purpose,
+            extend,
+            append_selection,
+        )
+
+        if purpose == Purpose.SingleSneak:
             arrow: str = "_❯" if forward else " ❮_"
-            self.view.settings().set(key="sneak_ready_to_search", value=True)
-            self.view.show_popup(
-                self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
-            )
-        else:
+        elif purpose == Purpose.DoubleSneak:
             arrow: str = "__❯" if forward else " ❮__"
-            self.view.show_popup(
-                self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
-            )
-            self.view.settings().set(key="sneak_ready_to_search", value=False)
+        else:
+            # this is not allowed
+            return
 
-        global char_forward_tuple
-        char_forward_tuple = ("", forward, extend)
+        self.view.settings().set(key="needs_char", value=True)
+
+        self.view.show_popup(
+            self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
+        )
 
 
-class RepeatFindNextCharacterCommand(FindNextCharacterBaseCommand):
+class RepeatNextCharacterCommand(NextCharacterBaseCommand):
     def run(self, _, **kwargs: bool) -> None:
-        search_string, forward, extend = char_forward_tuple
-        if not search_string:
+        if not listen_for_char["search_string"]:
             return
         if bool(kwargs):
             forward = kwargs["forward"]
+        else:
+            forward = listen_for_char["forward"]
         self.view.settings().set(key="has_stored_search", value=True)
-        self.execute(forward, search_string, extend)
+        self.execute(
+            listen_for_char["search_string"],
+            forward,
+            listen_for_char["extend"],
+            listen_for_char["append_selection"],
+        )
 
 
-class GoToNthMatchCommand(FindNextCharacterBaseCommand):
+class GoToNthMatchCommand(NextCharacterBaseCommand):
     def run(self, _, **kwargs: int) -> None:
         if bool(kwargs):
             number: int = kwargs["number"]
@@ -230,7 +257,8 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         region = sels[0]
         if len(sels) != 1:
             return
-        _, _, extend = char_forward_tuple
+
+        extend = listen_for_char["extend"]
         if region.a != region.b:
             extend = True
 
@@ -249,108 +277,46 @@ class GoToNthMatchCommand(FindNextCharacterBaseCommand):
         return
 
 
-class InsertSingleChar(sublime_plugin.TextCommand):
-    def run(self, edit: Edit):
-        view: View = self.view
-        self.view.settings().set(key="insert_single_char", value=True)
-        self.view.settings().set(key="block_caret", value=False)
-        self.view.settings().set(key="command_mode", value=False)
-        self.view.settings().set(key="needs_char", value=True)
-        self.view.settings().set(key="edit_buffer", value=True)
-        for sel in reversed(view.sel()):
-            view.insert(edit, sel.a, " ")
-            view.sel().add(Region(sel.a, sel.a + 1))
-
-
-class ReplaceSingleChar(sublime_plugin.TextCommand):
-    def run(self, edit):
-        view: View = self.view
-        self.view.settings().set(key="insert_single_char", value=True)
-        self.view.settings().set(key="block_caret", value=False)
-        self.view.settings().set(key="command_mode", value=False)
-        self.view.settings().set(key="needs_char", value=True)
-        self.view.settings().set(key="edit_buffer", value=True)
-        regions: list[Region] = []
-        for sel in view.sel():
-            regions.append(Region(sel.a, sel.a + 1))
-        view.sel().add_all(regions)
-
-
-class FindNextCharacterCommand(FindNextCharacterBaseCommand):
+class NextCharacterCommand(NextCharacterBaseCommand):
     def run(self, edit: Edit, character: str) -> None:
-        if self.view.settings().get("insert_single_char", False):
-            self.view.settings().set(key="command_mode", value=True)
-            self.view.settings().set(key="block_caret", value=True)
-            self.view.settings().set("insert_single_char", False)
+        v = self.view
+        vi = v.id()
+        global listen_for_char
+
+        search_string = listen_for_char["search_string"]
+        purpose = listen_for_char["purpose"]
+        forward = listen_for_char["forward"]
+
+        if purpose == Purpose.InsertChar:
             self.view.settings().set(key="needs_char", value=False)
-            if not self.view.settings().get(key="edit_buffer"):
-                return
-
+            self.view.settings().set(key="block_caret", value=True)
+            self.view.settings().set(key="command_mode", value=True)
             for reg in reversed(self.view.sel()):
-                if reg.empty():
-                    self.view.insert(edit, reg.a, character)
-                else:
-                    self.view.replace(edit, reg, character)
-            regs: list[int] = [reg.b for reg in self.view.sel()]
-            self.view.sel().clear()
-            self.view.sel().add_all(regs)
-
+                reg_length = reg.b - reg.a if reg.b > reg.a else 0
+                self.view.replace(edit, reg, character)
+                subtract_region(vi, reg.a, reg.b)
+                add_point(vi, reg.b - reg_length)
             return
 
-        global char_forward_tuple
-        sneak_ready_to_search: bool = self.view.settings().get(
-            key="sneak_ready_to_search", default=False
-        )
-        stored_char, forward, extend = char_forward_tuple
+        elif purpose == Purpose.SingleSneak:
+            search_string = character
 
-        if sneak_ready_to_search:
-            search_string = stored_char + character
-            char_forward_tuple = (search_string, forward, extend)
-            self.execute(forward, search_string, extend)
-            self.view.settings().set(key="sneak_ready_to_search", value=False)
-            self.view.settings().set(key="has_stored_search", value=True)
-            self.view.settings().set(key="sneak_override_find_keybinding", value=True)
-            self.view.settings().set(key="needs_char", value=False)
-        else:
-            self.view.settings().set(key="sneak_ready_to_search", value=True)
+        elif purpose == Purpose.DoubleSneak and not search_string:
+            char_listener(search_string=character)
             arrow: str = f"{character}_❯" if forward else f"❮{character}_"
             self.view.show_popup(
                 self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
             )
-            char_forward_tuple = character, forward, extend
-
-
-class FindNextCharacterListener(sublime_plugin.EventListener):
-    revert_to_normal_mode = [
-        "find_next_character",
-        "repeat_find_next_character",
-        "store_character",
-        "revert_selection",
-    ]
-
-    no_erase_region = ["smart_copy", "smart_cut", "smart_delete"]
-
-    def on_window_command(self, window: sublime.Window, _, __):
-        view = window.active_view()
-        if view is None:
             return
-        view.erase_phantoms("Sneak")
-        view.erase_regions("Sneak")
-        view.erase_regions("transient_selection")
-        view.erase_regions("Sneaks")
-        view.settings().set(key="needs_char", value=False)
-        view.settings().set(key="has_stored_search", value=False)
 
-    def on_text_command(self, view: View, command_name: str, _):
-        if command_name not in self.no_erase_region:
-            view.erase_regions("transient_selection")
+        elif purpose == Purpose.DoubleSneak and search_string:
+            search_string = search_string + character
 
-        view.erase_regions("Sneak")
-        view.erase_regions("Sneaks")
-        view.erase_phantoms("Sneak")
-        # and view.settings().get(key="needs_char")
-        if command_name not in self.revert_to_normal_mode:
-            view.settings().set(key="has_stored_search", value=False)
-            view.settings().set(key="needs_char", value=False)
-            # regs = [reg.b for reg in view.sel()]
-        # view.sel().clear()
+        self.view.settings().set(key="needs_char", value=False)
+        self.view.settings().set(key="has_stored_search", value=True)
+
+        extend = listen_for_char["extend"]
+        append_selection = listen_for_char["append_selection"]
+
+        char_listener(search_string)
+        self.execute(search_string, forward, extend, append_selection)

@@ -161,7 +161,7 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
         regions = []
         for pos in start_positions:
             found = False
-            for (start, _) in line_comments:
+            for start, _ in line_comments:
                 comment_region = sublime.Region(pos, pos + len(start))
                 if view.substr(comment_region) == start:
                     found = True
@@ -239,7 +239,7 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
 
         return True
 
-    def run(self, edit, block=False, variant=0):
+    def run(self, edit, block=False, next_line=False, variant=0):
         sel_posterior = -1
         for region in self.view.sel():
             sel_prior = sel_posterior
@@ -260,3 +260,10 @@ class ToggleCommentEnhancedCommand(sublime_plugin.TextCommand):
             else:
                 if not self.line_comment_region(self.view, edit, region, variant):
                     self.block_comment_region(self.view, edit, region, variant)
+
+        if next_line:
+            for r in self.view.sel():
+                next_line = self.view.line(self.view.line(r.b).b + 1).a
+                self.view.sel().subtract(r)
+                self.view.sel().add(next_line)
+                self.view.show(next_line)

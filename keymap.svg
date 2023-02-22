@@ -96,7 +96,7 @@
 
     <text>
         <tspan x="137" y="228">Comment</tspan>
-        <tspan x="153" y="107">⌫Word</tspan>
+        <tspan x="153" y="107">←</tspan>
         <tspan x="66" y="41">Goto</tspan>
         <tspan x="66" y="54">def</tspan>
         <tspan x="126" y="41">Save</tspan>
@@ -108,7 +108,7 @@
         <tspan x="246" y="41">Set</tspan>
         <tspan x="246" y="54">Mark</tspan>
         <tspan x="263" y="228">Copy</tspan>
-        <tspan x="275" y="107">⌦Word</tspan>
+        <tspan x="275" y="107">→</tspan>
         <tspan x="306" y="41">Unsplit</tspan>
         <tspan x="306" y="54">window</tspan>
         <tspan x="323" y="228">Paste</tspan>
