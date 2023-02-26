@@ -1,6 +1,5 @@
 from typing import Optional, Union
 
-import sublime_api
 import sublime_plugin
 from sublime import Edit, Region, View, active_window
 from sublime_api import view_add_regions  # pyright: ignore
@@ -101,7 +100,7 @@ class SetNumberCommand(sublime_plugin.TextCommand):
     def run(self, _, value=None):
         size = self.view.rowcol(self.view.size())[0]
         if value is None:
-            self.view.settings().erase("lolol")
+            self.view.settings().erase("set_number")
             if (multiplier := self.view.settings().get("multiplier")) is not None:
                 self.view.settings().erase("multiplier")
                 multiplier -= 1
@@ -121,4 +120,4 @@ class SetNumberCommand(sublime_plugin.TextCommand):
                 multiplier = value
 
             self.view.settings().set("multiplier", min(multiplier, min(size, 9999)))
-            self.view.settings().set("lolol", True)
+            self.view.settings().set("set_number", True)
