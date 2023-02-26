@@ -599,11 +599,6 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["ctrl+l"], "command": "smarter_soft_undo",
-        "context": [
-            { "key": "setting.command_mode" }
-        ]
-    },
     { "keys": ["shift+escape"], "command": "single_selection_last",
         "context": [
             { "key": "num_selections", "operator": "not_equal", "operand": 1}

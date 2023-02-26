@@ -12,7 +12,7 @@ from sublime_api import view_selection_subtract_region as subtract_region
 from sublime_api import view_show_point as show_point
 from sublime_plugin import TextCommand, TextInputHandler
 
-from .base import PositionAndType, backward, matchers
+from .base import PositionAndType, matchers
 
 pattern_cache = {}
 WORDCHARS = r"[-\._\w]+"
@@ -525,13 +525,6 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
         for region in self.view.sel():
             if region.end() != self.size:
                 self.looper(region)
-
-        if len(sels) != len(s) or any(
-            reg_a.a != reg_b.a or reg_a.b != reg_b.b for reg_a, reg_b in zip(sels, s)
-        ):
-            global backward
-            vi = self.view.id()
-            backward[vi].append(sels)
 
         self.view.show(self.view.sel()[-1].b, True)
 

@@ -3,17 +3,12 @@ from typing import List, Optional, Union
 
 import sublime
 import sublime_plugin
-from sublime import Region, Selection, View, active_window
+from sublime import Selection, View, active_window
 from sublime_api import view_full_line_from_point as full_line
 from sublime_api import view_line_from_point as line
 from sublime_api import view_selection_add_region as add_region
 
-from .base import (
-    backward,
-    build_or_rebuild_ws_for_buffer,
-    interesting_regions,
-    maybe_rebuild,
-)
+from .base import build_or_rebuild_ws_for_buffer, interesting_regions, maybe_rebuild
 
 
 class Action(IntEnum):
@@ -25,17 +20,6 @@ class Action(IntEnum):
 action: Action = Action.DO_NOTHING
 first_view: Union[View, None] = None
 old_pos: int = -1
-
-
-MIN_LINE_THRESHOLD = 5
-undo_no_track_cmds = [
-    "navigate_word",
-    "bol",
-    "eol",
-    "navigate_by_paragraph_forward",
-    "navigate_by_paragraph_backward",
-    "expand_selection_to_next",
-]
 
 
 revert_to_normal_mode = [
@@ -51,10 +35,7 @@ revert_to_normal_mode = [
 
 class BlockCursorOnStartupListener(sublime_plugin.EventListener):
     def on_init(self, views):
-        global backward
         for v in views:
-            vid = v.id()
-            backward[vid].append(list(v.sel()))
             command_mode = v.settings().get(key="command_mode")
             if command_mode:
                 v.settings().set(key="block_caret", value=True)
@@ -148,19 +129,8 @@ class EventListener(sublime_plugin.EventListener):
 
 
 class NextCharacterTextListener(sublime_plugin.ViewEventListener):
-    # todo: need to clone the queue when view is cloned
-    sels_before_cmd = [Region(1)]
-
     def on_text_command(self, command_name: str, args):
         v = self.view
-        vi = self.view.id()
-
-        current_sel = list(self.view.sel())
-        if command_name != "smarter_soft_undo":
-            if self.should_add(command_name, current_sel, self.sels_before_cmd):
-                global backward
-                backward[vi].append(current_sel)
-        self.sels_before_cmd = current_sel
 
         if command_name == "set_number":
             pre_command(v, command_name)
@@ -172,30 +142,6 @@ class NextCharacterTextListener(sublime_plugin.ViewEventListener):
             v.settings().erase("multiplier")
             v.settings().erase("set_number")
         pre_command(v, command_name)
-
-    def should_add(
-        self,
-        cmd_name: str,
-        current_sel: List[Region],
-        sels_before_cmd: List[Region],
-    ) -> bool:
-        if cmd_name in undo_no_track_cmds:
-            return False
-
-        if len(current_sel) != len(sels_before_cmd):
-            return True
-
-        if any(
-            reg_a.a != reg_b.a or reg_a.b != reg_b.b
-            for reg_a, reg_b in zip(current_sel, sels_before_cmd)
-        ) and any(not r.empty() for r in current_sel):
-            return True
-
-        current_pos = self.view.rowcol(current_sel[0].b)[0]
-        pos_before_cmd = self.view.rowcol(sels_before_cmd[0].b)[0]
-        if abs(current_pos - pos_before_cmd) > MIN_LINE_THRESHOLD:
-            return True
-        return False
 
     # thanks to Odatnurd from Sublime Discord
     @classmethod

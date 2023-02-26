@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict
 from enum import IntEnum
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import sublime
 from sublime import Region, View
@@ -17,6 +17,7 @@ PositionAndType = Tuple[int, int]
 # sneak
 matches: List[Region] = []
 charlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+
 
 #   char listener
 class Purpose(IntEnum):
@@ -55,30 +56,12 @@ def char_listener(
         listen_for_char["append_selection"] = append_selection
 
 
-# undo stack
-backward: Dict[int, List[Region]] = defaultdict(list)
-forward = defaultdict(list)
-
-
 def maybe_rebuild(view: View):
     if view.element() is not None:
         return
     global timeouts
     timeouts[view.buffer_id()] = time.time()
     sublime.set_timeout(lambda: build_or_rebuild_ws_for_buffer(view, False), 2000)
-    sublime.set_timeout(lambda: rebuild_undo_stack(view, False), 2000)
-
-
-def rebuild_undo_stack(view: View, now: bool):
-    global backward
-    global forward
-    vi = view.id()
-    s = view.sel()
-    forward[vi] = []
-    for hist_sel in backward[vi]:
-        for r in s:
-
-            pass
 
 
 def build_or_rebuild_ws_for_buffer(view: View, now: bool):

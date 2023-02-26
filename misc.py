@@ -6,8 +6,6 @@ from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_selection_add_region as add_reg  # pyright: ignore
 from sublime_plugin import WindowCommand
 
-from .base import backward, forward
-
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _, forward: Optional[bool] = None, cursor=False) -> None:
@@ -75,25 +73,6 @@ class RemoveBuildOutputCommand(WindowCommand):
         active_window().run_command("hide_panel")
         active_window().run_command("cancel_build")
         view.settings().set(key="needs_char", value=False)
-
-
-class SmarterSoftUndoCommand(sublime_plugin.TextCommand):
-    def run(self, _):
-        vi = self.view.id()
-        s = self.view.sel()
-
-        global forward
-        global backward
-
-        if len(backward[vi]) == 1:
-            prev_sel = backward[vi][0]
-        else:
-            prev_sel = backward[vi].pop()
-            forward[vi].append(prev_sel)
-
-        s.clear()
-        [add_reg(vi, r.a, r.b, 0.0) for r in prev_sel]
-        self.view.show(s)
 
 
 class SetNumberCommand(sublime_plugin.TextCommand):
