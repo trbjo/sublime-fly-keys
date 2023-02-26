@@ -5,6 +5,7 @@ import sublime_api
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, active_window
 from sublime_api import view_add_regions  # pyright: ignore
+from sublime_api import view_erase  # pyright:ignore
 from sublime_api import view_selection_add_region as add_reg  # pyright: ignore
 from sublime_plugin import WindowCommand
 
@@ -23,14 +24,12 @@ class CommandModeCommand(WindowCommand):
         maybe_rebuild(view)
 
 
-class SmartDeleteCommand(sublime_plugin.TextCommand):
-    def run(self, edit: Edit) -> None:
-        v = self.view
-
-        for reg in reversed(v.sel()):
-            if reg.empty():
-                reg = Region(reg.a, reg.a + 1)
-            v.erase(edit, reg)
+class DeleteSingleCharCommand(sublime_plugin.TextCommand):
+    def run(self, e: Edit, forward=False) -> None:
+        s = self.view.sel()
+        vi = self.view.id()
+        pt = 1 if forward else -1
+        [view_erase(vi, e.edit_token, Region(r.b, r.b + pt)) for r in s]
 
 
 class SmartDeleteLineCommand(sublime_plugin.TextCommand):
@@ -123,17 +122,18 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
 
 
 class InsertSingleChar(sublime_plugin.TextCommand):
-    def run(self, edit: Edit):
+    def run(self, edit: Edit, after=False):
         view: View = self.view
         vi = view.id()
         self.view.settings().set(key="block_caret", value=False)
         self.view.settings().set(key="command_mode", value=False)
         self.view.settings().set(key="needs_char", value=True)
         char_listener(purpose=Purpose.InsertChar)
-        for r in reversed(view.sel()):
+        for r in view.sel():
             view.sel().subtract(r)
-            view.insert(edit, r.b, " ")
-            add_reg(vi, r.b, r.b - 1 if r.b < r.b else r.b + 1, 0.0)
+            pt = r.b + 1 if after and r.b == r.a else r.b
+            view.insert(edit, pt, " ")
+            add_reg(vi, pt, pt - 1 if pt < pt else pt + 1, 0.0)
 
 
 class ReplaceSingleChar(sublime_plugin.TextCommand):
