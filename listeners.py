@@ -132,11 +132,9 @@ class NextCharacterTextListener(sublime_plugin.ViewEventListener):
     def on_text_command(self, command_name: str, args):
         v = self.view
 
-        if command_name == "set_number":
-            pre_command(v, command_name)
-            return
-
-        if multiplier := v.settings().get("multiplier"):
+        if command_name != "set_number" and (
+            multiplier := v.settings().get("multiplier")
+        ):
             for _ in range(multiplier - 1):
                 v.run_command(command_name, args)
             v.settings().erase("multiplier")
