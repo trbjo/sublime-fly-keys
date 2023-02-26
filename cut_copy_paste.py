@@ -3,11 +3,11 @@ from typing import List, Tuple
 
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, get_clipboard, set_clipboard
-from sublime_api import view_cached_substr as ssubstr
-from sublime_api import view_erase as erase
-from sublime_api import view_selection_add_point as add_pt
-from sublime_api import view_selection_add_region as add_region
-from sublime_api import view_selection_subtract_region as subtract
+from sublime_api import view_cached_substr as ssubstr  # pyright:ignore
+from sublime_api import view_erase as erase  # pyright:ignore
+from sublime_api import view_selection_add_point as add_pt  # pyright:ignore
+from sublime_api import view_selection_add_region as add_region  # pyright:ignore
+from sublime_api import view_selection_subtract_region as subtract  # pyright:ignore
 
 
 class CopyBufferCommand(sublime_plugin.TextCommand):
@@ -139,34 +139,30 @@ class SmartCutCommand(sublime_plugin.TextCommand):
 
 class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
-        buf: View = self.view
-        sels: Selection = buf.sel()
+        v: View = self.view
+        sels: Selection = v.sel()
         clipboard = get_clipboard()
         if clipboard.endswith("\n"):
-            stripped_clipboard = clipboard.strip()
-            for region in reversed(sels):
-                if not region.empty():
-                    buf.erase(edit, region)
-                buf.insert(edit, region.begin(), stripped_clipboard)
-            return
+            ws = "\n"
         else:
-            clips = clipboard.splitlines()
-            clip_pos: List[Tuple[int, int]] = [(len(clips[-1]), len(clips[-1]) + 1)]
-            for clip in reversed(clips[:-1]):
-                clip_pos.append((len(clip) + 1 + clip_pos[-1][0], len(clip) + 1))
+            ws = " "
+        clips = clipboard.splitlines()
+        clip_pos: List[Tuple[int, int]] = [(len(clips[-1]), len(clips[-1]) + 1)]
+        for clip in reversed(clips[:-1]):
+            clip_pos.append((len(clip) + 1 + clip_pos[-1][0], len(clip) + 1))
 
-            rev_sel: reversed[Region] = reversed(sels)
-            for reg in rev_sel:
-                if not reg.empty():
-                    buf.erase(edit, reg)
-                buf.insert(edit, reg.a, " ".join(clips))
+        rev_sel: reversed[Region] = reversed(sels)
+        for reg in rev_sel:
+            if not reg.empty():
+                v.erase(edit, reg)
+            v.insert(edit, reg.a, ws.join(clips))
 
-            rev_sel_new: reversed[Region] = reversed(sels)
-            for reg in rev_sel_new:
-                sels.add_all(
-                    Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] - 1)
-                    for pos in clip_pos
-                )
+        rev_sel_new: reversed[Region] = reversed(sels)
+        for reg in rev_sel_new:
+            sels.add_all(
+                Region(reg.begin() - pos[0], reg.begin() - pos[0] + pos[1] - 1)
+                for pos in clip_pos
+            )
 
 
 class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
@@ -196,18 +192,13 @@ def find_indent(v: View, line: Region, above: bool = False) -> int:
                     return len(next_line) - len(next_line.lstrip())
         return 0
     else:
-        cur_line_contents = v.substr(line)
-        if cur_line_contents.isspace():
-            return len(cur_line_contents)
+        if (line_content := v.substr(line)).isspace():
+            return len(line_content)
 
-        if above:
-            line_contents = cur_line_contents
-        else:
-            line_contents = v.substr(v.line(line.b + 1))
-            if line_contents == "":
-                line_contents = cur_line_contents
+        if not above and (next_line_content := v.substr(v.line(line.b + 1))) != "":
+            line_content = next_line_content
 
-        return len(line_contents) - len(line_contents.lstrip())
+        return len(line_content) - len(line_content.lstrip())
 
 
 class SmartPasteCommand(sublime_plugin.TextCommand):
