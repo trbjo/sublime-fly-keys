@@ -131,27 +131,20 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
         action = Action.DO_NOTHING
 
 
-class ReverseSelectionListener(sublime_plugin.EventListener):
+class EventListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
-        if key != "reversed_selection":
-            return None
+        if key == "side_bar_visible":
+            return active_window().is_sidebar_visible() == operand
 
-        lhs = operand
-        if match_all:
-            rhs = all([r.a > r.b for r in view.sel()])
-        else:
-            rhs = view.sel()[0].a > view.sel()[0].b
+        if key == "reversed_selection":
+            if match_all:
+                rhs = all([r.a > r.b for r in view.sel()])
+            else:
+                rhs = view.sel()[0].a > view.sel()[0].b
+            return operator == sublime.OP_EQUAL and rhs == operand
 
-        return True if operator == sublime.OP_EQUAL and rhs == lhs else False
-
-
-class NumGroupsListener(sublime_plugin.EventListener):
-    def on_query_context(self, view, key, operator, operand, match_all):
-        if key != "num_groups":
-            return None
-        if active_window().num_groups() == 1:
-            return True
-        return False
+        if key == "num_groups":
+            return active_window().num_groups() == 1
 
 
 class NextCharacterTextListener(sublime_plugin.ViewEventListener):
@@ -177,7 +170,7 @@ class NextCharacterTextListener(sublime_plugin.ViewEventListener):
             for _ in range(multiplier - 1):
                 v.run_command(command_name, args)
             v.settings().erase("multiplier")
-            v.settings().erase("lolol")
+            v.settings().erase("set_number")
         pre_command(v, command_name)
 
     def should_add(
