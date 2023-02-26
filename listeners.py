@@ -81,7 +81,8 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
         if key != "can_expand":
             return None
         view: View = self.view
-        view.settings().set("relative_line_numbers", False)
+        for v in active_window().views():
+            v.settings().set("relative_line_numbers", False)
         global first_view
         global action
         first_view = view
@@ -96,7 +97,8 @@ class GotoInputListener(sublime_plugin.ViewEventListener):
 
     def on_activated(self):
         view: View = self.view
-        view.settings().set("relative_line_numbers", True)
+        for v in active_window().views():
+            v.settings().set("relative_line_numbers", True)
         global action
         if action == Action.DO_NOTHING:
             return
