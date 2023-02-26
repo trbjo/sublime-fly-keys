@@ -73,8 +73,9 @@ class NavigateWordCommand(TextCommand):
                             most_recent = last - m.end()
                             pts.append((min(r.b, last - m.start()), last - m.end()))
                         break
-            s.clear()
-            [add_region(vid, a[0], a[1], 0.0) for a in pts]
+            if pts:
+                s.clear()
+                [add_region(vid, a[0], a[1], 0.0) for a in pts]
             show_point(vid, s[0].b, False, False, False)
 
 
