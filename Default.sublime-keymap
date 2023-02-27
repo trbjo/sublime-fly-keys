@@ -580,14 +580,15 @@
             { "key": "setting.command_mode", "operator": "equal", "operand": false }
         ]
     },
+
     { "keys": ["ctrl+z"], "command": "poor_mans_debugging",
         "context": [
             { "key": "text", "operator": "not_regex_contains", "operand": "\n" },
-            { "key": "selection_empty", "operator": "equal", "operand": false, "match_all": true },
             { "key": "selector", "operator": "equal", "operand": "source.python" },
-            { "key": "setting.command_mode", "operator": "equal", "operand": true }
+            { "key": "setting.command_mode" }
         ]
     },
+
     { "keys": ["ctrl+q"], "command": "cut" },
     { "keys": ["ctrl+q"], "command": "smart_delete_line",
         "context": [

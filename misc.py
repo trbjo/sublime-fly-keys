@@ -1,9 +1,11 @@
 from typing import Optional, Union
 
 import sublime_plugin
-from sublime import Edit, Region, View, active_window
+from sublime import Edit, FindFlags, Region, View, active_window
 from sublime_api import view_add_regions  # pyright: ignore
-from sublime_api import view_selection_add_region as add_reg  # pyright: ignore
+from sublime_api import view_find  # pyright: ignore
+from sublime_api import view_cached_substr as substr  # pyright: ignore
+from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_plugin import WindowCommand
 
 
@@ -39,29 +41,40 @@ class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
 
 
 class PoorMansDebuggingCommand(sublime_plugin.TextCommand):
+    regex = r"[-<>\w]+"
+
     def run(self, edit: Edit) -> None:
-        buf = self.view
-        if buf.is_read_only():
+        v = self.view
+        vi = v.id()
+        if v.is_read_only():
             return
-        selections = buf.sel()
+        s = v.sel()
+        for r in s:
+            if r.empty():
+                right = view_find(vi, self.regex, r.b, FindFlags.NONE)
+                s.subtract(r)
+                if substr(vi, r.a, r.b + 1).isspace():
+                    add_region(vi, right.a, right.b, 0.0)
+                else:
+                    line_content_rev: str = substr(vi, v.line(r.b).a, r.b)[::-1]
+                    if (boundary := line_content_rev.find(" ")) == -1:
+                        boundary = 0
+                    add_region(vi, r.a - boundary, right.b, 0.0)
 
-        for region in reversed(selections):
-            if region.empty():
-                continue
-
-            cur_line_num = buf.line(region.end())
+        for r in s:
+            cur_line_num = v.line(r.end())
             indent = (
-                cur_line_num.b - cur_line_num.a - len(buf.substr(cur_line_num).lstrip())
+                cur_line_num.b - cur_line_num.a - len(v.substr(cur_line_num).lstrip())
             )
-            content = "\n" + indent * " " + "print(f'{" + buf.substr(region) + "=}')"
-            _, insert_pos = buf.line(region.end())
+            content = "\n" + indent * " " + "print(f'{" + v.substr(r) + "=}')"
+            _, insert_pos = v.line(r.end())
             sel_beg_pos = cur_line_num.b + indent + 10
-            sel_beg_end = sel_beg_pos + region.end() - region.begin()
-            buf.insert(edit, insert_pos, content)
-            selections.subtract(region)
+            sel_beg_end = sel_beg_pos + r.end() - r.begin()
+            v.insert(edit, insert_pos, content)
+            s.subtract(r)
             new_reg = Region(sel_beg_pos, sel_beg_end)
 
-            selections.add(new_reg)
+            s.add(new_reg)
 
 
 class RemoveBuildOutputCommand(WindowCommand):
