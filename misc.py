@@ -100,8 +100,8 @@ class SetNumberCommand(sublime_plugin.TextCommand):
                     multiplier = size
                 elif multiplier == -1:
                     multiplier = size
-                hej = self.view.text_point_utf8(multiplier, 0)
-                next_res, _ = self.view.find(r"\S|^$|^\s+$", hej)
+                tp = self.view.text_point_utf8(multiplier, 0)
+                next_res, _ = self.view.find(r"\S|^$|^\s+$", tp)
                 self.view.sel().clear()
                 self.view.sel().add(next_res)
                 self.view.show(next_res)

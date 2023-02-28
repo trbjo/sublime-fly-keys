@@ -87,8 +87,8 @@ class SmarterSelectLines(TextCommand):
             if forward:
                 to_add: List[Region] = []
                 for r in s:
-                    hej = v.line(r)
-                    if hej.a <= r.b <= hej.b:
+                    line = v.line(r)
+                    if line.a <= r.b <= line.b:
                         to_add.append(r)
 
                 # cols = [v.rowcol(r.b)[1] for r in s]
