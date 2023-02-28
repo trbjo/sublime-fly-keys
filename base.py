@@ -1,5 +1,4 @@
 import time
-from collections import defaultdict
 from enum import IntEnum
 from typing import Dict, List, Optional, Tuple
 

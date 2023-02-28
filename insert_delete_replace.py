@@ -1,7 +1,6 @@
 from typing import Optional
 
 import sublime
-import sublime_api
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, active_window
 from sublime_api import view_add_regions  # pyright: ignore
