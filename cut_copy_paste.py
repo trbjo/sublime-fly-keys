@@ -3,11 +3,11 @@ from typing import List, Tuple
 
 import sublime_plugin
 from sublime import Edit, Region, Selection, View, get_clipboard, set_clipboard
-from sublime_api import view_cached_substr as ssubstr  # pyright:ignore
-from sublime_api import view_erase as erase  # pyright:ignore
-from sublime_api import view_selection_add_point as add_pt  # pyright:ignore
-from sublime_api import view_selection_add_region as add_region  # pyright:ignore
-from sublime_api import view_selection_subtract_region as subtract  # pyright:ignore
+from sublime_api import view_cached_substr as ssubstr  # pyright: ignore
+from sublime_api import view_erase as erase  # pyright: ignore
+from sublime_api import view_selection_add_point as add_pt  # pyright: ignore
+from sublime_api import view_selection_add_region as add_region  # pyright: ignore
+from sublime_api import view_selection_subtract_region as subtract  # pyright: ignore
 
 
 class CopyBufferCommand(sublime_plugin.TextCommand):
@@ -225,7 +225,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
             if is_whole_line:
                 for r, cliplet in zip(s, itertools.cycle(clips)):
                     line_reg = v.line(r.begin())
-                    insert_pos = line_reg.begin() if above else line_reg.end() + 1
+                    insert_pos = line_reg.a if above else v.full_line(r.begin()).b
                     indent = find_indent(v, line_reg, above)
                     insert_string = " " * indent + cliplet.lstrip() + "\n"
 
@@ -244,7 +244,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
             if is_whole_line:
                 for r in s:
                     line_reg = v.line(r.begin())
-                    insert_pos = line_reg.begin() if above else line_reg.end() + 1
+                    insert_pos = line_reg.a if above else v.full_line(r.begin()).b
                     indent = find_indent(v, line_reg, above)
 
                     insert_string = ""
