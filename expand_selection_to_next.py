@@ -5,9 +5,7 @@ from sublime_api import view_selection_add_region as add_region
 
 
 class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
-    pair = {"}": "}{", "]": "][", ")": ")("}
     string = "(meta.string, string) - punctuation.definition.string"
-    # string = "string, meta.string"
 
     def run(self, edit: Edit, around=False, left=True):
         v = self.view
@@ -35,7 +33,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 rpt = self.find_char(rpt, reg_b, True, bool(in_string))
 
                 if left:
-                    if charpair := self.pair.get(v.substr(rpt)):
+                    if charpair := {"}": "}{", "]": "][", ")": ")("}.get(v.substr(rpt)):
                         lpt = (
                             self.find_char(
                                 rpt - 1, lpt, False, bool(in_string), charpair
