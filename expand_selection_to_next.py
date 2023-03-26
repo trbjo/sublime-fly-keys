@@ -9,7 +9,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
     string = "(meta.string, string) - punctuation.definition.string"
     # string = "string, meta.string"
 
-    def run(self, edit: Edit, around=False, left=True, right=True):
+    def run(self, edit: Edit, around=False, left=True):
         v = self.view
         vi = v.id()
         size: int = v.size()
@@ -20,36 +20,30 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
             if any(s[0] < r.b < s[1] or s[0] > r.b > s[1] for s in regs):
                 continue
 
-            rpt = r.begin() if abs(r.b - r.a) == 1 else r.end()
-            lpt = r.a
+            rpt = r.begin() if abs(r.b - r.a) == 1 else r.b
 
             while True:
                 if (in_string := v.expand_to_scope(rpt, self.string)) is not None and (
-                    r.b + 1 != in_string.b or r.a - 1 != in_string.a
+                    r.end() + 1 != in_string.b or r.begin() - 1 != in_string.a
                 ):
-                    reg_a = in_string.a - 1
-                    reg_b = in_string.b - 1
+                    lpt = in_string.a
+                    reg_b = in_string.b
                 else:
-                    in_string = False
-                    reg_a = 1
-                    reg_b = size - 1
+                    lpt = 0
+                    reg_b = size
 
-                charpair = ")]}([{"
-                if right:
-                    rpt = self.find_char(rpt, reg_b + 1, True, bool(in_string))
-                    if not in_string and not (charpair := self.pair.get(v.substr(rpt))):
-                        break
+                rpt = self.find_char(rpt, reg_b, True, bool(in_string))
+
                 if left:
-                    if in_string and not (charpair := self.pair.get(v.substr(rpt))):
-                        lpt = reg_a + 1
-                        rpt = reg_b + 1
-                    else:
+                    if charpair := self.pair.get(v.substr(rpt)):
                         lpt = (
                             self.find_char(
-                                rpt - 1, reg_a, False, bool(in_string), charpair
+                                rpt - 1, lpt, False, bool(in_string), charpair
                             )
                             + 1
                         )
+                else:
+                    lpt = r.begin()
 
                 if r.begin() != lpt or r.end() != rpt:
                     break
@@ -64,11 +58,8 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 continue
 
             offset = 1 if around else 0
-            if right and not left:
-                lpt = r.begin()
-
-            if r.b < r.a or (left and not right):
-                regs.append((rpt - offset, lpt + offset))
+            if r.b < r.a:
+                regs.append((rpt + offset, lpt - offset))
             else:
                 regs.append((lpt - offset, rpt + offset))
 
