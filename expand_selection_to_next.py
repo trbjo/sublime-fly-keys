@@ -27,11 +27,10 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                     lpt = in_string.a
                     reg_b = in_string.b
                 else:
-                    lpt = 0
+                    lpt = -1
                     reg_b = size
 
                 rpt = self.find_char(rpt, reg_b, True, bool(in_string))
-
                 if left:
                     if charpair := {"}": "}{", "]": "][", ")": ")("}.get(v.substr(rpt)):
                         lpt = (
@@ -43,16 +42,12 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 else:
                     lpt = r.begin()
 
-                if r.begin() != lpt or r.end() != rpt:
-                    break
-
-                if around:
+                if around or r.begin() != lpt or r.end() != rpt:
                     break
 
                 rpt += 1
-                lpt -= 1
 
-            if rpt == size:
+            if rpt == size or lpt == 0:
                 continue
 
             offset = 1 if around else 0
