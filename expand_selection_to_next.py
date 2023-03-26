@@ -1,5 +1,6 @@
 import sublime_api
 import sublime_plugin
+from sublime import Edit
 from sublime_api import view_selection_add_region as add_region
 
 
