@@ -11,78 +11,68 @@ class NumberCommand(sublime_plugin.TextCommand):
     def save(self):
         self.view.run_command("save")
 
+    def find_pt(
+        self, line: str, start: int, stop: int, forward: bool, digit: bool
+    ) -> int:
+        for i in range(start, stop, 1 if forward else -1):
+            if line[i].isdigit() == digit:
+                return i
+        return stop
+
     def run(self, edit: Edit) -> None:
         buf = self.view
         selection = buf.sel()
         for region in reversed(selection):
-            if region.empty() == False:
+            if not region.empty():
                 mystr = buf.substr(region)
                 if mystr.isdigit() or mystr.startswith("-") and mystr[1:].isdigit():
                     continue
-                reg_list = [
+                if reg_list := [
                     Region(m.start() + region.begin(), m.end() + region.begin())
                     for m in re.finditer(r"-?\d+", buf.substr(region))
-                ]
-                if reg_list != []:
+                ]:
                     selection.subtract(region)
-                    for maybe_digit in reg_list:
-                        selection.add(maybe_digit)
+                    selection.add_all(reg_list)  # pyright:ignore
+                    continue
+
+            if not (line := buf.substr(buf.full_line(region.b))):
+                continue
+
+            line_no, column = buf.rowcol(region.b)
+
+            left_end = self.find_pt(line, column, -1, False, True)
+            left_begin = self.find_pt(line, left_end, -1, False, False)
+
+            right_begin = self.find_pt(line, column, len(line), True, True)
+            right_end = self.find_pt(line, right_begin, len(line), True, False)
+
+            if left_begin == left_end and right_begin == right_end:
+                continue
+
+            if left_end == right_begin:
+                left_pos = left_begin + 1
+                right_pos = right_end
+            elif left_begin == left_end == -1 and right_begin != right_end:
+                left_pos = right_begin
+                right_pos = right_end
+            elif right_begin == right_end == len(line) and left_begin != left_end:
+                left_pos = left_begin + 1
+                right_pos = left_end + 1
+
+            elif right_begin - column < column - left_end:
+                left_pos = right_begin
+                right_pos = right_end
             else:
-                line, column = buf.rowcol(region.begin())
-                cur_line = buf.substr(buf.full_line(buf.text_point(line, -1)))
-                line_length = len(cur_line)
-                start_pos = None
-                end_pos = None
-                to_the_right = line_length - column
-                to_the_left = line_length - (line_length - column) + 0
+                left_pos = left_begin + 1
+                right_pos = left_end + 1
 
-                if cur_line[column].isdigit() or (
-                    cur_line[column] == "-" and cur_line[column + 1].isdigit()
-                ):
-                    first_char_is_digit = True
-                else:
-                    first_char_is_digit = False
+            if left_pos >= 1 and line[left_pos - 1] == "-":
+                left_pos -= 1
 
-                for i in range(to_the_right):
-                    i_pointer = column + i
-                    if cur_line[i_pointer].isdigit() or (
-                        not end_pos
-                        and cur_line[i_pointer] == "-"
-                        and cur_line[i_pointer + 1].isdigit()
-                    ):
-
-                        if not start_pos and first_char_is_digit == False:
-                            start_pos = i_pointer
-
-                        end_pos = i_pointer
-
-                    elif end_pos:
-                        break
-
-                if not start_pos:
-                    for j in range(to_the_left):
-                        j_pointer = column - j
-                        if cur_line[j_pointer].isdigit() or (
-                            cur_line[j_pointer] == "-"
-                            and cur_line[j_pointer + 1].isdigit()
-                        ):
-
-                            if not end_pos:
-                                end_pos = j_pointer
-
-                            start_pos = j_pointer
-
-                        elif start_pos:
-                            break
-
-                if start_pos is not None and end_pos is not None:
-                    selection.subtract(region)
-                    selection.add(
-                        Region(
-                            buf.text_point(line, start_pos),
-                            buf.text_point(line, end_pos + 1),
-                        )
-                    )
+            pos_begin = buf.text_point(line_no, left_pos)
+            pos_end = buf.text_point(line_no, right_pos)
+            selection.subtract(region)
+            selection.add(Region(pos_begin, pos_end))
 
         for region in selection:
             try:

@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Union
 
 import sublime
 import sublime_plugin
@@ -7,7 +7,7 @@ from sublime_api import view_add_phantom, view_add_regions
 from sublime_api import view_selection_add_point as add_point
 from sublime_api import view_selection_subtract_region as subtract_region
 
-from .base import Purpose, char_listener, charlist, listen_for_char
+from .base import char_listener, charlist, listen_for_char
 
 
 class NextCharacterBaseCommand(sublime_plugin.TextCommand):
@@ -16,7 +16,6 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         search_string: str,
         forward: bool,
         extend: bool,
-        append_selection: bool = False,
     ) -> None:
         view = self.view
         global matches
@@ -87,12 +86,13 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                 location=self.view.sel()[-1].b,
             )
             return
-        if not append_selection:
-            for reg in regs_to_subtract:
-                view.sel().subtract(reg)
+
+        for reg in regs_to_subtract:
+            view.sel().subtract(reg)
         view.sel().add_all(regs_to_add)
         view.show(view.sel()[-1].b, True)
         view_id = self.view.id()
+
         try:
             if len(view.sel()) > 1:
                 light_hl: List[Region] = []
@@ -170,8 +170,20 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                         LAYOUT_INLINE,
                         None,
                     )
+
         except ValueError:
-            return
+            pass
+        if len(search_string) == 1:
+            signifier = (
+                f"{search_string}_❯" if forward else "❮" + search_string[::-1] + "_"
+            )
+        else:
+            signifier = f"{search_string}❯" if forward else "❮" + search_string[::-1]
+
+        self.view.show_popup(
+            self.get_html(error=False).format(symbol=signifier),
+            location=self.view.sel()[-1].b,
+        )
 
     def get_html(self, error=False) -> str:
         if error:
@@ -199,8 +211,6 @@ class ListenForCharacterCommand(NextCharacterBaseCommand):
         _,
         forward: bool,
         extend: bool = False,
-        purpose: Purpose = Purpose.Nop,
-        append_selection=False,
     ) -> None:
         """
         Sets the buffer ready for search
@@ -209,18 +219,11 @@ class ListenForCharacterCommand(NextCharacterBaseCommand):
         char_listener(
             "",
             forward,
-            purpose,
             extend,
-            append_selection,
         )
 
-        if purpose == Purpose.SingleSneak:
-            arrow: str = "_❯" if forward else " ❮_"
-        elif purpose == Purpose.DoubleSneak:
-            arrow: str = "__❯" if forward else " ❮__"
-        else:
-            # this is not allowed
-            return
+        arrow: str = "_❯" if forward else " ❮_"
+        # arrow: str = "__❯" if forward else " ❮__"
 
         self.view.settings().set(key="needs_char", value=True)
 
@@ -242,12 +245,13 @@ class RepeatNextCharacterCommand(NextCharacterBaseCommand):
             listen_for_char["search_string"],
             forward,
             listen_for_char["extend"],
-            listen_for_char["append_selection"],
         )
 
 
 class GoToNthMatchCommand(NextCharacterBaseCommand):
     def run(self, _, **kwargs: int) -> None:
+        self.view.settings().set(key="has_stored_search", value=False)
+        self.view.settings().set(key="needs_char", value=False)
         if bool(kwargs):
             number: int = kwargs["number"]
         else:
@@ -259,8 +263,8 @@ class GoToNthMatchCommand(NextCharacterBaseCommand):
             return
 
         extend = listen_for_char["extend"]
-        if region.a != region.b:
-            extend = True
+        # if region.a != region.b:
+        # extend = True
 
         if len(matches) < number:
             return
@@ -280,43 +284,20 @@ class GoToNthMatchCommand(NextCharacterBaseCommand):
 class NextCharacterCommand(NextCharacterBaseCommand):
     def run(self, edit: Edit, character: str) -> None:
         v = self.view
-        vi = v.id()
         global listen_for_char
 
         search_string = listen_for_char["search_string"]
-        purpose = listen_for_char["purpose"]
         forward = listen_for_char["forward"]
-
-        if purpose == Purpose.InsertChar:
-            self.view.settings().set(key="needs_char", value=False)
-            self.view.settings().set(key="block_caret", value=True)
-            self.view.settings().set(key="command_mode", value=True)
-            for reg in reversed(self.view.sel()):
-                reg_length = reg.b - reg.a if reg.b > reg.a else 0
-                self.view.replace(edit, reg, character)
-                subtract_region(vi, reg.a, reg.b)
-                add_point(vi, reg.b - reg_length)
-            return
-
-        elif purpose == Purpose.SingleSneak:
-            search_string = character
-
-        elif purpose == Purpose.DoubleSneak and not search_string:
-            char_listener(search_string=character)
-            arrow: str = f"{character}_❯" if forward else f"❮{character}_"
-            self.view.show_popup(
-                self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
-            )
-            return
-
-        elif purpose == Purpose.DoubleSneak and search_string:
-            search_string = search_string + character
-
-        self.view.settings().set(key="needs_char", value=False)
-        self.view.settings().set(key="has_stored_search", value=True)
-
         extend = listen_for_char["extend"]
-        append_selection = listen_for_char["append_selection"]
 
+        search_string += character
+
+        self.view.settings().set(key="has_stored_search", value=True)
+        if len(search_string) == 2:
+            arrow: str = f"{search_string}❯" if forward else f"❮{search_string}"
+            self.view.settings().set(key="needs_char", value=False)
+        else:
+            arrow: str = f"{character}_❯" if forward else f"❮{character}_"
+
+        self.execute(search_string, forward, extend)
         char_listener(search_string)
-        self.execute(search_string, forward, extend, append_selection)

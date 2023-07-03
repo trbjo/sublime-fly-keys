@@ -5,10 +5,11 @@ import sublime_plugin
 from sublime import Edit, Region, Selection, View, active_window
 from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_erase  # pyright:ignore
+from sublime_api import view_selection_add_point as add_pt  # pyright: ignore
 from sublime_api import view_selection_add_region as add_reg  # pyright: ignore
 from sublime_plugin import WindowCommand
 
-from .base import Purpose, char_listener, maybe_rebuild
+from .base import maybe_rebuild
 
 
 class CommandModeCommand(WindowCommand):
@@ -62,15 +63,19 @@ class InsertModeCommand(sublime_plugin.TextCommand):
             if region.empty():
                 if replace:
                     buf.erase(edit, Region(region.a, region.b + 1))
+                else:
+                    if not before:
+                        buf.sel().subtract(region)
+                        buf.sel().add(region.b + 1)
             else:
                 if replace:
                     buf.erase(edit, region)
                 else:
                     buf.sel().subtract(region)
                     if before:
-                        buf.sel().add(region.a)
+                        buf.sel().add(region.begin())
                     else:
-                        buf.sel().add(region.b)
+                        buf.sel().add(region.end())
 
         buf.settings().set(key="block_caret", value=False)
         buf.settings().set(key="command_mode", value=False)
@@ -120,29 +125,39 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
         buf.settings().set(key="command_mode", value=False)
 
 
-class InsertSingleChar(sublime_plugin.TextCommand):
-    def run(self, edit: Edit, after=False):
+class InsertSingleCharCommand(sublime_plugin.TextCommand):
+    def run(
+        self,
+        edit: Edit,
+        character,
+        after=False,
+    ):
         view: View = self.view
         vi = view.id()
-        self.view.settings().set(key="block_caret", value=False)
-        self.view.settings().set(key="command_mode", value=False)
-        self.view.settings().set(key="needs_char", value=True)
-        char_listener(purpose=Purpose.InsertChar)
+        for r in view.sel():
+            pt = r.end() if after else r.begin()
+            if after and r.empty():
+                pt += 1
+            view.sel().subtract(r)
+            view.insert(edit, pt, character)
+            add_reg(vi, pt + 1, pt + 1, 0.0)
+
+
+class InsertSpaceCommand(sublime_plugin.TextCommand):
+    def run(self, edit: Edit):
+        view: View = self.view
+        vi = view.id()
         for r in view.sel():
             view.sel().subtract(r)
-            pt = r.b + 1 if after and r.b == r.a else r.b
-            view.insert(edit, pt, " ")
-            add_reg(vi, pt, pt - 1 if pt < pt else pt + 1, 0.0)
+            view.insert(edit, r.b, " ")
+            add_pt(vi, r.b if r.b < r.a else r.b + 1, 0.0)
 
 
 class ReplaceSingleChar(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit, character):
         view: View = self.view
-        vi = view.id()
-        self.view.settings().set(key="block_caret", value=False)
-        self.view.settings().set(key="command_mode", value=False)
-        self.view.settings().set(key="needs_char", value=True)
-        char_listener(purpose=Purpose.InsertChar)
-
         for r in view.sel():
-            add_reg(vi, r.a, r.a - 1 if r.b < r.a else r.a + 1, 0.0)
+            if r.empty():
+                view.replace(edit, Region(r.a, r.a + 1), character)
+            else:
+                view.replace(edit, r, character)

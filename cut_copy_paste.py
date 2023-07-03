@@ -137,17 +137,18 @@ class SmartCutCommand(sublime_plugin.TextCommand):
         return
 
 
-class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
+class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         v: View = self.view
-        sels: Selection = v.sel()
-        clipboard = get_clipboard()
-        if clipboard.endswith("\n"):
-            ws = "\n"
+        if (syntax := v.syntax()) is not None and syntax.name == "Go":
+            wschar = "\t"
         else:
-            ws = " "
-        clips = clipboard.splitlines()
+            wschar = " "
+        sels: Selection = v.sel()
+
+        clips = [c.strip() for c in get_clipboard().splitlines() if c.strip()]
         clip_pos: List[Tuple[int, int]] = [(len(clips[-1]), len(clips[-1]) + 1)]
+
         for clip in reversed(clips[:-1]):
             clip_pos.append((len(clip) + 1 + clip_pos[-1][0], len(clip) + 1))
 
@@ -155,7 +156,7 @@ class SmartPasteCutNewlinesOrWhitespaceCommand(sublime_plugin.TextCommand):
         for reg in rev_sel:
             if not reg.empty():
                 v.erase(edit, reg)
-            v.insert(edit, reg.a, ws.join(clips))
+            v.insert(edit, reg.a, wschar.join(clips))
 
         rev_sel_new: reversed[Region] = reversed(sels)
         for reg in rev_sel_new:
@@ -175,14 +176,19 @@ class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
             v.insert(edit, r.begin(), stripped_clipboard)
 
 
-def find_indent(v: View, line: Region, above: bool = False) -> int:
+def find_indent(
+    v: View,
+    line: Region,
+    wschar: str,
+    above: bool = False,
+) -> int:
     vi = v.id()
     if line.a == line.b:
         if above:
             l_beg = line.b
             while l_beg > 1:
                 l_beg, l_end = v.line(l_beg - 1)
-                if (prev_line := ssubstr(vi, l_beg, l_end)).startswith(" "):
+                if (prev_line := ssubstr(vi, l_beg, l_end)).startswith(wschar):
                     return len(prev_line) - len(prev_line.lstrip())
         else:
             l_end = line.b
@@ -210,6 +216,11 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
     def run(self, edit: Edit, above: bool = False, replace=True) -> None:
         v: View = self.view
+        if (syntax := v.syntax()) is not None and syntax.name == "Go":
+            wschar = "\t"
+        else:
+            wschar = " "
+
         s: Selection = v.sel()
         clipboard = get_clipboard()
         clips = clipboard.splitlines()
@@ -226,8 +237,8 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 for r, cliplet in zip(s, itertools.cycle(clips)):
                     line_reg = v.line(r.begin())
                     insert_pos = line_reg.a if above else v.full_line(r.begin()).b
-                    indent = find_indent(v, line_reg, above)
-                    insert_string = " " * indent + cliplet.lstrip() + "\n"
+                    indent = find_indent(v, line_reg, wschar, above)
+                    insert_string = wschar * indent + cliplet.lstrip() + "\n"
 
                     s.subtract(r)
                     v.insert(edit, insert_pos, insert_string)
@@ -245,21 +256,27 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 for r in s:
                     line_reg = v.line(r.begin())
                     insert_pos = line_reg.a if above else v.full_line(r.begin()).b
-                    indent = find_indent(v, line_reg, above)
+                    indent = find_indent(v, line_reg, wschar, above)
 
-                    insert_string = ""
+                    insert_string = []
                     initial_indent = None
+
+                    first_line_is_newline = 0
+                    if not clips[0]:
+                        first_line_is_newline = 1
+
                     for line in clips:
-                        deindented_line = line.lstrip()
-                        cur_indent = len(line) - len(deindented_line)
-                        if initial_indent == None:
-                            initial_indent = cur_indent
-                        this_indent = indent + cur_indent - initial_indent
-                        insert_string += " " * this_indent + deindented_line + "\n"
+                        if deindented_line := line.lstrip():
+                            cur_indent = len(line) - len(deindented_line)
+                            if initial_indent == None:
+                                initial_indent = cur_indent
+                            this_indent = indent + cur_indent - initial_indent
+                            insert_string.append(wschar * this_indent + deindented_line)
+                        insert_string.append("\n")
 
                     s.subtract(r)
-                    v.insert(edit, insert_pos, insert_string)
-                    s.add(insert_pos + indent)
+                    v.insert(edit, insert_pos, "".join(insert_string))
+                    s.add(insert_pos + indent + first_line_is_newline)
             else:
                 for r in s:
                     insert_pos = r.begin() if above else r.end()

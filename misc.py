@@ -6,7 +6,7 @@ from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_find  # pyright: ignore
 from sublime_api import view_cached_substr as substr  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
-from sublime_plugin import WindowCommand
+from sublime_plugin import TextCommand, TextInputHandler, WindowCommand
 
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
@@ -90,16 +90,16 @@ class RemoveBuildOutputCommand(WindowCommand):
 
 class SetNumberCommand(sublime_plugin.TextCommand):
     def run(self, _, value=None):
-        size = self.view.rowcol(self.view.size())[0]
+        lines = self.view.rowcol(self.view.size())[0]
         if value is None:
             self.view.settings().erase("set_number")
             if (multiplier := self.view.settings().get("multiplier")) is not None:
                 self.view.settings().erase("multiplier")
                 multiplier -= 1
-                if size < multiplier:
-                    multiplier = size
+                if lines < multiplier:
+                    multiplier = lines
                 elif multiplier == -1:
-                    multiplier = size
+                    multiplier = lines
                 tp = self.view.text_point_utf8(multiplier, 0)
                 next_res, _ = self.view.find(r"\S|^$|^\s+$", tp)
                 self.view.sel().clear()
@@ -111,5 +111,5 @@ class SetNumberCommand(sublime_plugin.TextCommand):
             else:
                 multiplier = value
 
-            self.view.settings().set("multiplier", min(multiplier, min(size, 9999)))
+            self.view.settings().set("multiplier", min(multiplier, min(lines, 9999)))
             self.view.settings().set("set_number", True)

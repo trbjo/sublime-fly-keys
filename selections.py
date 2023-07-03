@@ -1,18 +1,22 @@
 import re
 from collections import defaultdict
-from typing import List
+from typing import Iterable, List, Tuple
 
 import sublime_api
 import sublime_plugin
-from sublime import Edit, Region
+from sublime import Edit, Region, Selection, View, active_window
 from sublime_api import view_cached_substr as substr
 from sublime_api import view_cached_substr as view_substr
+from sublime_api import view_selection_add_point as add_point
 from sublime_api import view_selection_add_region as add_region
 from sublime_api import view_selection_subtract_region as subtract_region
 from sublime_api import view_show_point as show_point
 from sublime_plugin import TextCommand, TextInputHandler
 
-from .base import PositionAndType, matchers
+# expand to next
+matchers: str = """([{)]}"'"""
+PositionAndType = Tuple[int, int]
+
 
 pattern_cache = {}
 WORDCHARS = r"[-\._\w]+"
@@ -32,7 +36,7 @@ class SmarterSelectLines(TextCommand):
         ]:
             return
 
-        if s[-1].end() == v.size():
+        if (s[-1].end() == v.size() and forward) or (s[0].begin() == 0 and not forward):
             return
 
         vid = v.id()
@@ -135,24 +139,60 @@ class SelectOnlyDelimiterInSelection(TextCommand):
     def input_description(self) -> str:
         return "Pattern"
 
-    def is_enabled(self) -> bool:
-        if self.view is None:
-            return False
-        return any(r.a != r.b for r in self.view.sel())
-
     def run(self, _, pattern, include=False):
         if not pattern:
             return
 
+        pattern_cache[include] = pattern
+        raw_pattern = pattern
+        pattern = ""
+        counter = 0
+        while counter < len(raw_pattern):
+            char = raw_pattern[counter]
+            if ord(char) == 92:
+                counter += 1
+                if raw_pattern[counter] == "n":
+                    pattern += "\n"
+                elif raw_pattern[counter] == "r":
+                    pattern += "\r"
+                elif raw_pattern[counter] == "t":
+                    pattern += "\t"
+                elif raw_pattern[counter] == "\\":
+                    pattern += "\\"
+            else:
+                pattern += char
+            counter += 1
+
         v = self.view
         vid = v.id()
-        pattern_cache[include] = pattern
         length = len(pattern)
+
+        if all(r.a == r.b for r in self.view.sel()):
+            reg = Region(0, v.size())
+            idx = list(findall(pattern, length, v.substr(reg)))
+            if not idx:
+                return
+            if include:
+                subtract_region(vid, reg.a, reg.b)
+                [
+                    add_region(vid, reg.begin() + i, reg.begin() + i + length, 0.0)
+                    for i in idx
+                ]
+            else:
+                add_region(vid, 0, v.size(), 0.0)
+                [
+                    subtract_region(vid, reg.begin() + i, reg.begin() + i + length)
+                    for i in idx
+                ]
+            return
+
         for reg in list(v.sel()):
             if reg.empty():
+                v.sel().subtract(reg)
                 continue
             idx = list(findall(pattern, length, v.substr(reg)))
             if not idx:
+                v.sel().subtract(reg)
                 continue
             if include:
                 subtract_region(vid, reg.a, reg.b)
@@ -187,63 +227,68 @@ class SubtractSelectionCommand(sublime_plugin.TextCommand):
             self.view.show(selections[sel].b, True)
 
 
+recorded_selections = {}
+
+
+class RecordSelectionsCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        vi = self.view.id()
+        sels = self.view.sel()
+        recorded_selections[vi] = [(r.a, r.b) for r in sels]
+
+
+class AddRecordedSelectionsCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        vi = self.view.id()
+        try:
+            new_sels = recorded_selections[vi]
+            [add_region(vi, r[0], r[1], 0.0) for r in new_sels]
+        except KeyError:
+            return
+
+
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
     def run(self, edit, forward: bool = False, skip: bool = False) -> None:
         vi = self.view.id()
         sels = self.view.sel()
         first = sels[0].begin()
         last = sels[-1].end()
+        size = self.view.size()
 
         if forward:
-            buf: str = view_substr(vi, first - 1, self.view.size())
+            padding = "\a" if first == 0 else ""
+            buf: str = f"{padding}{view_substr(vi, first - 1, size)}\a"
         else:
-            buf: str = view_substr(vi, 0, last + 1)[::-1]
+            padding = "\a" if last == size else ""
+            buf: str = f"\a{view_substr(vi, 0, last + 1)}{padding}"[::-1]
 
         words = defaultdict(list)
         for reg in sels:
             if reg.empty():
                 continue
-            wlength = reg.end() - reg.begin()
+            wlen = reg.end() - reg.begin()
             offset = reg.begin() - first if forward else last - reg.end()
-            word = buf[1 + offset : wlength + 1 + offset]
+            word = buf[1 + offset : wlen + 1 + offset]
             words[word].append(reg)
 
         for word, regs in words.items():
-            wlength = len(word)
-
+            wlen = len(word)
             regex = r"\W" + re.escape(word) + r"\W"
+
             # imitate find under expand's boundary detection
-            boundary_selection = True
-            for r in regs:
-                offset = r.begin() - first if forward else last - r.end()
-                bword = buf[offset : wlength + 2 + offset]
-                if not re.match(regex, bword):
-                    boundary_selection = False
+            if forward:
+                offsets = [r.begin() - first for r in regs]
+                idx = regs[-1].end() - first
+            else:
+                offsets = [last - r.end() for r in regs]
+                idx = last - regs[0].begin()
+
+            at_boundary = all(re.match(regex, buf[o : wlen + 2 + o]) for o in offsets)
+
+            while (idx := buf.find(word, idx + 1)) != -1:
+                if not at_boundary or re.match(regex, buf[idx - 1 : idx + wlen + 1]):
                     break
-
-            buffer_length = len(buf)
-            idx = regs[-1].end() - first if forward else last - regs[0].begin()
-            word_not_found = False
-            while True:
-                idx = buf.find(word, idx + 1)
-
-                if idx == -1:
-                    word_not_found = True
-                    break
-
-                if not boundary_selection:
-                    break
-
-                if wlength + idx == buffer_length:  # beginning/end of the buffer
-                    boundary_word = buf[idx - 1 : idx + wlength]
-                    regex = r"\W" + re.escape(word)
-                else:
-                    boundary_word = buf[idx - 1 : idx + wlength + 1]
-
-                if re.match(regex, boundary_word):
-                    break
-
-            if word_not_found:
+            else:
                 continue
 
             if skip:
@@ -252,10 +297,10 @@ class SmarterFindUnderExpand(sublime_plugin.TextCommand):
 
             if forward:
                 start = first + idx - 1
-                end = start + wlength
+                end = start + wlen
             else:
                 end = last - idx + 1
-                start = end - wlength
+                start = end - wlen
 
             add_region(
                 vi,
@@ -282,18 +327,69 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
         buf.sel().add_all(reg_list)
 
 
+class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
+    def run(self, _, after: bool = False) -> None:
+        v = self.view
+        vi = v.id()
+        first = v.sel()[0].begin()
+        buffer = sublime_api.view_cached_substr(v.id(), first, v.sel()[-1].end())
+        for r in v.sel():
+            v.sel().subtract(r)
+            line = v.line(r.begin())
+            line = Region(max(r.begin(), line.a), line.b)
+            while line.a < r.end() and line.b <= v.size():
+                if after:
+                    add_point(vi, line.b)
+                elif x := re.search(r"\S", buffer[line.a - first : line.b - first]):
+                    add_point(vi, line.a + x.start())
+                line = v.line(line.b + 1)
+
+
+class FancySplitCommand(sublime_plugin.TextCommand):
+    def run(self, _, after: bool = False) -> None:
+        v = self.view
+        vi = v.id()
+        first = v.sel()[0].begin()
+        buffer = sublime_api.view_cached_substr(v.id(), first, v.sel()[-1].end())
+        regs = []
+        for r in v.sel():
+            line = v.line(r.begin())
+            line = Region(max(r.begin(), line.a), line.b)
+            while line.a < r.end() and line.b <= v.size():
+                if x := re.search(r"\S", buffer[line.a - first : line.b - first]):
+                    if after:
+                        regs.append((line.a + x.start(), line.b))
+                    else:
+                        regs.append((line.b, line.a + x.start()))
+                line = v.line(line.b + 1)
+        v.sel().clear()
+        [add_region(vi, *r, 0.0) for r in regs]
+
+
 class RevertSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _) -> None:
         buf = self.view
         sel = buf.sel()
-        for reg in sel:
-            if reg.empty():
-                continue
-            region = Region(reg.b, reg.a)
-            sel.subtract(reg)
-            sel.add(region)
+        if all(r.a == r.b for r in sel):
+            viewport_x, viewport_y = buf.viewport_extent()
+            view_x_begin, view_y_begin = buf.viewport_position()
+            view_y_end = view_y_begin + viewport_y
 
-        buf.show(sel[-1].b, True)
+            first_cur_x, first_cur_y = buf.text_to_layout(sel[0].b)
+            if view_y_begin < first_cur_y < view_y_end:
+                buf.show(sel[-1].b, True)
+            else:
+                buf.show(sel[0].b, True)
+
+        else:
+            for reg in sel:
+                if reg.empty():
+                    continue
+                region = Region(reg.b, reg.a)
+                sel.subtract(reg)
+                sel.add(region)
+
+            buf.show(sel[-1].b, True)
 
 
 class SingleSelectionLastCommand(sublime_plugin.TextCommand):
@@ -305,41 +401,33 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
         buf.show(reg.b, True)
 
 
-class SplitSelectionIntoLinesWholeWordsCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
+class SplitSelectionIntoLinesCommand(sublime_plugin.TextCommand):
+    def bounds(self, regex: str):
+        buf: View = self.view
         selections = buf.sel()
-        rev_sels: reversed[Region] = reversed(selections)
-        for region in rev_sels:
+        to_subtract = []
+        word_boundaries = []
+        for region in selections:
             if region.empty():
                 continue
-
             contents = buf.substr(region)
             begin = region.begin()
-            word_boundaries = [
-                Region(m.start() + begin, m.end() + begin)
-                for m in re.finditer(WORDCHARS, contents)
+            local_bounds = [
+                (m.start() + begin, m.end() + begin)
+                for m in re.finditer(regex, contents)
             ]
-            if word_boundaries != []:
-                selections.subtract(region)
-                selections.add_all(word_boundaries)
+            if len(local_bounds) > 1 and (
+                local_bounds[0][0] != region.a or local_bounds[0][1] != region.b
+            ):
+                word_boundaries.extend(local_bounds)
+                to_subtract.append(region)
+        return word_boundaries, to_subtract
 
-
-class SplitSelectionIntoLinesSpacesCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
-        selections = buf.sel()
-        rev_sels: reversed[Region] = reversed(selections)
-        for region in rev_sels:
-            if region.empty():
-                continue
-
-            contents = buf.substr(region)
-            begin = region.begin()
-            word_boundaries = [
-                Region(m.start() + begin, m.end() + begin)
-                for m in re.finditer(r"[\S]+", contents)
-            ]
-            if word_boundaries != []:
-                selections.subtract(region)
-                selections.add_all(word_boundaries)
+    def run(self, edit: Edit) -> None:
+        view = self.view
+        vid = view.id()
+        word_boundaries, to_subtract = self.bounds(r"[\S]+")
+        if not word_boundaries:
+            word_boundaries, to_subtract = self.bounds(WORDCHARS)
+        [view.sel().subtract(r) for r in to_subtract]
+        [add_region(vid, *r, 0.0) for r in word_boundaries]

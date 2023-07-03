@@ -2,15 +2,17 @@ import sublime_api
 import sublime_plugin
 from sublime import Edit
 from sublime_api import view_selection_add_region as add_region
+from sublime_api import view_selection_subtract_region as subtract_region
 
 
 class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
-    string = "(meta.string, string) - punctuation.definition.string"
+    string = "meta.string, string"
 
-    def run(self, edit: Edit, around=False, left=True):
+    def run(self, edit: Edit, around=False, left=True, right=True):
         v = self.view
         vi = v.id()
         size: int = v.size()
+        to_subtract = []
         self.buf_str: str = sublime_api.view_cached_substr(vi, 0, size)
 
         regs = []
@@ -19,26 +21,53 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 continue
 
             rpt = r.begin() if abs(r.b - r.a) == 1 else r.b
+            lpt = r.begin()
 
             while True:
-                if (in_string := v.expand_to_scope(rpt, self.string)) is not None and (
-                    r.end() + 1 != in_string.b or r.begin() - 1 != in_string.a
+                around_offset = 0 if around else 1
+                if (
+                    (in_string := v.expand_to_scope(rpt, self.string))
+                    and (
+                        in_string.a < r.end() < in_string.b - around_offset
+                        or in_string.a + around_offset < r.begin() < in_string.b
+                    )
+                    and not (
+                        local_scope := v.scope_name(rpt).split(" ")[-2]
+                    ).startswith("punctuation.definition.string.begin")
                 ):
-                    lpt = in_string.a
-                    reg_b = in_string.b
+                    # we deal with nested string scopes, e.g. a string inside a format string
+
+                    nested = False
+                    if local_scope.startswith("string"):
+                        nested = v.extract_scope(rpt)
+                    elif local_scope.startswith("punctuation.definition.string.end"):
+                        nested = v.extract_scope(rpt - 1)
+
+                    if nested and (nested.b < in_string.b or nested.a < in_string.a):
+                        substr = v.substr(nested.b - 1)
+                        if (substr == "'" and "single" in local_scope) or (
+                            substr == '"' and "double" in local_scope
+                        ):
+                            in_string = nested
+
+                    lpt = in_string.a + 1
+                    reg_b = in_string.b - 1
                 else:
+                    in_string = False
                     lpt = -1
                     reg_b = size
 
                 rpt = self.find_char(rpt, reg_b, True, bool(in_string))
                 if left:
                     if charpair := {"}": "}{", "]": "][", ")": ")("}.get(v.substr(rpt)):
-                        lpt = (
-                            self.find_char(
+                        if (
+                            llpt := self.find_char(
                                 rpt - 1, lpt, False, bool(in_string), charpair
                             )
-                            + 1
-                        )
+                        ) == lpt - 1:
+                            rpt = reg_b
+                        else:
+                            lpt = llpt + 1
                 else:
                     lpt = r.begin()
 
@@ -47,19 +76,23 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
                 rpt += 1
 
-            if rpt == size or lpt == 0:
+            if rpt == size or lpt <= 0:
                 continue
 
+            if not right:
+                rpt = lpt
+                lpt = r.b
+
             offset = 1 if around else 0
+            to_subtract.append(r)
             if r.b < r.a:
                 regs.append((rpt + offset, lpt - offset))
             else:
                 regs.append((lpt - offset, rpt + offset))
 
-        if regs:
-            v.sel().clear()
-            [add_region(vi, *r, 0.0) for r in regs]
-            self.view.show(self.view.sel()[-1].b, True)
+        [subtract_region(vi, *r) for r in to_subtract]
+        [add_region(vi, *r, 0.0) for r in regs]
+        self.view.show(self.view.sel()[-1].b, True)
 
     def find_char(
         self,

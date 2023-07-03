@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 import sublime
 import sublime_plugin
 from sublime import NewFileFlags, View, active_window, set_clipboard
+from sublime_api import settings_get_default  # pyright: ignore
 from sublime_api import view_cached_substr as view_substr  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_api import view_set_viewport_position as set_vp  # pyright: ignore
@@ -44,25 +45,27 @@ class CloseTransientViewCommand(WindowCommand):
         w.run_command("hide_panel", {"cancel": True})
 
         group = w.active_group()
-        if (transient := w.transient_sheet_in_group(group)) is not None:
-            views: Dict[str, List[List[int]]] = w.settings().get(
-                "ViewsBeforeSearch", {}
-            )  # pyright: ignore
-            viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
-                "viewport_positions", {}
-            )  # pyright: ignore
-            if str(transient.id()) not in views.keys():
-                transient.close()
-            prior_vs: List[int] = w.settings().get("views_before_search", [])
-            active_group: int = w.settings().get("active_group", 0)
-            for v in w.views():
-                v.sel().clear()
-                [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-                set_vp(v.id(), viewport_pos[str(v.id())], False)
-                if v.id() in prior_vs:
-                    self.window.focus_view(v)
+        if (transient := w.transient_view_in_group(group)) is None:
+            return
 
-            w.focus_group(active_group)
+        views: Dict[str, List[List[int]]] = w.settings().get(
+            "ViewsBeforeSearch", {}
+        )  # pyright: ignore
+        viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
+            "viewport_positions", {}
+        )  # pyright: ignore
+        if str(transient.id()) not in views.keys():
+            transient.close()
+        prior_vs: List[int] = w.settings().get("views_before_search", [])
+        active_group: int = w.settings().get("active_group", 0)
+        for v in w.views():
+            v.sel().clear()
+            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+            set_vp(v.id(), viewport_pos[str(v.id())], False)
+            if v.id() in prior_vs:
+                self.window.focus_view(v)
+
+        w.focus_group(active_group)
 
 
 class OpenFindResultsCommand(WindowCommand):
@@ -81,9 +84,9 @@ class OpenFindResultsCommand(WindowCommand):
         w.settings().set(key="active_group", value=w.active_group())
 
         if panel == "find_results":
-            self.window.run_command("show_panel", {"panel": f"output.{panel}"})
+            w.run_command("show_panel", {"panel": f"output.{panel}"})
 
-        if view := self.window.find_output_panel(panel):
+        if view := w.find_output_panel(panel):
             if panel == "diagnostics":
                 view.settings().set("font_face", "sans-serif")
                 view.settings().set("font_size", 9.5)
@@ -97,7 +100,7 @@ class OpenFindResultsCommand(WindowCommand):
             s = view.sel()
             if len(s) == 0:
                 view.sel().add(0)
-            self.window.focus_view(view)
+            w.focus_view(view)
 
 
 class OutputPanelNavigateCommand(TextCommand):

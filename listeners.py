@@ -53,6 +53,18 @@ class WindowListener(sublime_plugin.EventListener):
     def on_window_command(self, window: sublime.Window, command_name, _):
         pre_command(window.active_view(), command_name)
 
+    def on_close(self, view: View):
+        w = active_window()
+        sheet = view.sheet()
+        group = sheet.group()
+        if group is None:
+            return
+        # if w.active_group() != 0:
+        sheets = w.sheets_in_group(group)
+        length = len(sheets)
+        if length == 0:
+            w.run_command("close_pane")
+
     def on_init(self, views):
         for v in views:
             if v.element() is not None:

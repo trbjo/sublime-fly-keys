@@ -73,11 +73,11 @@
             <tspan x="111" y="167">|← ↖&#xFE0E;</tspan>
             <tspan x="177" y="167">←</tspan>
             <tspan x="537" y="167">↓</tspan>
-            <tspan x="591" y="161">Select</tspan>
-            <tspan x="591" y="174">Under C.</tspan>
+            <tspan x="591" y="167">Search</tspan>
             <tspan x="472" y="161">Insert</tspan>
-            <tspan x="472" y="174">Mode</tspan>
-            <tspan x="655" y="167">→| ↘&#xFE0E;</tspan>
+            <tspan x="472" y="174">Before</tspan>
+            <tspan x="651" y="161">Insert</tspan>
+            <tspan x="651" y="174">After</tspan>
             <tspan x="237" y="167">⌦</tspan>
             <tspan x="293" y="167">→</tspan>
         </text>
@@ -96,7 +96,7 @@
 
     <text>
         <tspan x="137" y="228">Comment</tspan>
-        <tspan x="153" y="107">←</tspan>
+        <tspan x="153" y="107">|← Word</tspan>
         <tspan x="66" y="41">Goto</tspan>
         <tspan x="66" y="54">def</tspan>
         <tspan x="126" y="41">Save</tspan>
@@ -108,22 +108,24 @@
         <tspan x="246" y="41">Set</tspan>
         <tspan x="246" y="54">Mark</tspan>
         <tspan x="263" y="228">Copy</tspan>
-        <tspan x="275" y="107">→</tspan>
+        <tspan x="275" y="107">Word →|</tspan>
         <tspan x="306" y="41">Unsplit</tspan>
         <tspan x="306" y="54">window</tspan>
         <tspan x="323" y="228">Paste</tspan>
         <tspan x="337" y="107">Undo</tspan>
-        <tspan x="349" y="167">Search</tspan>
+        <tspan x="349" y="167"></tspan>
         <tspan x="365" y="41">Split</tspan>
         <tspan x="365" y="54">window</tspan>
-        <tspan x="378" y="228">Duplicate</tspan>
+        <tspan x="378" y="228">Paste</tspan>
         <tspan x="397" y="102">Smart</tspan>
         <tspan x="397" y="115">Select</tspan>
-        <tspan x="411" y="167">Select¶</tspan>
+        <tspan x="355" y="167">→| ↘&#xFE0E;</tspan>
+        <tspan x="410" y="161">Select</tspan>
+        <tspan x="410" y="174">Under C.</tspan>
         <tspan x="426" y="41">Revert</tspan>
         <tspan x="426" y="54">Hunk</tspan>
-        <tspan x="443" y="228">Sneak ←</tspan>
-        <tspan x="457" y="107">Word |←</tspan>
+        <tspan x="443" y="228">Duplicate</tspan>
+        <tspan x="457" y="107">Sneak ←</tspan>
         <tspan x="486" y="41">Next</tspan>
         <tspan x="486" y="54">mod</tspan>
         <tspan x="503" y="228">Sneak →</tspan>
@@ -133,7 +135,7 @@
         <tspan x="562" y="221">Add C.</tspan>
         <tspan x="562" y="234">Below</tspan>
         <tspan x="577" y="107">Word→|</tspan>
-        <tspan x="637" y="107">→|Word</tspan>
+        <tspan x="637" y="107"></tspan>
         <tspan x="606" y="41">Git add</tspan>
         <tspan x="606" y="54">hunk</tspan>
         <tspan x="621" y="221">Next</tspan>

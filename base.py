@@ -9,27 +9,14 @@ from sublime import Region, View
 interesting_regions: Dict[int, Dict[str, Tuple[int]]] = {}
 timeouts: Dict[int, float] = {}
 
-# expand to next
-matchers: str = """([{)]}"'"""
-PositionAndType = Tuple[int, int]
-
 # sneak
 matches: List[Region] = []
 charlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
 
-#   char listener
-class Purpose(IntEnum):
-    Nop = 0
-    SingleSneak = 1
-    DoubleSneak = 2
-    InsertChar = 3
-
-
 listen_for_char = {
     "search_string": "",
     "forward": True,
-    "purpose": Purpose.SingleSneak,
     "extend": False,
     "append_selection": False,
 }
@@ -38,21 +25,15 @@ listen_for_char = {
 def char_listener(
     search_string: Optional[str] = None,
     forward: Optional[bool] = None,
-    purpose: Optional[Purpose] = None,
     extend: Optional[bool] = None,
-    append_selection: Optional[bool] = None,
 ) -> None:
     global listen_for_char
     if search_string is not None:
         listen_for_char["search_string"] = search_string
     if forward is not None:
         listen_for_char["forward"] = forward
-    if purpose is not None:
-        listen_for_char["purpose"] = purpose
     if extend is not None:
         listen_for_char["extend"] = extend
-    if append_selection is not None:
-        listen_for_char["append_selection"] = append_selection
 
 
 def maybe_rebuild(view: View):
