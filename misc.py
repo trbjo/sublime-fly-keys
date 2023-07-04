@@ -10,22 +10,13 @@ from sublime_plugin import TextCommand, TextInputHandler, WindowCommand
 
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _, forward: Optional[bool] = None, cursor=False) -> None:
+    def run(self, _, forward: Optional[bool] = None, after=True) -> None:
         buf = self.view
         for region in buf.sel():
             buf.sel().subtract(region)
-            if cursor:
-                reg = region.b
-                if not forward:
-                    reg -= 1
-            elif forward == True:
-                _, col = buf.rowcol(region.end())
-                if col == 0:
-                    reg = region.end() - 1
-                else:
-                    reg = region.end()
-            else:
-                reg = region.begin()
+            reg = region.end() if forward else region.begin()
+            if not after:
+                reg -= 1
             buf.sel().add(reg)
             buf.show(reg, False)
 
