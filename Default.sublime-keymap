@@ -569,22 +569,25 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["ctrl+l"], "command": "jump_back", "args": {"clear": false},
+
+
+    { "keys": ["ctrl+l"], "command": "jump_forward", "args": {"clear": true},
         "context": [
             { "key": "setting.command_mode" }
+        ]
+    },
+    { "keys": ["L"], "command": "record_selections",
+        "context": [
+            { "key": "setting.command_mode" },
         ]
     },
 
-    { "keys": ["L"], "command": "jump_forward", "args": {"clear": true},
+    { "keys": ["ctrl+shift+l"], "command": "add_recorded_selections",
         "context": [
-            { "key": "setting.command_mode" }
+            { "key": "setting.command_mode" },
         ]
     },
-    { "keys": ["ctrl+shift+l"], "command": "jump_forward", "args": {"clear": false},
-        "context": [
-            { "key": "setting.command_mode" }
-        ]
-    },
+
 
     { "keys": ["ctrl+escape"], "command": "single_selection",
         "context": [
@@ -1297,20 +1300,6 @@
             { "key": "overlay_has_focus", "operator": "equal", "operand": true },
             { "key": "overlay_name", "operator": "equal", "operand" : "goto" }
         ]},
-
-
-
-    { "keys": ["R"], "command": "record_selections",
-        "context": [
-            { "key": "setting.command_mode" },
-        ]
-    },
-
-    // { "keys": ["ctrl+r"], "command": "add_recorded_selections",
-        // "context": [
-            // { "key": "setting.command_mode" },
-        // ]
-    // },
 
 
 

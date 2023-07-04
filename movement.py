@@ -1,5 +1,6 @@
+import re
 from bisect import bisect
-from typing import Dict, List
+from typing import Dict
 
 import sublime_plugin
 from sublime import Edit, FindFlags, Region
@@ -13,6 +14,9 @@ from sublime_api import view_show_point as show_point  # pyright: ignore
 from sublime_plugin import TextCommand
 
 from .base import get_regions
+
+normrgx = re.compile(r"^[-\w]+$")
+wholergx = re.compile(r"^\S+$")
 
 
 class BolCommand(sublime_plugin.TextCommand):
@@ -59,55 +63,74 @@ class NavigateWordCommand(TextCommand):
         if len(s) < 1:
             return
         vid = v.id()
+        pts = []
 
         if forward:
             flag = FindFlags.NONE
-            pts = [
-                (vfind(vi, rrev if r.a > r.b and extend else rgx, r.b, flag), r)
-                for r in s
-            ]
+            for r in s:
+                substr = v.substr(r)
+                pat = rgx
+                pt = r.end()
+                if (
+                    not re.match(wholergx if whole_words else normrgx, substr)
+                    and r.a > r.b
+                ):
+                    pat = rrev if extend else rgx
+                    pt = r.b
+                pts.append((vfind(vi, pat, pt, flag), r))
+
         else:
             flag = FindFlags.REVERSE
-            pts = [
-                (vfind(vi, rrev if r.b > r.a and extend else rgx, r.b, flag), r)
-                for r in s
-            ]
+            for r in s:
+                substr = v.substr(r)
+                pat = rgx
+                pt = r.begin()
+                if (
+                    not re.match(wholergx if whole_words else normrgx, substr)
+                    and r.b > r.a
+                ):
+                    pat = rrev if extend else rgx
+                    pt = r.b
+                pts.append((vfind(vi, pat, pt, flag), r))
 
-        if forward:
-            if extend:
-                for mypt in pts:
-                    if mypt[1].a > mypt[1].b:
-                        subtract_region(vi, mypt[1].b, mypt[0].b)
-                        if mypt[0].b >= mypt[1].a:
-                            add_point(vi, mypt[1].a)
-                    else:
-                        if mypt[0].a != -1:
-                            add_region(vid, mypt[1].a, mypt[0].b, 0.0)
-            else:
-                if not (len(pts) == 1 and pts[0][0].a == -1):
-                    s.clear()
-                    [add_region(vid, r[0].a, r[0].b, 0.0) for r in pts if r[0].a != -1]
-        else:
-            if extend:
-                for mypt in pts:
-                    if mypt[1].a < mypt[1].b:
-                        subtract_region(vi, mypt[1].b, mypt[0].a)
-                        if mypt[0].a <= mypt[1].a:
-                            add_point(vi, mypt[1].a)
-                    else:
-                        add_region(vid, mypt[1].a, mypt[0].a, 0.0)
-            else:
-                if not (len(pts) == 1 and pts[0][0].a == -1):
-                    s.clear()
-                    [
+        if forward and extend:
+            for mypt in pts:
+                if mypt[1].a > mypt[1].b:
+                    subtract_region(vi, mypt[1].b, mypt[0].b)
+                    if mypt[0].b >= mypt[1].a:
+                        add_region(vid, mypt[1].begin(), mypt[0].b, 0.0)
+                else:
+                    if mypt[0].a != -1:
+                        add_region(vid, mypt[1].a, mypt[0].b, 0.0)
+        elif not forward and extend:
+            for mypt in pts:
+                if mypt[1].a < mypt[1].b:
+                    subtract_region(vi, mypt[1].b, mypt[0].a)
+                    if mypt[0].a <= mypt[1].a:
+                        add_region(vid, mypt[1].b, mypt[0].a, 0.0)
+                else:
+                    add_region(vid, mypt[1].a, mypt[0].a, 0.0)
+        elif forward and not extend:
+            if not (len(pts) == 1 and pts[0][0].a == -1):
+                s.clear()
+                for r in pts:
+                    if r[0].a != -1:
                         add_region(
                             vid,
-                            r[0].b if r[1].end() > r[0].b else r[1].end(),
-                            r[0].a,
+                            r[1].begin() if r[1].end() >= r[0].a else r[0].a,
+                            r[0].b,
                             0.0,
                         )
-                        for r in pts
-                    ]
+        elif not forward and not extend:
+            if not (len(pts) == 1 and pts[0][0].a == -1):
+                s.clear()
+                for r in pts:
+                    add_region(
+                        vid,
+                        r[0].b if r[1].end() > r[0].b else r[1].end(),
+                        r[0].a,
+                        0.0,
+                    )
 
         show_point(vid, s[-1 if forward else 0].b, False, False, False)
 
@@ -314,11 +337,11 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
             elif right_pos != len(line) and left_pos == -1:
                 pos = right_pos
             elif right_pos == len(line) and left_pos != -1:
-                pos = left_pos
+                pos = left_pos + 1
             elif right_pos - column < column - left_pos:
                 pos = right_pos
             else:
-                pos = left_pos
+                pos = left_pos + 1
 
             pos = buf.text_point(line_no, pos)
             sel.subtract(reg)
