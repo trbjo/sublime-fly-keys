@@ -42,7 +42,6 @@ def pre_command(v: Optional[View], command_name):
 
     v.erase_phantoms("Sneak")
     v.erase_regions("Sneak")
-    v.erase_regions("Sneaks")
 
     if command_name not in revert_to_normal_mode:
         v.settings().set(key="has_stored_search", value=False)
@@ -55,9 +54,9 @@ class WindowListener(sublime_plugin.EventListener):
 
     def on_close(self, view: View):
         w = active_window()
-        sheet = view.sheet()
-        group = sheet.group()
-        if group is None:
+        if (sheet := view.sheet()) is None:
+            return
+        if (group := sheet.group()) is None:
             return
         # if w.active_group() != 0:
         sheets = w.sheets_in_group(group)
