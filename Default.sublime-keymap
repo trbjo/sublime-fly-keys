@@ -72,7 +72,7 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["p"], "command": "clear_selection", "args": {"forward": false, "cursor": true},
+    { "keys": ["p"], "command": "clear_selection", "args": {"forward": true, "after": false},
         "context": [
             { "key": "selection_empty", "operator": "equal", "operand": false },
             { "key": "setting.command_mode" }
@@ -386,7 +386,7 @@
     },
     { "keys": ["b"], "command": "chain", "args": {
         "commands": [
-            { "command": "clear_selection", "args": { "forward": false }},
+            { "command": "clear_selection", "args": { "forward": true }},
             { "command": "duplicate_line" }
         ] },
         "context": [
@@ -913,12 +913,6 @@
         ]
     },
 
-    // { "keys": ["ctrl+s"], "command": "goto_symbol_in_project",
-        // "context": [
-            // { "key": "setting.command_mode" }
-        // ]
-    // },
-
     { "keys": ["-"], "command": "goto_definition",
         "context": [
             { "key": "setting.command_mode" }
@@ -1064,7 +1058,7 @@
     },
     { "keys": ["enter"], "command": "chain", "args": {
         "commands": [
-            { "command": "clear_selection", "args": { "cursor": false }},
+            { "command": "clear_selection", "args": { "forward": true, "after": false }},
             { "command": "find_under_expand" },
             { "command": "find_next" }
         ] },
@@ -1075,8 +1069,7 @@
     },
     { "keys": ["enter"], "command": "chain", "args": {
         "commands": [
-            { "command": "clear_selection", "args": { "cursor": true }},
-            { "command": "move", "args": { "by": "characters", "forward": true }},
+            { "command": "clear_selection", "args": { "forward": true, "after": false }},
             { "command": "find_under_expand" },
             { "command": "find_next" }
         ] },
@@ -1240,7 +1233,7 @@
     },
     { "keys": ["shift+enter"], "command": "chain", "args": {
         "commands": [
-            { "command": "clear_selection", "args": { "cursor": false }},
+            { "command": "clear_selection", "args": { "forward": false }},
             { "command": "find_under_expand" },
             { "command": "find_prev" }
         ] },
