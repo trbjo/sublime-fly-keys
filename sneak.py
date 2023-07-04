@@ -14,6 +14,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
     def execute(
         self,
         search_string: str,
+        start_pt: int,
         forward: bool,
         extend: bool,
     ) -> None:
@@ -24,59 +25,28 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         regs_to_subtract: List[Region] = []
         try:
             if forward:
-                offset = 0
-                extend_offset = 1 if extend else 0
-                first_pt = view.sel()[0].end() - extend_offset
-                mybuf = self.view.substr(Region(first_pt + 1, view.size()))
+                mybuf = self.view.substr(Region(start_pt, view.size()))
                 for region in view.sel():
-                    pt: int = (
-                        mybuf.index(search_string, region.b - first_pt - extend_offset)
-                        + 1
-                        + first_pt
-                    )
-                    if region.a == region.b:
-                        if extend:
-                            regs_to_add.append(
-                                sublime.Region(region.a, pt + len(search_string))
-                            )
-                        else:
-                            regs_to_subtract.append(region)
-                            regs_to_add.append(pt)
-                    elif region.a < region.b:
+                    pt: int = mybuf.index(search_string) + start_pt
+                    if extend:
                         regs_to_add.append(
-                            Region(region.b - 1, pt + len(search_string))
+                            sublime.Region(region.a, pt + len(search_string))
                         )
-                    elif region.a > region.b:
-                        if pt > region.a:
-                            regs_to_subtract.append(Region(region.a, region.b))
-                            regs_to_add.append(region.a)
-                        else:
-                            regs_to_subtract.append(Region(region.b, pt))
+                    else:
+                        regs_to_subtract.append(region)
+                        regs_to_add.append(Region(pt, pt + len(search_string)))
             else:
                 search_string = search_string[::-1]
-                offset = 1 if len(search_string) == 1 else 0
-                last_pt = view.sel()[-1].b
-                mybuf = self.view.substr(Region(0, last_pt - 1))[::-1]
+                mybuf = self.view.substr(Region(0, start_pt))[::-1]
                 for region in view.sel():
-                    pt: int = (
-                        last_pt - mybuf.index(search_string, last_pt - region.b) - 2
-                    )
-                    if region.a == region.b:
-                        if extend:
-                            regs_to_add.append(
-                                sublime.Region(region.a, pt - 1 + offset)
-                            )
-                        else:
-                            regs_to_subtract.append(region)
-                            regs_to_add.append(pt - 1 + offset)
-                    elif region.a < region.b:
-                        if pt < region.a:
-                            regs_to_subtract.append(Region(region.b, region.a))
-                            regs_to_add.append(region.a)
-                        else:
-                            regs_to_subtract.append(Region(region.b, pt + 1))
-                    elif region.a > region.b:
-                        regs_to_add.append(Region(region.a, pt - 1 + offset))
+                    pt: int = start_pt - mybuf.index(search_string)
+                    if extend:
+                        regs_to_add.append(
+                            sublime.Region(region.a, pt - len(search_string))
+                        )
+                    else:
+                        regs_to_subtract.append(region)
+                        regs_to_add.append(Region(pt, pt - len(search_string)))
 
         except ValueError:
             self.view.show_popup(
@@ -103,13 +73,15 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                 for i, region in enumerate(view.sel()):
                     if forward:
                         pt: int = (
-                            mybuf.index(search_string, region.b - first_pt + 1)
-                            + first_pt
+                            mybuf.index(search_string, region.b - start_pt + 1)
+                            + start_pt
                             + 1
                         )
                     else:
                         pt: int = (
-                            last_pt - mybuf.index(search_string, last_pt - region.b) - 2
+                            start_pt
+                            - mybuf.index(search_string, start_pt - region.b)
+                            - 2
                         )
                     try:
                         if pt == view.sel()[i + 1 if forward else i - 1].b + new_offset:
@@ -136,7 +108,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                 if light_hl:
                     view_add_regions(
                         view_id,
-                        "Sneaks",
+                        "Sneak",
                         light_hl,
                         "light",
                         "",
@@ -148,17 +120,17 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                     )
             else:
                 if forward:
-                    rel_pt: int = view.sel()[0].b - first_pt
+                    rel_pt: int = view.sel()[0].b - start_pt
                 else:
-                    rel_pt: int = last_pt - view.sel()[0].b
+                    rel_pt: int = start_pt - view.sel()[0].b
 
                 html = self.get_html()
                 for i in range(10):
-                    rel_pt = mybuf.index(search_string, rel_pt) + 1
+                    rel_pt = mybuf.index(search_string, rel_pt + 1)
                     if forward:
-                        abs_pt: int = rel_pt + first_pt
+                        abs_pt: int = rel_pt + start_pt
                     else:
-                        abs_pt: int = last_pt - rel_pt - len(search_string)
+                        abs_pt: int = start_pt - rel_pt - len(search_string)
 
                     reg: Region = Region(abs_pt, abs_pt + len(search_string))
                     matches.append(reg)
@@ -223,10 +195,7 @@ class ListenForCharacterCommand(NextCharacterBaseCommand):
         )
 
         arrow: str = "_❯" if forward else " ❮_"
-        # arrow: str = "__❯" if forward else " ❮__"
-
         self.view.settings().set(key="needs_char", value=True)
-
         self.view.show_popup(
             self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
         )
@@ -241,10 +210,12 @@ class RepeatNextCharacterCommand(NextCharacterBaseCommand):
         else:
             forward = listen_for_char["forward"]
         self.view.settings().set(key="has_stored_search", value=True)
+        start_pt = self.view.sel()[0].end() if forward else self.view.sel()[-1].b
         self.execute(
             listen_for_char["search_string"],
-            forward,
-            listen_for_char["extend"],
+            start_pt=start_pt,
+            forward=forward,
+            extend=listen_for_char["extend"],
         )
 
 
@@ -263,8 +234,6 @@ class GoToNthMatchCommand(NextCharacterBaseCommand):
             return
 
         extend = listen_for_char["extend"]
-        # if region.a != region.b:
-        # extend = True
 
         if len(matches) < number:
             return
@@ -276,7 +245,7 @@ class GoToNthMatchCommand(NextCharacterBaseCommand):
             sels.add(Region(start, pt))
         else:
             sels.clear()
-            sels.add(mymatch.a)
+            sels.add(Region(mymatch.a, mymatch.b))
         view.show(sels[0].b, True)
         return
 
@@ -294,10 +263,13 @@ class NextCharacterCommand(NextCharacterBaseCommand):
 
         self.view.settings().set(key="has_stored_search", value=True)
         if len(search_string) == 2:
-            arrow: str = f"{search_string}❯" if forward else f"❮{search_string}"
             self.view.settings().set(key="needs_char", value=False)
-        else:
-            arrow: str = f"{character}_❯" if forward else f"❮{character}_"
 
-        self.execute(search_string, forward, extend)
+        start_pt = self.view.sel()[0].begin() if forward else self.view.sel()[-1].b
+        self.execute(
+            search_string=search_string,
+            start_pt=start_pt,
+            forward=forward,
+            extend=extend,
+        )
         char_listener(search_string)
