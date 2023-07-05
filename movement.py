@@ -251,67 +251,6 @@ class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
         buf.show(buf.sel()[0].b, False)
 
 
-class SmartFindBoundaryCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
-        sel = buf.sel()
-        for reg in sel:
-            line_indices: Region = buf.full_line(reg)
-            line_contents = buf.substr(line_indices)
-
-            if len(line_contents) <= 1:
-                continue
-
-            cursor_begin: int = reg.a - line_indices.a
-
-            if reg.a == reg.b or not line_contents[cursor_begin].isspace():
-                # handle situation where cursor is at the end of the line:
-                if reg.b == line_indices.b - 1:
-                    cursor_begin -= 1
-
-                # we find out if the cursor is already at a word
-                while line_contents[cursor_begin].isspace() and cursor_begin < len(
-                    line_contents
-                ):
-                    cursor_begin += 1
-
-            if reg.empty():
-                cursor_end: int = cursor_begin
-            else:
-                cursor_end: int = reg.b - line_indices.a
-
-                if reg.b != line_indices.b - 1:
-                    cursor_end += 1
-
-                while (
-                    line_contents[cursor_end].isspace()
-                    and cursor_end < len(line_contents) - 1
-                ):
-                    cursor_end += 1
-
-            while not line_contents[cursor_end].isspace() and cursor_end < len(
-                line_contents
-            ):
-                cursor_end += 1
-
-            left_offset: int = 0
-            for i in range(cursor_begin + 1):
-                if line_contents[cursor_begin::-1][i].isspace():
-                    left_offset = i - 1
-                    break
-            else:
-                # match until beginning of line:
-                left_offset = i
-
-            left_abs_pos = line_indices.a + cursor_begin - left_offset
-            right_abs_pos = line_indices.a + cursor_end
-
-            if reg.empty():
-                sel.subtract(reg)
-
-            sel.add(Region(left_abs_pos, right_abs_pos))
-
-
 class SmartFindWordCommand(sublime_plugin.TextCommand):
     def find_pt(self, line: str, start: int, stop: int, forward: bool) -> int:
         for i in range(start, stop, 1 if forward else -1):
