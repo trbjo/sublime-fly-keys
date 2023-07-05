@@ -56,6 +56,7 @@ class NavigateWordCommand(TextCommand):
     ):
         rgx = r"\S+" if whole_words else r"[-\w]+"
         rrev = r"\s+" if whole_words else r"[^-\w]+"
+        compiled_rgx = wholergx if whole_words else normrgx
 
         v = self.view
         s = v.sel()
@@ -68,13 +69,9 @@ class NavigateWordCommand(TextCommand):
         if forward:
             flag = FindFlags.NONE
             for r in s:
-                substr = v.substr(r)
                 pat = rgx
                 pt = r.end()
-                if (
-                    not re.match(wholergx if whole_words else normrgx, substr)
-                    and r.a > r.b
-                ):
+                if r.a > r.b and not re.match(compiled_rgx, v.substr(r)):
                     pat = rrev if extend else rgx
                     pt = r.b
                 pts.append((vfind(vi, pat, pt, flag), r))
@@ -82,55 +79,57 @@ class NavigateWordCommand(TextCommand):
         else:
             flag = FindFlags.REVERSE
             for r in s:
-                substr = v.substr(r)
                 pat = rgx
                 pt = r.begin()
-                if (
-                    not re.match(wholergx if whole_words else normrgx, substr)
-                    and r.b > r.a
-                ):
+                if r.b > r.a and not re.match(compiled_rgx, v.substr(r)):
                     pat = rrev if extend else rgx
                     pt = r.b
                 pts.append((vfind(vi, pat, pt, flag), r))
 
         if forward and extend:
-            for mypt in pts:
-                if mypt[1].a > mypt[1].b:
-                    subtract_region(vi, mypt[1].b, mypt[0].b)
-                    if mypt[0].b >= mypt[1].a:
-                        add_region(vid, mypt[1].begin(), mypt[0].b, 0.0)
+            for r in pts:
+                if r[1].a > r[1].b:
+                    subtract_region(vi, r[1].b, r[0].b)
+                    if r[0].b >= r[1].a:
+                        add_region(vid, r[1].begin(), r[0].b, 0.0)
                 else:
-                    if mypt[0].a != -1:
-                        add_region(vid, mypt[1].a, mypt[0].b, 0.0)
+                    if r[0].a != -1:
+                        add_region(vid, r[1].a, r[0].b, 0.0)
         elif not forward and extend:
-            for mypt in pts:
-                if mypt[1].a < mypt[1].b:
-                    subtract_region(vi, mypt[1].b, mypt[0].a)
-                    if mypt[0].a <= mypt[1].a:
-                        add_region(vid, mypt[1].b, mypt[0].a, 0.0)
+            for r in pts:
+                if r[1].a < r[1].b:
+                    subtract_region(vi, r[1].b, r[0].a)
+                    if r[0].a <= r[1].a:
+                        add_region(vid, r[1].b, r[0].a, 0.0)
                 else:
-                    add_region(vid, mypt[1].a, mypt[0].a, 0.0)
+                    add_region(vid, r[1].a, r[0].a, 0.0)
         elif forward and not extend:
             if not (len(pts) == 1 and pts[0][0].a == -1):
+                last = s[-1]
+                save_last = False
                 s.clear()
                 for r in pts:
-                    if r[0].a != -1:
-                        add_region(
-                            vid,
-                            r[1].begin() if r[1].end() >= r[0].a else r[0].a,
-                            r[0].b,
-                            0.0,
-                        )
+                    if r[0].a != -1:  # eof workaround
+                        rg = r[1].b if r[1].a == r[0].a else r[0].a
+                        add_region(vid, rg, r[0].b, 0.0)
+                    else:
+                        save_last = True
+                if save_last:
+                    add_region(vid, last.a, last.b, 0.0)
+
         elif not forward and not extend:
             if not (len(pts) == 1 and pts[0][0].a == -1):
+                first = s[0]
+                save_first = False
                 s.clear()
                 for r in pts:
-                    add_region(
-                        vid,
-                        r[0].b if r[1].end() > r[0].b else r[1].end(),
-                        r[0].a,
-                        0.0,
-                    )
+                    if r[0].a != -1:  # bof workaround
+                        rg = r[0].b if r[1].end() > r[0].b else r[1].end()
+                        add_region(vid, rg, r[0].a, 0.0)
+                    else:
+                        save_first = True
+                if save_first:
+                    add_region(vid, *first, 0.0)
 
         show_point(vid, s[-1 if forward else 0].b, False, False, False)
 
