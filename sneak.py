@@ -50,7 +50,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                     mybuf = mybuf.lower()
 
                 for region in s:
-                    offset = start_pt - region.begin()
+                    offset = abs(start_pt - region.end() - 1)
                     pt: int = start_pt - mybuf.index(search_string, offset)
                     if extend:
                         regs_to_add.append(sublime.Region(region.a, pt - slength))
@@ -193,7 +193,11 @@ class RepeatNextCharacterCommand(NextCharacterBaseCommand):
         else:
             forward = listen_for_char["forward"]
         self.view.settings().set(key="has_stored_search", value=True)
-        start_pt = self.view.sel()[0 if forward else -1].begin()
+
+        if forward:
+            start_pt = self.view.sel()[0].begin()
+        else:
+            start_pt = self.view.sel()[-1].end()
 
         self.execute(
             search_string,
