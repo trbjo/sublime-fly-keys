@@ -51,7 +51,6 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
 
                 for region in s:
                     offset = start_pt - region.begin()
-                    offset = 0
                     pt: int = start_pt - mybuf.index(search_string, offset)
                     if extend:
                         regs_to_add.append(sublime.Region(region.a, pt - slength))
