@@ -42,6 +42,7 @@ def pre_command(v: Optional[View], command_name):
 
     v.erase_phantoms("Sneak")
     v.erase_regions("Sneak")
+    v.erase_regions("Sneaks")
 
     if command_name not in revert_to_normal_mode:
         v.settings().set(key="has_stored_search", value=False)
