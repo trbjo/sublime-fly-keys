@@ -32,6 +32,9 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         try:
             if forward:
                 mybuf = self.view.substr(Region(start_pt, view.size()))
+                if search_string.islower():  # smartcase
+                    mybuf = mybuf.lower()
+
                 for region in s:
                     offset = region.end() - start_pt - slength + 1
                     pt: int = mybuf.index(search_string, offset) + start_pt
@@ -43,6 +46,9 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
             else:
                 search_string = search_string[::-1]
                 mybuf = self.view.substr(Region(0, start_pt))[::-1]
+                if search_string.islower():  # smartcase
+                    mybuf = mybuf.lower()
+
                 for region in s:
                     offset = start_pt - region.begin()
                     offset = 0
