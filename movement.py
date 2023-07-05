@@ -110,7 +110,7 @@ class NavigateWordCommand(TextCommand):
                 s.clear()
                 for r in pts:
                     if r[0].a != -1:  # eof workaround
-                        rg = r[1].b if r[1].a == r[0].a else r[0].a
+                        rg = r[1].begin() if r[1].end() == r[0].a else r[0].a
                         add_region(vid, rg, r[0].b, 0.0)
                     else:
                         save_last = True
