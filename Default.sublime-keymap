@@ -589,7 +589,7 @@
     },
 
 
-    { "keys": ["ctrl+escape"], "command": "single_selection",
+    { "keys": ["shift+escape"], "command": "single_selection",
         "context": [
             { "key": "num_selections", "operator": "not_equal", "operand": 1}
         ]
@@ -1203,7 +1203,7 @@
         ]
     },
 
-    { "keys": ["shift+escape"], "command": "chain", "args": {
+    { "keys": ["ctrl+escape"], "command": "chain", "args": {
         "commands": [
             { "command": "open_find_results", "args": { "panel": "find_results"}},
             { "command": "output_panel_navigate", "args": { "show": "same"}}
@@ -1212,14 +1212,14 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["shift+escape"], "command": "close_transient_view",
+    { "keys": ["ctrl+escape"], "command": "close_transient_view",
         "context": [
             { "key": "panel", "operand": "output.find_results" },
             { "key": "panel_visible", "operator": "equal", "operand": true }
         ]
     },
 
-    { "keys": ["shift+escape"], "command": "revert_selection",
+    { "keys": ["ctrl+escape"], "command": "revert_selection",
         "context": [
             { "key": "setting.command_mode" },
             { "key": "selection_empty", "operator": "equal", "operand": false }
