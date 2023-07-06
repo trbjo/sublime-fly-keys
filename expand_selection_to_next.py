@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import sublime_api
 import sublime_plugin
 from sublime import Edit
@@ -8,7 +10,35 @@ from sublime_api import view_selection_subtract_region as subtract_region
 class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
     string = "meta.string, string"
 
-    def run(self, edit: Edit, around=False, left=True, right=True):
+    def get_action(self) -> Tuple[str, bool, bool]:
+        v = self.view
+        if (set_number := self.view.settings().get("set_number")) is not None:
+            v.settings().erase("set_number")
+
+        if (multiplier := self.view.settings().get("multiplier")) is not None:
+            v.settings().erase("multiplier")
+            if multiplier == 1:
+                return "()", False, False
+            elif multiplier == 2:
+                return "()", True, False
+            elif multiplier == 3:
+                return "[]", False, False
+            elif multiplier == 4:
+                return "[]", True, False
+            elif multiplier == 5:
+                return r"{}", False, False
+            elif multiplier == 6:
+                return r"{}", True, False
+        return "([{)]}", False, True
+
+    def run(
+        self,
+        _: Edit,
+        left=True,
+        right=True,
+    ):
+        charpair, around, include_string = self.get_action()
+
         v = self.view
         vi = v.id()
         size: int = v.size()
@@ -34,7 +64,7 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                     and not (
                         local_scope := v.scope_name(rpt).split(" ")[-2]
                     ).startswith("punctuation.definition.string.begin")
-                ):
+                ) and include_string:
                     # we deal with nested string scopes, e.g. a string inside a format string
 
                     nested = False
@@ -57,12 +87,12 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                     lpt = -1
                     reg_b = size
 
-                rpt = self.find_char(rpt, reg_b, True, bool(in_string))
+                rpt = self.find_char(charpair, rpt, reg_b, True, bool(in_string))
                 if left:
-                    if charpair := {"}": "}{", "]": "][", ")": ")("}.get(v.substr(rpt)):
+                    if char := {"}": "}{", "]": "][", ")": ")("}.get(v.substr(rpt)):
                         if (
                             llpt := self.find_char(
-                                rpt - 1, lpt, False, bool(in_string), charpair
+                                char, rpt - 1, lpt, False, bool(in_string)
                             )
                         ) == lpt - 1:
                             rpt = reg_b
@@ -96,11 +126,11 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
 
     def find_char(
         self,
+        charpair: str,
         start: int,
         stop: int,
         forward: bool,
         in_string: bool,
-        charpair="([{)]}",
     ) -> int:
         stack = []
         offset = int(len(charpair) / 2)

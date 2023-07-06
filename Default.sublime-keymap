@@ -406,7 +406,7 @@
         ]
     },
 
-    { "keys": ["f"], "command": "expand_selection_to_next", "args": { "around": false },
+    { "keys": ["f"], "command": "expand_selection_to_next",
         "context": [
             { "key": "setting.command_mode" }
         ]
