@@ -2,7 +2,17 @@ import itertools
 from typing import List, Tuple
 
 import sublime_plugin
-from sublime import Edit, Region, Selection, View, get_clipboard, set_clipboard
+from sublime import (
+    DRAW_NO_OUTLINE,
+    Edit,
+    Region,
+    Selection,
+    View,
+    get_clipboard,
+    set_clipboard,
+    set_timeout,
+)
+from sublime_api import view_add_regions
 from sublime_api import view_cached_substr as ssubstr  # pyright: ignore
 from sublime_api import view_erase as erase  # pyright: ignore
 from sublime_api import view_selection_add_point as add_pt  # pyright: ignore
@@ -16,23 +26,16 @@ class CopyBufferCommand(sublime_plugin.TextCommand):
         set_clipboard(buf.substr(Region(0, buf.size())))
 
 
-class SmartCopyWholeLineCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        v: View = self.view
-        sel = v.sel()
-        set_clipboard("".join(v.substr(v.full_line(reg)) for reg in sel))
-        reg = sel[-1].b
-        sel.clear()
-        sel.add(reg)
-        v.show(sel[-1].b)
-        return
-
-
 class SmartCopyCommand(sublime_plugin.TextCommand):
     def run(self, _, whole_line: bool = False) -> None:
         v: View = self.view
         vi = v.id()
         sel = v.sel()
+
+        if whole_line:
+            regs = [r.b if l.contains(r.b) else l.a for r in sel for l in v.lines(r)]
+            sel.clear()
+            sel.add_all(regs)
 
         future_cb: List[Region] = []
         end = v.full_line(sel[0].a).a
@@ -67,13 +70,18 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         if clip.isspace():
             return
 
+        name = "copy_regions"
+        regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
+        color = "light"
+        view_add_regions(vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None)
+        set_timeout(lambda: self.view.erase_regions("copy_regions"), 400)
+
         if only_empty_selections and contiguous_regions:
             regs = [sel[-1].b]
-        else:
-            regs = [reg.b for reg in sel]
+            sel.clear()
+            for p in regs:
+                add_pt(vi, p)
 
-        sel.clear()
-        [add_pt(vi, p) for p in regs]
         set_clipboard(clip)
 
 

@@ -329,16 +329,14 @@
     },
 
     { "keys": ["ctrl+j"], "command": "copy" },
-    { "keys": ["j"], "command": "smart_copy_whole_line",
+    { "keys": ["j"], "command": "smart_copy",
         "context": [
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["j"], "command": "smart_copy",
+    { "keys": ["j"], "command": "smart_copy", "args": {"whole_line": true},
         "context": [
-            { "key": "last_command", "operator": "not_equal", "operand": "find_next" },
-            { "key": "last_command", "operator": "not_equal", "operand": "find_prev" },
-            { "key": "last_command", "operator": "not_equal", "operand": "" },
+            { "key": "last_command", "operator": "equal", "operand": "smart_copy" },
             { "key": "setting.command_mode" }
         ]
     },
