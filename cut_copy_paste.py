@@ -10,8 +10,8 @@ from sublime import (
     View,
     get_clipboard,
     set_clipboard,
-    set_timeout,
 )
+from sublime_api import set_timeout_async as set_timeout_async  # pyright: ignore
 from sublime_api import view_add_regions
 from sublime_api import view_cached_substr as ssubstr  # pyright: ignore
 from sublime_api import view_erase as erase  # pyright: ignore
@@ -74,7 +74,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
         color = "light"
         view_add_regions(vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None)
-        set_timeout(lambda: self.view.erase_regions("copy_regions"), 400)
+        set_timeout_async(lambda: self.view.erase_regions("copy_regions"), 250)
 
         if only_empty_selections and contiguous_regions:
             regs = [sel[-1].b]
@@ -148,10 +148,8 @@ class SmartCutCommand(sublime_plugin.TextCommand):
 class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
         v: View = self.view
-        if (syntax := v.syntax()) is not None and syntax.name == "Go":
-            wschar = "\t"
-        else:
-            wschar = " "
+
+        wschar = " " if v.settings().get("translate_tabs_to_spaces") else "\t"
         sels: Selection = v.sel()
 
         clips = [c.strip() for c in get_clipboard().splitlines() if c.strip()]
@@ -187,6 +185,7 @@ class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
 def find_indent(
     v: View,
     line: Region,
+    region: Region,
     wschar: str,
     above: bool = False,
 ) -> int:
@@ -207,7 +206,7 @@ def find_indent(
         return 0
     else:
         if (line_content := v.substr(line)).isspace():
-            return len(line_content)
+            return region.b - line.a
 
         if not above and (next_line_content := v.substr(v.line(line.b + 1))) != "":
             line_content = next_line_content
@@ -217,76 +216,76 @@ def find_indent(
 
 class SmartPasteCommand(sublime_plugin.TextCommand):
     def selections_match_clipboard(self, s: Selection, clips: List[str]) -> bool:
+        if len(clips) == len(s):
+            return True
         vi = self.view.id()
         return all(not r.empty() for r in s) and len(set(clips)) == len(
             set(ssubstr(vi, r.a, r.b) for r in s)
         )
 
-    def run(self, edit: Edit, above: bool = False, replace=True) -> None:
+    def run(
+        self, edit: Edit, above: bool = False, replace=True, indent_same=False
+    ) -> None:
         v: View = self.view
-        if (syntax := v.syntax()) is not None and syntax.name == "Go":
-            wschar = "\t"
-        else:
-            wschar = " "
 
+        wschar = " " if v.settings().get("translate_tabs_to_spaces") else "\t"
         s: Selection = v.sel()
         clipboard = get_clipboard()
         clips = clipboard.splitlines()
         vi = v.id()
-        is_whole_line = clipboard.endswith("\n")
 
+        selections_match = self.selections_match_clipboard(s, clips)
         if replace:
             [erase(vi, edit.edit_token, r) for r in s if r.a != r.b]
+            # return
         else:
             [(subtract(vi, r.begin(), r.end()), add_pt(vi, r.b)) for r in s]
 
-        if len(clips) == len(s) or self.selections_match_clipboard(s, clips):
-            if is_whole_line:
-                for r, cliplet in zip(s, itertools.cycle(clips)):
-                    line_reg = v.line(r.begin())
-                    insert_pos = line_reg.a if above else v.full_line(r.begin()).b
-                    indent = find_indent(v, line_reg, wschar, above)
-                    insert_string = wschar * indent + cliplet.lstrip() + "\n"
+        if not clipboard.endswith("\n"):
+            clipboard_iterator = clips if selections_match else [clipboard]
+            for r, cliplet in zip(s, itertools.cycle(clipboard_iterator)):
+                insert_pos = r.begin() if above else r.end()
+                v.insert(edit, insert_pos, cliplet)
+                add_region(vi, insert_pos, insert_pos + len(cliplet), 0.0)
+            return
 
-                    s.subtract(r)
-                    v.insert(edit, insert_pos, insert_string)
-                    add_pt(vi, insert_pos + indent)
+        stripped_lines = [line.lstrip() for line in clips]
+        if selections_match:
+            for r, cliplet in zip(s, itertools.cycle(stripped_lines)):
+                line_reg = v.line(r.begin())
+                insert_pos = line_reg.a if above else v.full_line(r.begin()).b
+                indent = find_indent(v, line_reg, r, wschar, above)
+                insert_string = wschar * indent + cliplet + "\n"
 
-            else:
-                for r, cliplet in zip(s, itertools.cycle(clips)):
-                    insert_string = cliplet
-                    insert_pos = r.begin() if above else r.end()
-                    v.insert(edit, insert_pos, insert_string)
-                    add_region(vi, insert_pos, insert_pos + len(insert_string), 0.0)
-
+                s.subtract(r)
+                v.insert(edit, insert_pos, insert_string)
+                add_pt(vi, insert_pos + indent)
         else:
-            if is_whole_line:
-                for r in s:
-                    line_reg = v.line(r.begin())
-                    insert_pos = line_reg.a if above else v.full_line(r.begin()).b
-                    indent = find_indent(v, line_reg, wschar, above)
+            content_line = -1
+            padding = 0
+            line_lengths = []
+            for i, line in enumerate(clips):
+                line_lengths.append(len(line))
+                if line.isspace():
+                    padding += len(line)
+                elif not (len(line) == 0) and content_line == -1:
+                    content_line = i
+            if content_line == -1:
+                content_line = 0
 
-                    insert_string = []
-                    initial_indent = None
+            init_indent = len(clips[content_line]) - len(stripped_lines[content_line])
+            for r in s:
+                line_reg = v.line(r.begin())
+                insert_pos = line_reg.a if above else v.full_line(r.begin()).b
+                buf_indent = indent = find_indent(v, line_reg, r, wschar, above)
+                strings = []
+                for lline, sline in zip(line_lengths, stripped_lines):
+                    if not indent_same:
+                        indent = buf_indent + lline - len(sline) - init_indent
+                    strings.extend([wschar * indent, sline, "\n"])
 
-                    first_line_is_newline = 0
-                    if not clips[0]:
-                        first_line_is_newline = 1
+                insert_string = "".join(strings)
 
-                    for line in clips:
-                        if deindented_line := line.lstrip():
-                            cur_indent = len(line) - len(deindented_line)
-                            if initial_indent == None:
-                                initial_indent = cur_indent
-                            this_indent = indent + cur_indent - initial_indent
-                            insert_string.append(wschar * this_indent + deindented_line)
-                        insert_string.append("\n")
-
-                    s.subtract(r)
-                    v.insert(edit, insert_pos, "".join(insert_string))
-                    s.add(insert_pos + indent + first_line_is_newline)
-            else:
-                for r in s:
-                    insert_pos = r.begin() if above else r.end()
-                    v.insert(edit, insert_pos, clipboard)
-                    add_region(vi, insert_pos, insert_pos + len(clipboard), 0.0)
+                s.subtract(r)
+                v.insert(edit, insert_pos, insert_string)
+                add_pt(vi, insert_pos + buf_indent + content_line + padding)

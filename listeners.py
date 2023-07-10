@@ -42,6 +42,7 @@ def pre_command(v: Optional[View], command_name):
 
     v.erase_phantoms("Sneak")
     v.erase_regions("Sneak")
+    v.erase_regions("copy_regions")
     v.erase_regions("Sneaks")
 
     if command_name not in revert_to_normal_mode:
@@ -49,21 +50,96 @@ def pre_command(v: Optional[View], command_name):
         v.settings().set(key="needs_char", value=False)
 
 
+def assign_cells(num_panes, max_columns):
+    num_rows, num_cols = rows_cols_for_panes(num_panes, max_columns)
+
+    cells = []
+    for i in range(0, num_panes):
+        if i < (max_columns - 1):
+            cells.append([i, 0, i + 1, num_rows])
+        else:
+            row = i - (max_columns - 1)
+            cells.append([num_cols - 1, row, num_cols, row + 1])
+    return cells
+
+
+def create_splits(num_splits):
+    return [0.0] + [1.0 / num_splits * i for i in range(1, num_splits)] + [1.0]
+
+
+def rows_cols_for_panes(num_panes, max_columns):
+    if num_panes > max_columns:
+        num_cols = max_columns
+        num_rows = num_panes - num_cols + 1
+    else:
+        num_cols = num_panes
+        num_rows = 1
+    return num_rows, num_cols
+
+
+MAX_COLUMNS = 2
+
+
 class WindowListener(sublime_plugin.EventListener):
+    def on_query_context(
+        self, view, key, operator, operand, match_all
+    ) -> Optional[bool]:
+        if key == "search_in_selection":
+            w = active_window()
+            if setting := w.settings().get(key="search_in_selection"):
+                w.settings().erase("search_in_selection")
+            return setting == operand
+
     def on_window_command(self, window: sublime.Window, command_name, _):
         pre_command(window.active_view(), command_name)
 
     def on_close(self, view: View):
         w = active_window()
-        if (sheet := view.sheet()) is None:
+        max_columns = w.template_settings().get("max_columns", MAX_COLUMNS)
+        if len(w.sheets_in_group(w.active_group())) > 0:
             return
-        if (group := sheet.group()) is None:
+
+        idx = w.active_group()
+        layout = w.get_layout()
+        num_panes = len(layout["cells"])
+
+        if num_panes == 1:
             return
-        # if w.active_group() != 0:
-        sheets = w.sheets_in_group(group)
-        length = len(sheets)
-        if length == 0:
-            w.run_command("close_pane")
+
+        for i in range(idx, w.num_groups()):
+            current_selection = w.selected_sheets_in_group(i)
+            w.move_sheets_to_group(w.sheets_in_group(i), i - 1)
+            w.select_sheets(current_selection)
+
+        rows = layout["rows"]
+        cols = layout["cols"]
+        cells = layout["cells"]
+
+        if layout["cells"] != assign_cells(num_panes, max_columns):
+            num_rows, num_cols = rows_cols_for_panes(num_panes - 1, max_columns)
+            rows = create_splits(num_rows)
+            cols = create_splits(num_cols)
+            cells = assign_cells(num_panes - 1, max_columns)
+        else:
+            num_cols = len(cols) - 1
+            num_rows = len(rows) - 1
+
+            if num_rows > 1:
+                num_rows -= 1
+                rows = create_splits(num_rows)
+            else:
+                num_cols -= 1
+                cols = create_splits(num_cols)
+
+            cells = assign_cells(num_panes - 1, max_columns)
+
+        w.set_layout({"cells": cells, "rows": rows, "cols": cols})
+        w.settings().set("last_automatic_layout", cells)
+
+        new_idx = idx - 1
+        if new_idx < 0:
+            new_idx = 0
+        w.focus_group(new_idx)
 
     def on_init(self, views):
         for v in views:
@@ -177,8 +253,13 @@ class BufferListener(sublime_plugin.ViewEventListener):
         action = Action.DO_NOTHING
 
     def on_text_command(self, command_name: str, args):
+        special_cmds = ["expand_selection_to_next", "insert_mode"]
         v = self.view
         if v.element() is not None:
+            return
+
+        if command_name in special_cmds:
+            pre_command(v, command_name)
             return
 
         if command_name != "set_number" and (

@@ -140,7 +140,7 @@ class NavigateByParagraphForwardCommand(TextCommand):
         vi = v.id()
         pts = []
         for r in v.sel():
-            region = r.begin()
+            region = r.b
             try:
                 myregs = get_regions(v, "last")
                 bisect_res = bisect(myregs, region)

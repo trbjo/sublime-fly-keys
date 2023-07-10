@@ -11,29 +11,6 @@ timeouts: Dict[int, float] = {}
 
 # sneak
 matches: List[Region] = []
-charlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-
-
-listen_for_char = {
-    "search_string": "",
-    "forward": True,
-    "extend": False,
-    "append_selection": False,
-}
-
-
-def char_listener(
-    search_string: Optional[str] = None,
-    forward: Optional[bool] = None,
-    extend: Optional[bool] = None,
-) -> None:
-    global listen_for_char
-    if search_string is not None:
-        listen_for_char["search_string"] = search_string
-    if forward is not None:
-        listen_for_char["forward"] = forward
-    if extend is not None:
-        listen_for_char["extend"] = extend
 
 
 def maybe_rebuild(view: View):

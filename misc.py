@@ -2,9 +2,8 @@ from typing import Optional, Union
 
 import sublime_plugin
 from sublime import Edit, FindFlags, Region, View, active_window
-from sublime_api import view_add_regions  # pyright: ignore
-from sublime_api import view_find  # pyright: ignore
 from sublime_api import view_cached_substr as substr  # pyright: ignore
+from sublime_api import view_find  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_plugin import TextCommand, TextInputHandler, WindowCommand
 

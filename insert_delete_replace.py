@@ -53,7 +53,33 @@ class SmartDeleteLineCommand(sublime_plugin.TextCommand):
 
 
 class InsertModeCommand(sublime_plugin.TextCommand):
+    def other_action(self) -> bool:
+        v = self.view
+        if (set_number := self.view.settings().get("set_number")) is not None:
+            v.settings().erase("set_number")
+
+        if (multiplier := self.view.settings().get("multiplier")) is not None:
+            v.settings().erase("multiplier")
+            if multiplier == 1:
+                v.run_command("upper_case")
+            elif multiplier == 2:
+                v.run_command("lower_case")
+            elif multiplier == 3:
+                v.run_command("title_case")
+            elif multiplier == 4:
+                v.run_command("convert_to_snake")
+            elif multiplier == 5:
+                v.run_command("convert_to_pascal")
+            else:
+                return False
+
+            return True
+        return False
+
     def run(self, edit: Edit, replace=False, before=False) -> None:
+        if self.other_action():
+            return
+
         buf = self.view
         if buf.is_read_only():
             sublime.status_message("Buffer is read only")

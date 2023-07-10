@@ -36,8 +36,11 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
         _: Edit,
         left=True,
         right=True,
+        around=False,
     ):
-        charpair, around, include_string = self.get_action()
+        charpair, _around, include_string = self.get_action()
+        if not around:
+            around = _around
 
         v = self.view
         vi = v.id()

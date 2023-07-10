@@ -156,11 +156,15 @@ class JumpHistory:
             or self.current_command == "redo_or_repeat"
             or self.current_command == "redo"
             or self.current_command == "smart_find_word"
+            or self.current_command == "show_panel"  # find typing
         ):
             self.current_command = ":empty"
             return
 
-        if (multiplier := view.settings().get("multiplier")) is not None:
+        if view.settings().get("multiplier") is not None:
+            return
+
+        if view.settings().get("search_in_selection") is not None:
             return
 
         # We need the view to be loaded in order to interact with regions
@@ -861,3 +865,17 @@ class FancyMoveBufferToPrevPaneCommand(WindowCommand):
 
         for b in scratch_buffers:
             b.primary_view().set_scratch(False)
+
+
+class FocusViewCommand(WindowCommand):
+    """
+    The missing command for switching focus from side bar to view
+    """
+
+    def run(self) -> None:
+        w = self.window
+        active_group = w.active_group()
+        if (sheet := w.active_sheet_in_group(active_group)) is None:
+            return
+
+        w.focus_sheet(sheet)
