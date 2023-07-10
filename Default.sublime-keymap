@@ -72,12 +72,6 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["p"], "command": "clear_selection", "args": {"forward": true, "after": false},
-        "context": [
-            { "key": "selection_empty", "operator": "equal", "operand": false },
-            { "key": "setting.command_mode" }
-        ]
-    },
     { "keys": ["ctrl+p"], "command": "move", "args": { "by": "characters", "forward": true } },
     { "keys": ["ctrl+p"], "command": "move", "args": { "by": "characters", "forward": true,"extend": true },
         "context": [
