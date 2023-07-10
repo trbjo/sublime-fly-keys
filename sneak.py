@@ -44,6 +44,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
     ) -> bool:
         v = self.view
         regs_to_add: List[Union[Region, int]] = []
+        global matches
 
         s = v.sel()
         slength = len(search_string)
@@ -80,6 +81,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                     regs_to_add.append(Region(pt - slength, pt))
 
         except ValueError:
+            matches = []
             return False
 
         s.clear()
@@ -119,7 +121,6 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
 
             else:
                 rel_pt = s[0].b - begin if forward else begin - s[0].b
-                global matches
                 matches = []
                 for i in range(10):
                     rel_pt = mybuf.index(search_string, rel_pt + 1)
@@ -159,9 +160,6 @@ class RepeatNextCharacterCommand(NextCharacterBaseCommand):
         if not (search_string := listen_for_char["search_string"]):
             return
 
-        self.view.settings().set(key="has_stored_search", value=True)
-        slength = len(search_string)
-
         val = self.execute(
             search_string,
             forward=forward,
@@ -169,7 +167,7 @@ class RepeatNextCharacterCommand(NextCharacterBaseCommand):
             repeat=True,
         )
 
-        if slength == 2 or search_string in only_single_chars:
+        if len(search_string) == 2 or search_string in only_single_chars:
             popup = f"{search_string}❯" if forward else f"❮{search_string}"
         else:
             popup = f"{search_string}_❯" if forward else f"❮{search_string}_"
