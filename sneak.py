@@ -1,13 +1,31 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
-import sublime
 import sublime_plugin
 from sublime import DRAW_NO_OUTLINE, LAYOUT_INLINE, Edit, Region, Selection, View
-from sublime_api import view_add_phantom, view_add_regions
-from sublime_api import view_selection_add_point as add_point
-from sublime_api import view_selection_subtract_region as subtract_region
+from sublime_api import view_add_phantom, view_add_regions  # pyright: ignore
+from sublime_plugin import TextCommand
 
-from .base import char_listener, charlist, listen_for_char
+charlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+listen_for_char = {
+    "search_string": "",
+    "forward": True,
+    "extend": False,
+}
+only_single_chars = r"#(){}[]"
+
+
+def set_chars(
+    search_string: Optional[str] = None,
+    forward: Optional[bool] = None,
+    extend: Optional[bool] = None,
+) -> None:
+    global listen_for_char
+    if search_string is not None:
+        listen_for_char["search_string"] = search_string
+    if forward is not None:
+        listen_for_char["forward"] = forward
+    if extend is not None:
+        listen_for_char["extend"] = extend
 
 
 class NextCharacterBaseCommand(sublime_plugin.TextCommand):
@@ -20,55 +38,54 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
     def execute(
         self,
         search_string: str,
-        start_pt: int,
         forward: bool,
         extend: bool,
-    ) -> None:
-        view = self.view
+        repeat: bool,
+    ) -> bool:
+        v = self.view
         regs_to_add: List[Union[Region, int]] = []
-        regs_to_subtract: List[Region] = []
-        s = view.sel()
+
+        s = v.sel()
         slength = len(search_string)
+        if forward:
+            begin = s[0].b
+            mybuf = v.substr(Region(begin - slength, v.size()))
+        else:
+            begin = s[-1].b
+            search_string = search_string[::-1]
+            mybuf = v.substr(Region(0, begin))[::-1]
+
+        if search_string.islower():  # smartcase
+            mybuf = mybuf.lower()
+
         try:
-            if forward:
-                mybuf = self.view.substr(Region(start_pt, view.size()))
-                if search_string.islower():  # smartcase
-                    mybuf = mybuf.lower()
+            for r in s:
+                if forward:
+                    first = r.b if r.a > r.b else r.a
+                    offset = r.b - begin
+                    if repeat:
+                        offset += slength
+                    pt: int = mybuf.index(search_string, offset) + begin
+                else:
+                    offset = begin - r.b
+                    if repeat:
+                        offset += slength
+                    pt: int = begin - mybuf.index(search_string, offset)
+                    first = r.b if r.a < r.b else r.a
 
-                for region in s:
-                    offset = region.end() - start_pt - slength + 1
-                    pt: int = mybuf.index(search_string, offset) + start_pt
-                    if extend:
-                        regs_to_add.append(sublime.Region(region.a, pt + slength))
-                    else:
-                        regs_to_subtract.append(region)
-                        regs_to_add.append(Region(pt, pt + slength))
-            else:
-                search_string = search_string[::-1]
-                mybuf = self.view.substr(Region(0, start_pt))[::-1]
-                if search_string.islower():  # smartcase
-                    mybuf = mybuf.lower()
-
-                for region in s:
-                    offset = abs(start_pt - region.end() - 1)
-                    pt: int = start_pt - mybuf.index(search_string, offset)
-                    if extend:
-                        regs_to_add.append(sublime.Region(region.a, pt - slength))
-                    else:
-                        regs_to_subtract.append(region)
-                        regs_to_add.append(Region(pt, pt - slength))
+                if extend:
+                    reg = (first, pt) if forward else (first, pt - slength)
+                    regs_to_add.append(Region(*reg))
+                else:
+                    regs_to_add.append(Region(pt - slength, pt))
 
         except ValueError:
-            arrow = search_string + "❯" if forward else "❮" + search_string[::-1]
-            html = self.get_html(error=True).format(symbol=arrow)
-            self.view.show_popup(html, location=s[-1].b)
-            return
+            return False
 
-        for reg in regs_to_subtract:
-            s.subtract(reg)
+        s.clear()
         s.add_all(regs_to_add)
-        view.show(s[-1].b, True)
-        vid = self.view.id()
+        v.show(s[-1].b, True)
+        vid = v.id()
 
         try:
             if len(s) > 1:
@@ -76,12 +93,12 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                 regular_hl: List[Region] = []
                 for i, region in enumerate(s):
                     if forward:
-                        offset = region.b - start_pt
-                        pt_beg: int = mybuf.index(search_string, offset + 1) + start_pt
-                        pt_end = pt_beg + slength
+                        offset = region.b - begin
+                        pt_end = begin + mybuf.index(search_string, offset + 1)
+                        pt_beg = pt_end - slength
                     else:
-                        offset = start_pt - region.b
-                        pt_beg: int = start_pt - mybuf.index(search_string, offset)
+                        offset = begin - region.b
+                        pt_beg = begin - mybuf.index(search_string, offset + 1)
                         pt_end = pt_beg - slength
 
                     hl_reg = Region(pt_beg, pt_end)
@@ -101,28 +118,19 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                     self.add_hl("light", light_hl, "Sneaks")
 
             else:
-                if forward:
-                    rel_pt: int = s[0].b - start_pt
-                else:
-                    rel_pt: int = start_pt - s[0].b
-
-                html = self.get_html()
+                rel_pt = s[0].b - begin if forward else begin - s[0].b
                 global matches
                 matches = []
                 for i in range(10):
                     rel_pt = mybuf.index(search_string, rel_pt + 1)
-                    if forward:
-                        abs_pt: int = rel_pt + start_pt
-                    else:
-                        abs_pt: int = start_pt - rel_pt - slength
-
+                    abs_pt = rel_pt + begin if forward else begin - rel_pt - slength
                     reg: Region = Region(abs_pt, abs_pt + slength)
                     matches.append(reg)
                     view_add_phantom(
                         vid,
                         "Sneak",
                         reg,
-                        html.format(symbol=charlist[i]),
+                        get_html(v).format(symbol=charlist[i]),
                         LAYOUT_INLINE,
                         None,
                     )
@@ -130,138 +138,114 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         except ValueError:
             pass
 
-        if slength == 1:
-            popup = f"{search_string}_❯" if forward else f"❮{search_string[::-1]}_"
-        else:
-            popup = f"{search_string}❯" if forward else f"❮{search_string[::-1]}"
-
-        self.view.show_popup(
-            self.get_html(error=False).format(symbol=popup),
-            location=self.view.sel()[-1].b,
-        )
-
-    def get_html(self, error=False) -> str:
-        if error:
-            bg_color = self.view.style()["redish"]
-        else:
-            bg_color = self.view.style()["accent"]
-        fg_color = self.view.style()["background"]
-        return """<body
-            style="
-                padding: 0 2px 0 1px;
-                margin: 0;
-                border-radius:2px;
-                background-color:{background};
-                color:{color};
-            ">
-            <div>{{symbol}}</div>
-        </body>""".format(
-            background=bg_color, color=fg_color
-        )
+        return True
 
 
-class ListenForCharacterCommand(NextCharacterBaseCommand):
-    def run(
-        self,
-        _,
-        forward: bool,
-        extend: bool = False,
-    ) -> None:
+class ListenForCharacterCommand(TextCommand):
+    def run(self, _, forward: bool, extend: bool = False) -> None:
         """
         Sets the buffer ready for search
         """
-
-        char_listener(
-            "",
-            forward,
-            extend,
-        )
-
+        set_chars("", forward, extend)
         arrow: str = "_❯" if forward else " ❮_"
         self.view.settings().set(key="needs_char", value=True)
         self.view.show_popup(
-            self.get_html().format(symbol=arrow), location=self.view.sel()[-1].b
+            get_html(self.view).format(symbol=arrow), location=self.view.sel()[-1].b
         )
 
 
 class RepeatNextCharacterCommand(NextCharacterBaseCommand):
-    def run(self, _, **kwargs: bool) -> None:
+    def run(self, _, forward: bool) -> None:
         if not (search_string := listen_for_char["search_string"]):
             return
-        if bool(kwargs):
-            forward = kwargs["forward"]
-        else:
-            forward = listen_for_char["forward"]
+
         self.view.settings().set(key="has_stored_search", value=True)
+        slength = len(search_string)
 
-        if forward:
-            start_pt = self.view.sel()[0].begin()
-        else:
-            start_pt = self.view.sel()[-1].end()
-
-        self.execute(
+        val = self.execute(
             search_string,
-            start_pt=start_pt,
             forward=forward,
             extend=listen_for_char["extend"],
+            repeat=True,
         )
 
-
-class GoToNthMatchCommand(NextCharacterBaseCommand):
-    def run(self, _, **kwargs: int) -> None:
-        self.view.settings().set(key="has_stored_search", value=False)
-        self.view.settings().set(key="needs_char", value=False)
-        if bool(kwargs):
-            number: int = kwargs["number"]
+        if slength == 2 or search_string in only_single_chars:
+            popup = f"{search_string}❯" if forward else f"❮{search_string}"
         else:
-            return
-        view = self.view
-        sels: Selection = view.sel()
-        region = sels[0]
+            popup = f"{search_string}_❯" if forward else f"❮{search_string}_"
+        show_popup(popup, self.view, val)
+
+
+class GoToNthMatchCommand(TextCommand):
+    def run(self, _, number: int) -> None:
+        v = self.view
+        v.settings().set(key="has_stored_search", value=False)
+        v.settings().set(key="needs_char", value=False)
+        sels: Selection = v.sel()
+
         if len(sels) != 1:
             return
 
-        extend = listen_for_char["extend"]
-
         if len(matches) < number:
             return
-        mymatch: Region = matches[number - 1]
-        if extend:
-            pt = mymatch.b if region.a < region.b else mymatch.a
-            start = sels[0].a
+
+        region = sels[0]
+        num: Region = matches[number - 1]
+        if listen_for_char["extend"]:
+            pt = num.b if region.a < region.b else num.a
+            start = region.a
             sels.clear()
             sels.add(Region(start, pt))
         else:
             sels.clear()
-            sels.add(Region(mymatch.a, mymatch.b))
-        view.show(sels[0].b, True)
-        return
+            sels.add(Region(num.a, num.b))
+        v.show(sels[0].b, True)
+
+
+def show_popup(popup, view: View, blue: bool = True) -> None:
+    view.show_popup(
+        get_html(view, blue=blue).format(symbol=popup),
+        location=view.sel()[-1].b,
+    )
+
+
+def get_html(view: View, blue=True) -> str:
+    if blue:
+        bg_color = view.style()["accent"]
+    else:
+        bg_color = view.style()["redish"]
+    fg_color = view.style()["background"]
+    return """<body
+        style="
+            padding: 0 2px 0 1px;
+            margin: 0;
+            border-radius:2px;
+            background-color:{background};
+            color:{color};
+        ">
+        <div>{{symbol}}</div>
+    </body>""".format(
+        background=bg_color, color=fg_color
+    )
 
 
 class NextCharacterCommand(NextCharacterBaseCommand):
     def run(self, edit: Edit, character: str) -> None:
         global listen_for_char
 
-        search_string = listen_for_char["search_string"]
+        search_string = listen_for_char["search_string"] + character
         forward = listen_for_char["forward"]
         extend = listen_for_char["extend"]
 
-        search_string += character
-
+        set_chars(search_string)
         self.view.settings().set(key="has_stored_search", value=True)
-
-        if len(search_string) == 2:
-            self.view.settings().set(key="needs_char", value=False)
-
-        if forward:
-            start_pt = self.view.sel()[0].begin()
-        else:
-            start_pt = self.view.sel()[-1].end() + len(search_string) - 1
-
-        self.execute(
-            search_string=search_string,
-            start_pt=start_pt,
-            forward=forward,
-            extend=extend,
+        val = self.execute(
+            search_string=search_string, forward=forward, extend=extend, repeat=False
         )
-        char_listener(search_string)
+
+        if len(search_string) == 2 or character in only_single_chars:
+            self.view.settings().set(key="needs_char", value=False)
+            popup = f"{search_string}❯" if forward else f"❮{search_string}"
+        else:
+            popup = f"{search_string}_❯" if forward else f"❮{search_string}_"
+        show_popup(popup, self.view, val)
