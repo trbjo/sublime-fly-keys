@@ -187,11 +187,11 @@ def find_indent(
     line: Region,
     region: Region,
     wschar: str,
-    above: bool = False,
+    before: bool = False,
 ) -> int:
     vi = v.id()
     if line.a == line.b:
-        if above:
+        if before:
             l_beg = line.b
             while l_beg > 1:
                 l_beg, l_end = v.line(l_beg - 1)
@@ -208,7 +208,7 @@ def find_indent(
         if (line_content := v.substr(line)).isspace():
             return region.b - line.a
 
-        if not above and (next_line_content := v.substr(v.line(line.b + 1))) != "":
+        if not before and (next_line_content := v.substr(v.line(line.b + 1))) != "":
             line_content = next_line_content
 
         return len(line_content) - len(line_content.lstrip())
@@ -224,7 +224,7 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         )
 
     def run(
-        self, edit: Edit, above: bool = False, replace=True, indent_same=False
+        self, edit: Edit, before: bool = False, replace=True, indent_same=False
     ) -> None:
         v: View = self.view
 
@@ -239,12 +239,15 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
             [erase(vi, edit.edit_token, r) for r in s if r.a != r.b]
             # return
         else:
-            [(subtract(vi, r.begin(), r.end()), add_pt(vi, r.b)) for r in s]
+            if before:
+                [(subtract(vi, r.begin(), r.end()), add_pt(vi, r.begin())) for r in s]
+            else:
+                [(subtract(vi, r.begin(), r.end()), add_pt(vi, r.end())) for r in s]
 
         if not clipboard.endswith("\n"):
             clipboard_iterator = clips if selections_match else [clipboard]
             for r, cliplet in zip(s, itertools.cycle(clipboard_iterator)):
-                insert_pos = r.begin() if above else r.end()
+                insert_pos = r.begin() if before else r.end()
                 v.insert(edit, insert_pos, cliplet)
                 add_region(vi, insert_pos, insert_pos + len(cliplet), 0.0)
             return
@@ -253,8 +256,8 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         if selections_match:
             for r, cliplet in zip(s, itertools.cycle(stripped_lines)):
                 line_reg = v.line(r.begin())
-                insert_pos = line_reg.a if above else v.full_line(r.begin()).b
-                indent = find_indent(v, line_reg, r, wschar, above)
+                insert_pos = line_reg.a if before else v.full_line(r.begin()).b
+                indent = find_indent(v, line_reg, r, wschar, before)
                 insert_string = wschar * indent + cliplet + "\n"
 
                 s.subtract(r)
@@ -276,8 +279,8 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
             init_indent = len(clips[content_line]) - len(stripped_lines[content_line])
             for r in s:
                 line_reg = v.line(r.begin())
-                insert_pos = line_reg.a if above else v.full_line(r.begin()).b
-                buf_indent = indent = find_indent(v, line_reg, r, wschar, above)
+                insert_pos = line_reg.a if before else v.full_line(r.begin()).b
+                buf_indent = indent = find_indent(v, line_reg, r, wschar, before)
                 strings = []
                 for lline, sline in zip(line_lengths, stripped_lines):
                     if not indent_same:
