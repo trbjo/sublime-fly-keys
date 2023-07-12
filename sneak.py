@@ -11,7 +11,7 @@ listen_for_char = {
     "forward": True,
     "extend": False,
 }
-only_single_chars = r"#(){}[]"
+only_single_chars = "./()\"'-:,;<>~!@#$%^&*|+=[]{}`~?"
 
 
 def set_chars(
@@ -124,8 +124,8 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                 matches = []
                 for i in range(10):
                     rel_pt = mybuf.index(search_string, rel_pt + 1)
-                    abs_pt = rel_pt + begin if forward else begin - rel_pt - slength
-                    reg: Region = Region(abs_pt, abs_pt + slength)
+                    abs_pt = begin + (rel_pt if forward else -rel_pt)
+                    reg: Region = Region(abs_pt - slength, abs_pt)
                     matches.append(reg)
                     view_add_phantom(
                         vid,
