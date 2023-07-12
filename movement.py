@@ -54,8 +54,8 @@ class NavigateWordCommand(TextCommand):
     def run(
         self, _, forward: bool = True, whole_words: bool = False, extend: bool = False
     ):
-        rgx = r"\S+" if whole_words else r"[-\w]+"
-        rrev = r"\s+" if whole_words else r"[^-\w]+"
+        rgx = r"\S+" if whole_words else r"[\w]+"
+        rrev = r"\s+" if whole_words else r"[^\w]+"
         compiled_rgx = wholergx if whole_words else normrgx
 
         v = self.view
