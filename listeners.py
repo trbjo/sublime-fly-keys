@@ -1,9 +1,11 @@
+import re
 from enum import IntEnum
 from typing import Optional, Union
 
 import sublime
 import sublime_plugin
 from sublime import Selection, View, active_window
+from sublime_api import view_cached_substr as substr  # pyright: ignore
 from sublime_api import view_full_line_from_point as full_line  # pyright: ignore
 from sublime_api import view_line_from_point as line  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
@@ -157,6 +159,9 @@ class WindowListener(sublime_plugin.EventListener):
 class BufferListener(sublime_plugin.ViewEventListener):
     # thanks to Odatnurd from Sublime Discord
     # useful for relative line numbers, build_or_rebuild_ws_for_buffer
+
+    regex = re.compile(r"^(\n|.\b)[\w]+(\b.|\n)$")
+
     @classmethod
     def applies_to_primary_view_only(cls) -> bool:
         """
@@ -183,6 +188,17 @@ class BufferListener(sublime_plugin.ViewEventListener):
         view: View = self.view
         if view.element() is not None:
             return
+
+        if key == "word_boundary":
+            reg = view.sel()[-1]
+            a = reg.begin()
+            b = reg.end()
+            mysubstr = substr(view.id(), a - 1, b + 1)
+            if a == 0:
+                mysubstr = f"\a{mysubstr}"
+            if b == view.size():
+                mysubstr += "\a"
+            return bool(self.regex.match(mysubstr)) == operand
 
         if key == "side_bar_visible":
             return active_window().is_sidebar_visible() == operand
