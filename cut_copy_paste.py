@@ -12,7 +12,7 @@ from sublime import (
     set_clipboard,
 )
 from sublime_api import set_timeout_async as set_timeout_async  # pyright: ignore
-from sublime_api import view_add_regions
+from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_cached_substr as ssubstr  # pyright: ignore
 from sublime_api import view_erase as erase  # pyright: ignore
 from sublime_api import view_selection_add_point as add_pt  # pyright: ignore
