@@ -1,8 +1,9 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import sublime_plugin
 from sublime import DRAW_NO_OUTLINE, LAYOUT_INLINE, Edit, Region, Selection, View
 from sublime_api import view_add_phantom, view_add_regions  # pyright: ignore
+from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_plugin import TextCommand
 
 charlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
@@ -40,21 +41,28 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         search_string: str,
         forward: bool,
         extend: bool,
-        repeat: bool,
+        special: bool,
     ) -> bool:
         v = self.view
-        regs_to_add: List[Union[Region, int]] = []
+        regs_to_add = []
         global matches
 
         s = v.sel()
-        slength = len(search_string)
+        slen = len(search_string)
+        diff = 0
         if forward:
-            begin = s[0].b
-            mybuf = v.substr(Region(begin - slength, v.size()))
+            regb = s[0].b
+            rega = s[0].a
+            begin = rega if special else regb
+            diff = abs(regb - rega) if special else 0
+            mybuf = v.substr(Region(begin, v.size()))
         else:
-            begin = s[-1].b
+            regb = s[-1].b
+            rega = s[-1].a
+            begin = rega + 1 if special else regb
             search_string = search_string[::-1]
             mybuf = v.substr(Region(0, begin))[::-1]
+            diff = abs(regb - begin) if special else 0
 
         if search_string.islower():  # smartcase
             mybuf = mybuf.lower()
@@ -62,32 +70,30 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         try:
             for r in s:
                 if forward:
-                    first = r.b if r.a > r.b else r.a
-                    offset = r.b - begin
-                    if repeat:
-                        offset += slength
+                    ext_from = r.b if r.a > r.b else r.a
+                    offset = r.b - begin - diff
                     pt: int = mybuf.index(search_string, offset) + begin
                 else:
-                    offset = begin - r.b
-                    if repeat:
-                        offset += slength
+                    ext_from = r.b if r.a < r.b else r.a
+                    offset = begin - r.b - diff
                     pt: int = begin - mybuf.index(search_string, offset)
-                    first = r.b if r.a < r.b else r.a
 
                 if extend:
-                    reg = (first, pt) if forward else (first, pt - slength)
-                    regs_to_add.append(Region(*reg))
+                    r = (ext_from, pt + slen) if forward else (ext_from, pt - slen)
+                    regs_to_add.append(r)
                 else:
-                    regs_to_add.append(Region(pt - slength, pt))
+                    r = (pt, pt + slen) if forward else Region(pt, pt - slen)
+                    regs_to_add.append(r)
 
         except ValueError:
             matches = []
             return False
 
         s.clear()
-        s.add_all(regs_to_add)
-        v.show(s[-1].b, True)
         vid = v.id()
+        for region in regs_to_add:
+            add_region(vid, *region, 0.0)
+        v.show(s[-1].b, True)
 
         try:
             if len(s) > 1:
@@ -97,11 +103,11 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                     if forward:
                         offset = region.b - begin
                         pt_end = begin + mybuf.index(search_string, offset + 1)
-                        pt_beg = pt_end - slength
+                        pt_beg = pt_end - slen
                     else:
                         offset = begin - region.b
                         pt_beg = begin - mybuf.index(search_string, offset + 1)
-                        pt_end = pt_beg - slength
+                        pt_end = pt_beg - slen
 
                     hl_reg = Region(pt_beg, pt_end)
 
@@ -125,7 +131,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                 for i in range(10):
                     rel_pt = mybuf.index(search_string, rel_pt + 1)
                     abs_pt = begin + (rel_pt if forward else -rel_pt)
-                    reg: Region = Region(abs_pt - slength, abs_pt)
+                    reg: Region = Region(abs_pt, abs_pt + (slen if forward else -slen))
                     matches.append(reg)
                     view_add_phantom(
                         vid,
@@ -164,7 +170,7 @@ class RepeatNextCharacterCommand(NextCharacterBaseCommand):
             search_string,
             forward=forward,
             extend=listen_for_char["extend"],
-            repeat=True,
+            special=False,
         )
 
         if len(search_string) == 2 or search_string in only_single_chars:
@@ -190,7 +196,7 @@ class GoToNthMatchCommand(TextCommand):
         region = sels[0]
         num: Region = matches[number - 1]
         if listen_for_char["extend"]:
-            pt = num.b if region.a < region.b else num.a
+            pt = num.b
             start = region.a
             sels.clear()
             sels.add(Region(start, pt))
@@ -238,7 +244,10 @@ class NextCharacterCommand(NextCharacterBaseCommand):
         set_chars(search_string)
         self.view.settings().set(key="has_stored_search", value=True)
         val = self.execute(
-            search_string=search_string, forward=forward, extend=extend, repeat=False
+            search_string=search_string,
+            forward=forward,
+            extend=extend,
+            special=len(search_string) == 2,
         )
 
         if len(search_string) == 2 or character in only_single_chars:
