@@ -247,7 +247,7 @@ class NextCharacterCommand(NextCharacterBaseCommand):
             search_string=search_string,
             forward=forward,
             extend=extend,
-            special=len(search_string) == 2,
+            special=len(search_string) == 2 and not extend,
         )
 
         if len(search_string) == 2 or character in only_single_chars:
