@@ -88,9 +88,14 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
 class SmartCutCommand(sublime_plugin.TextCommand):
     """docstring for SmartCopyCommand"""
 
-    def run(self, edit: Edit) -> None:
+    def run(self, edit: Edit, whole_line: bool = False) -> None:
         v: View = self.view
         sel = v.sel()
+
+        if whole_line:
+            regs = [r.b if l.contains(r.b) else l.a for r in sel for l in v.lines(r)]
+            sel.clear()
+            sel.add_all(regs)
 
         regions_to_copy: List[Region] = []
         end = v.full_line(sel[0].begin()).begin()

@@ -294,6 +294,13 @@
         ]
     },
 
+    { "keys": ["ctrl+q"], "command": "cut" },
+    { "keys": ["ctrl+q"], "command": "smart_cut", "args": {"whole_line": true},
+        "context": [
+            { "key": "setting.command_mode" }
+        ]
+    },
+
     { "keys": ["q"], "command": "smart_cut",
         "context": [
             { "key": "setting.command_mode" }
@@ -525,13 +532,6 @@
         "context": [
             { "key": "auto_complete_visible" },
             { "key": "setting.command_mode", "operator": "equal", "operand": false }
-        ]
-    },
-
-    { "keys": ["ctrl+q"], "command": "cut" },
-    { "keys": ["ctrl+q"], "command": "smart_delete_line",
-        "context": [
-            { "key": "setting.command_mode" }
         ]
     },
 
