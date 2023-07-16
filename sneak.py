@@ -52,14 +52,12 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
         diff = 0
         if forward:
             regb = s[0].b
-            rega = s[0].a
-            begin = rega if special else regb
-            diff = abs(regb - rega) if special else 0
+            begin = regb - 1 if special else regb
+            diff = 1 if special else 0
             mybuf = v.substr(Region(begin, v.size()))
         else:
             regb = s[-1].b
-            rega = s[-1].a
-            begin = rega + 1 if special else regb
+            begin = regb + 2 if special else regb
             search_string = search_string[::-1]
             mybuf = v.substr(Region(0, begin))[::-1]
             diff = abs(regb - begin) if special else 0
@@ -247,7 +245,7 @@ class NextCharacterCommand(NextCharacterBaseCommand):
             search_string=search_string,
             forward=forward,
             extend=extend,
-            special=len(search_string) == 2 and not extend,
+            special=len(search_string) == 2,
         )
 
         if len(search_string) == 2 or character in only_single_chars:
