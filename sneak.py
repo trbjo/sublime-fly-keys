@@ -80,7 +80,7 @@ class NextCharacterBaseCommand(sublime_plugin.TextCommand):
                     r = (ext_from, pt + slen) if forward else (ext_from, pt - slen)
                     regs_to_add.append(r)
                 else:
-                    r = (pt, pt + slen) if forward else Region(pt, pt - slen)
+                    r = (pt, pt + slen) if forward else (pt, pt - slen)
                     regs_to_add.append(r)
 
         except ValueError:
