@@ -812,15 +812,22 @@ class FancyMoveBufferToNextPaneCommand(WindowCommand):
         num_groups = w.num_groups()
         next_group = w.active_group() + 1
 
-        view = w.active_view()
+        if (view := w.active_view()) is None:
+            return
         v_bid = view.buffer_id()
-
+        change_scratch_status = False
         if num_groups > next_group:
             for v in w.views_in_group(next_group):
                 if v_bid == v.buffer_id():
-                    return  # only unique buffers per group
+                    if v.is_dirty():
+                        change_scratch_status = True
+                        v.set_scratch(True)
+                    v.close()
+                    break
 
             w.move_sheets_to_group(sheets=[view.sheet()], group=next_group)
+            if change_scratch_status:
+                view.set_scratch(False)
 
         elif num_groups < MAX_NUM_GROUPS:
             w.run_command("new_pane")
