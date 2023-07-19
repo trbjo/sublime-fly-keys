@@ -67,6 +67,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         else:
             clip = "\n".join(v.substr(reg) for reg in future_cb)
 
+        v.show(v.sel()[-1].b, False)
         if clip.isspace():
             return
 
@@ -143,11 +144,9 @@ class SmartCutCommand(sublime_plugin.TextCommand):
             for reg in reversed(regions_to_copy):
                 v.erase(edit, reg)
 
-        if clip.isspace():
-            return
-
-        set_clipboard(clip)
-        return
+        v.show(v.sel()[-1].b, False)
+        if not clip.isspace():
+            set_clipboard(clip)
 
 
 class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
@@ -176,6 +175,8 @@ class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
                 for pos in clip_pos
             )
 
+        v.show(v.sel()[-1].b, False)
+
 
 class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
@@ -185,6 +186,8 @@ class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
         for r in reversed(s):
             v.erase(edit, r)
             v.insert(edit, r.begin(), stripped_clipboard)
+
+        v.show(v.sel()[-1].b, False)
 
 
 def find_indent(
@@ -297,3 +300,5 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 s.subtract(r)
                 v.insert(edit, insert_pos, insert_string)
                 add_pt(vi, insert_pos + buf_indent + content_line + padding)
+
+        v.show(v.sel()[-1].b, False)

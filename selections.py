@@ -241,12 +241,23 @@ class RecordSelectionsCommand(sublime_plugin.TextCommand):
 
 
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
-    def run(self, edit, forward: bool = False, skip: bool = False) -> None:
+    def run(
+        self,
+        edit,
+        forward: bool = True,
+        skip: bool = False,
+        find_all: bool = False,
+    ) -> None:
         vi = self.view.id()
         sels = self.view.sel()
-        first = sels[0].begin()
-        last = sels[-1].end()
         size = self.view.size()
+
+        if find_all:
+            first = 0
+            last = size
+        else:
+            first = sels[0].begin()
+            last = sels[-1].end()
 
         if forward:
             padding = "\a" if first == 0 else ""
@@ -276,31 +287,33 @@ class SmarterFindUnderExpand(sublime_plugin.TextCommand):
                 offsets = [last - r.end() for r in regs]
                 idx = last - regs[0].begin()
 
+            if find_all:
+                idx = 0
+
             at_boundary = all(re.match(regex, buf[o : wlen + 2 + o]) for o in offsets)
 
             while (idx := buf.find(word, idx + 1)) != -1:
                 if not at_boundary or re.match(regex, buf[idx - 1 : idx + wlen + 1]):
-                    break
+                    if skip:
+                        del_reg = regs[-1 if forward else 0]
+                        subtract_region(vi, del_reg.a, del_reg.b)
+
+                    if forward:
+                        start = first + idx - 1
+                        end = start + wlen
+                    else:
+                        end = last - idx + 1
+                        start = end - wlen
+
+                    reg = (start, end) if any(r.b > r.a for r in regs) else (end, start)
+                    add_region(vi, *reg, 0.0)
+
+                    if not find_all:
+                        break
             else:
                 continue
 
-            if skip:
-                del_reg = regs[-1 if forward else 0]
-                subtract_region(vi, del_reg.a, del_reg.b)
-
-            if forward:
-                start = first + idx - 1
-                end = start + wlen
-            else:
-                end = last - idx + 1
-                start = end - wlen
-
-            add_region(
-                vi,
-                *((start, end) if any(r.b > r.a for r in regs) else (end, start)),
-                0.0,
-            )
-            show_point(vi, end, True, False, True)
+        show_point(vi, sels[-1 if forward else 0].b, True, False, True)
 
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
