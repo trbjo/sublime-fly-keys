@@ -12,7 +12,7 @@ listen_for_char = {
     "forward": True,
     "extend": False,
 }
-only_single_chars = "\\./()\"'-:,;<>~!@#$%^&*|+=[]{}`~?"
+only_single_chars = "_\\./()\"'-:,;<>~!@#$%^&*|+=[]{}`~?"
 
 
 def set_chars(
