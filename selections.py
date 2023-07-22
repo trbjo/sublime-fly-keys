@@ -95,20 +95,17 @@ class SmarterSelectLines(TextCommand):
                     if line.a <= r.b <= line.b:
                         to_add.append(r)
 
-                # cols = [v.rowcol(r.b)[1] for r in s]
-                # col = max(cols)
-                for lol in to_add:
-                    next_line_reg = v.line(v.line(lol.b).b + 1)
+                for region in to_add:
+                    next_line_reg = v.line(v.line(region.b).b + 1)
 
-                    col = v.rowcol(lol.b)[1]
+                    col = v.rowcol(region.b)[1]
                     if (next_line_reg.b - next_line_reg.a) > col:
                         s.add(next_line_reg.a + col)
                     else:
                         s.add(next_line_reg.b)
             else:
                 cols = [v.rowcol(r.b)[1] for r in s]
-                col = max(cols)
-                for r in list(s):
+                for r, col in zip(list(s), cols):
                     prev_line_reg = v.line(v.line(r.b).a - 1)
                     if (prev_line_reg.b - prev_line_reg.a) > col:
                         s.add(prev_line_reg.a + col)
@@ -434,12 +431,14 @@ class SplitSelectionIntoLinesCommand(sublime_plugin.TextCommand):
     newline = r"\r?\n+"
     whitespace = r"\s+"
     word_n_punctuation = r"[^-\._\w]+"
+    word_n_punctuation_ext = r"[^-_\w]+"
     word = r"[^A-Za-z]+"
 
     regex_order = [
         newline,
         whitespace,
         word_n_punctuation,
+        word_n_punctuation_ext,
         word,
     ]
 
