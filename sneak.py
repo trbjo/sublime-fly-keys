@@ -160,14 +160,14 @@ class ListenForCharacterCommand(TextCommand):
 
 
 class RepeatNextCharacterCommand(NextCharacterBaseCommand):
-    def run(self, _, forward: bool) -> None:
+    def run(self, _, forward: bool, extend: bool = False) -> None:
         if not (search_string := listen_for_char["search_string"]):
             return
 
         val = self.execute(
             search_string,
             forward=forward,
-            extend=listen_for_char["extend"],
+            extend=extend,
             special=False,
         )
 

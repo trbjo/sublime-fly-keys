@@ -1239,12 +1239,24 @@
             { "key": "setting.command_mode" }
         ]
     },
+    { "keys": ["ctrl+enter"], "command": "repeat_next_character", "args": { "forward": true, "extend": true },
+        "context": [
+            { "key": "setting.has_stored_search" },
+            { "key": "setting.command_mode" }
+        ]
+    },
     { "keys": ["enter"], "command": "output_panel_navigate",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "text.find-in-files, output.lsp.diagnostics" }
         ]
     },
     { "keys": ["shift+enter"], "command": "repeat_next_character", "args": { "forward": false },
+        "context": [
+            { "key": "setting.has_stored_search" },
+            { "key": "setting.command_mode" }
+        ]
+    },
+    { "keys": ["ctrl+shift+enter"], "command": "repeat_next_character", "args": { "forward": false, "extend": true },
         "context": [
             { "key": "setting.has_stored_search" },
             { "key": "setting.command_mode" }
@@ -1440,10 +1452,5 @@
         ]},
 
 
-    { "keys": ["ctrl+enter"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"},
-     "context": [
-         { "key": "setting.command_mode" }
-     ]
-    },
 
     ]
