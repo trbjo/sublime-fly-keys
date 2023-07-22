@@ -295,13 +295,13 @@
     },
 
     { "keys": ["ctrl+q"], "command": "cut" },
-    { "keys": ["ctrl+q"], "command": "smart_cut", "args": {"whole_line": true},
+    { "keys": ["ctrl+q"], "command": "smart_copy", "args": {"whole_line": true, "cut": true},
         "context": [
             { "key": "setting.command_mode" }
         ]
     },
 
-    { "keys": ["q"], "command": "smart_cut",
+    { "keys": ["q"], "command": "smart_copy", "args": {"whole_line": false, "cut": true},
         "context": [
             { "key": "setting.command_mode" }
         ]
