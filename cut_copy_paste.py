@@ -27,7 +27,7 @@ class CopyBufferCommand(sublime_plugin.TextCommand):
 
 
 class SmartCopyCommand(sublime_plugin.TextCommand):
-    def run(self, _, whole_line: bool = False) -> None:
+    def run(self, edit, whole_line: bool = False, cut: bool = False) -> None:
         v: View = self.view
         vi = v.id()
         sel = v.sel()
@@ -37,116 +37,52 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
             sel.clear()
             sel.add_all(regs)
 
-        future_cb: List[Region] = []
-        end = v.full_line(sel[0].a).a
+        pointer_after_action = int(v.sel()[0 if cut else -1].b)
+        v.show(pointer_after_action, False)
 
-        contiguous_regions = True
-
+        lines = set()
+        content: List[Region] = []
         for r in sel:
             if r.a != r.b:
-                future_cb.append(r)
-            else:
-                line = v.full_line(r.a)
-                if future_cb:
-                    if future_cb[-1].a != line.a and future_cb[-1].b != line.b:
-                        future_cb.append(line)
-                else:
-                    future_cb.append(line)
+                content.append(r)
+                continue
 
-                if contiguous_regions:
-                    if end == line.a:
-                        end = line.b
-                    else:
-                        contiguous_regions = False
+            line = v.full_line(r.b)
+            if line.a in lines:
+                continue
+
+            lines.add(line.a)
+            content.append(line)
 
         if only_empty_selections := all(r.b == r.a for r in sel):
-            if contiguous_regions:
-                clip = v.substr(Region(future_cb[0].a, future_cb[-1].b))
-            else:
-                clip = "".join(v.substr(reg) for reg in future_cb)
+            clip = "".join(v.substr(reg) for reg in content)
         else:
-            clip = "\n".join(v.substr(reg) for reg in future_cb)
+            clip = "\n".join(v.substr(reg) for reg in content)
 
-        v.show(v.sel()[-1].b, False)
+        if cut:
+            for reg in reversed(content):
+                v.erase(edit, reg)
+
         if clip.isspace():
             return
 
-        name = "copy_regions"
-        regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
-        color = "light"
-        view_add_regions(vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None)
-        set_timeout_async(lambda: self.view.erase_regions("copy_regions"), 250)
+        set_clipboard(clip)
+        if not cut:
+            name = "copy_regions"
+            regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
+            color = "light"
+            view_add_regions(
+                vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None
+            )
+            set_timeout_async(lambda: self.view.erase_regions("copy_regions"), 250)
+
+        contiguous_regions = all(
+            content[i].b == content[i + 1].a for i in range(len(content) - 1)
+        )
 
         if only_empty_selections and contiguous_regions:
-            regs = [sel[-1].b]
             sel.clear()
-            for p in regs:
-                add_pt(vi, p)
-
-        set_clipboard(clip)
-
-
-class SmartCutCommand(sublime_plugin.TextCommand):
-    """docstring for SmartCopyCommand"""
-
-    def run(self, edit: Edit, whole_line: bool = False) -> None:
-        v: View = self.view
-        sel = v.sel()
-
-        if whole_line:
-            regs = [r.b if l.contains(r.b) else l.a for r in sel for l in v.lines(r)]
-            sel.clear()
-            sel.add_all(regs)
-
-        regions_to_copy: List[Region] = []
-        end = v.full_line(sel[0].begin()).begin()
-
-        only_empty_selections = True
-        contiguous_regions = True
-
-        for region in sel:
-            if region.empty():
-                line = v.full_line(region.begin())
-
-                if regions_to_copy != []:
-                    if (
-                        regions_to_copy[-1].a != line.a
-                        and regions_to_copy[-1].b != line.b
-                    ):
-                        regions_to_copy.append(line)
-                else:
-                    regions_to_copy.append(line)
-
-                if end == line.begin():
-                    end = line.end()
-                else:
-                    contiguous_regions = False
-
-            else:
-                only_empty_selections = False
-                regions_to_copy.append(region)
-
-        if only_empty_selections:
-            reg = sel[-1].a
-            if contiguous_regions:
-                interesting_region = Region(
-                    regions_to_copy[0].begin(), regions_to_copy[-1].end()
-                )
-                clip = v.substr(interesting_region)
-                v.erase(edit, interesting_region)
-            else:
-                clip = "".join(v.substr(reg) for reg in regions_to_copy)
-                for reg in reversed(regions_to_copy):
-                    v.erase(edit, reg)
-
-        else:
-            clip = "\n".join(v.substr(reg) for reg in regions_to_copy)
-            for reg in reversed(regions_to_copy):
-                v.erase(edit, reg)
-
-        v.show(v.sel()[-1].b, False)
-        if not clip.isspace():
-            set_clipboard(clip)
+            add_pt(vi, pointer_after_action)
 
 
 class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
