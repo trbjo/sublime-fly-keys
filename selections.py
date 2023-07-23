@@ -88,29 +88,21 @@ class SmarterSelectLines(TextCommand):
 
         # normal
         else:
+            current_lines: set[int] = {v.line(r.b).a for r in s}
             if forward:
-                to_add: List[Region] = []
-                for r in s:
-                    line = v.line(r)
-                    if line.a <= r.b <= line.b:
-                        to_add.append(r)
-
-                for region in to_add:
-                    next_line_reg = v.line(v.line(region.b).b + 1)
-
-                    col = v.rowcol(region.b)[1]
-                    if (next_line_reg.b - next_line_reg.a) > col:
-                        s.add(next_line_reg.a + col)
-                    else:
-                        s.add(next_line_reg.b)
+                to_add = [v.line(v.line(region.b).b + 1) for region in s]
             else:
-                cols = [v.rowcol(r.b)[1] for r in s]
-                for r, col in zip(list(s), cols):
-                    prev_line_reg = v.line(v.line(r.b).a - 1)
-                    if (prev_line_reg.b - prev_line_reg.a) > col:
-                        s.add(prev_line_reg.a + col)
-                    else:
-                        s.add(prev_line_reg.b)
+                to_add = [v.line(v.line(region.b).a - 1) for region in s]
+
+            for region, next_line in zip(s, to_add):
+                if next_line.a in current_lines:
+                    continue
+
+                col = v.rowcol(region.b)[1]
+                if (next_line.b - next_line.a) > col:
+                    s.add(next_line.a + col)
+                else:
+                    s.add(next_line.b)
 
         if forward:
             v.show(s[-1].b)
