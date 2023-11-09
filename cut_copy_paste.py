@@ -38,7 +38,6 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
             sel.add_all(regs)
 
         pointer_after_action = int(v.sel()[0 if cut else -1].b)
-        v.show(pointer_after_action, False)
 
         lines = set()
         content: List[Region] = []
@@ -63,18 +62,20 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
             for reg in reversed(content):
                 v.erase(edit, reg)
 
+        v.show(v.sel()[-1].b, False)
         if clip.isspace():
             return
 
         set_clipboard(clip)
-        if not cut:
-            name = "copy_regions"
-            regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
-            color = "light"
-            view_add_regions(
-                vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None
-            )
-            set_timeout_async(lambda: self.view.erase_regions("copy_regions"), 250)
+
+        if cut:
+            return
+
+        name = "copy_regions"
+        regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
+        color = "light"
+        view_add_regions(vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None)
+        set_timeout_async(lambda: self.view.erase_regions("copy_regions"), 250)
 
         contiguous_regions = all(
             content[i].b == content[i + 1].a for i in range(len(content) - 1)
@@ -163,9 +164,8 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         if len(clips) == len(s):
             return True
         vi = self.view.id()
-        return all(not r.empty() for r in s) and len(set(clips)) == len(
-            set(ssubstr(vi, r.a, r.b) for r in s)
-        )
+        # all(not r.empty() for r in s) and
+        return len(clips) == len(set(ssubstr(vi, r.a, r.b) for r in s))
 
     def run(
         self, edit: Edit, before: bool = False, replace=True, indent_same=False
@@ -229,6 +229,9 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
                 for lline, sline in zip(line_lengths, stripped_lines):
                     if not indent_same:
                         indent = buf_indent + lline - len(sline) - init_indent
+                        # if wschar == "\t":
+                        # indent = int(indent / 4)
+
                     strings.extend([wschar * indent, sline, "\n"])
 
                 insert_string = "".join(strings)

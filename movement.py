@@ -1,254 +1,184 @@
 import re
-from bisect import bisect
-from typing import Dict
+import time
 
 import sublime_plugin
-from sublime import Edit, FindFlags, Region
+from sublime import Region
 from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_cached_substr as substr  # pyright: ignore
 from sublime_api import view_find as vfind  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
-from sublime_api import view_selection_subtract_region as subtract_region
+from sublime_api import (
+    view_selection_subtract_region as subtract_region,  # pyright: ignore
+)
 from sublime_api import view_show_point as show_point  # pyright: ignore
 from sublime_plugin import TextCommand
 
-from .base import get_regions
+from .base import buffer_slice
 
-normrgx = re.compile(r"^[-\w]+$")
-wholergx = re.compile(r"^\S+$")
+then = time.time()
 
-
-class BolCommand(sublime_plugin.TextCommand):
-    def run(self, edit: Edit, extend=True):
-        v = self.view
-        s = v.sel()
-        vid = v.id()
-        pat = r"\s*(?=\S)"
-        pts = [
-            (r.a if r.a > r.b else r.b, v.find(pat, v.line(r.begin()).begin()).b)
-            for r in s
-        ]
-        s.clear()
-        [
-            add_region(vid, r[0], r[1], 0.0)
-            if r[1] < r[0] and extend
-            else add_point(vid, r[1] if r[1] != -1 else r[0])
-            for r in pts
-        ]
-        show_point(vid, s[0].b, False, False, False)
-
-
-class EolCommand(sublime_plugin.TextCommand):
-    def run(self, edit: Edit):
-        v = self.view
-        s = v.sel()
-        vid = v.id()
-        pts = [(r.a if r.a < r.b else r.b, v.line(r.end()).b) for r in s]
-        s.clear()
-        [add_region(vid, r[0], r[1], 0.0) for r in pts]
-        show_point(vid, s[-1].b, False, False, False)
+normrgx = re.compile(r"[-\w]+")
+wholergx = re.compile(r"\S+")
 
 
 class NavigateWordCommand(TextCommand):
     def run(
         self, _, forward: bool = True, whole_words: bool = False, extend: bool = False
     ):
-        rgx = r"\S+" if whole_words else r"[\w]+"
-        rrev = r"\s+" if whole_words else r"[^\w]+"
-        compiled_rgx = wholergx if whole_words else normrgx
-
         v = self.view
         s = v.sel()
-        vi = v.id()
         if len(s) < 1:
             return
+
         vid = v.id()
         pts = []
+        rgx = wholergx if whole_words else normrgx
 
-        if forward:
-            flag = FindFlags.NONE
-            for r in s:
-                pat = rgx
-                pt = r.end()
-                if r.a > r.b and not re.match(compiled_rgx, v.substr(r)):
-                    pat = rrev if extend else rgx
-                    pt = r.b
-                pts.append((vfind(vi, pat, pt, flag), r))
+        bufind = buffer_slice(v, forward)
+        bufind.send(None)
+        for a, b in s if forward else reversed(s):
+            mend = b
+            while match := bufind.send((mend, rgx)):
+                mstart, mend = match
+                if mstart == b and (mend == a or (extend and forward is (a > mend))):
+                    continue
 
+                shrink = a != b and forward is (a > b)
+                if extend:
+                    a = b if shrink and (forward is (mstart > a) or b == mstart) else a
+                    b = mstart if shrink and a != b else mend
+                else:
+                    a = mstart if b != mstart or shrink else a
+                    b = mend
+
+                break
+            pts.append((a, b))
+
+        s.clear()
+        for start, end in pts:
+            add_region(vid, start, end, 0.0)
+        show_point(vid, s[-1 if forward else 0].b, False, False, False)
+
+
+class NavigateParagraphCommand(TextCommand):
+    forward = re.compile(r"(\n[\t ]*){2,}")
+    backward = re.compile(r"\S(?=[\t ]*\n\n)")
+
+    def add_regs(self, regs, forward: bool, extend: bool = False):
+        v = self.view
+        s = v.sel()
+        vid = v.id()
+
+        s.clear()
+        if extend:
+            for a, b, *_ in regs:
+                add_region(vid, a, b, 0.0)
         else:
-            flag = FindFlags.REVERSE
-            for r in s:
-                pat = rgx
-                pt = r.begin()
-                if r.b > r.a and not re.match(compiled_rgx, v.substr(r)):
-                    pat = rrev if extend else rgx
-                    pt = r.b
-                pts.append((vfind(vi, pat, pt, flag), r))
-
-        if forward and extend:
-            for r in pts:
-                if r[1].a > r[1].b:
-                    subtract_region(vi, r[1].b, r[0].b)
-                    if r[0].b >= r[1].a:
-                        add_region(vid, r[1].begin(), r[0].b, 0.0)
-                else:
-                    if r[0].a != -1:
-                        add_region(vid, r[1].a, r[0].b, 0.0)
-        elif not forward and extend:
-            for r in pts:
-                if r[1].a < r[1].b:
-                    subtract_region(vi, r[1].b, r[0].a)
-                    if r[0].a <= r[1].a:
-                        add_region(vid, r[1].b, r[0].a, 0.0)
-                else:
-                    add_region(vid, r[1].a, r[0].a, 0.0)
-        elif forward and not extend:
-            if not (len(pts) == 1 and pts[0][0].a == -1):
-                last = s[-1]
-                save_last = False
-                s.clear()
-                for r in pts:
-                    if r[0].a != -1:  # eof workaround
-                        rg = r[1].begin() if r[1].end() == r[0].a else r[0].a
-                        add_region(vid, rg, r[0].b, 0.0)
-                    else:
-                        save_last = True
-                if save_last:
-                    add_region(vid, last.a, last.b, 0.0)
-
-        elif not forward and not extend:
-            if not (len(pts) == 1 and pts[0][0].a == -1):
-                first = s[0]
-                save_first = False
-                s.clear()
-                for r in pts:
-                    if r[0].a != -1:  # bof workaround
-                        rg = r[0].b if r[1].end() > r[0].b else r[1].end()
-                        add_region(vid, rg, r[0].a, 0.0)
-                    else:
-                        save_first = True
-                if save_first:
-                    add_region(vid, *first, 0.0)
+            for a, b, *_ in regs:
+                add_point(vid, b)
 
         show_point(vid, s[-1 if forward else 0].b, False, False, False)
 
 
-class NavigateByParagraphForwardCommand(TextCommand):
-    def run(self, _) -> None:
+sels = set()
+
+
+class LineOrParagraphCommand(NavigateParagraphCommand):
+    backpat = re.compile(r"\S\s*(\n|\Z)")
+
+    def run(self, _, forward: bool = True):
         v = self.view
-        vi = v.id()
-        pts = []
-        for r in v.sel():
-            region = r.b
-            try:
-                myregs = get_regions(v, "last")
-                bisect_res = bisect(myregs, region)
-                sel_end = myregs[bisect_res]
-            except IndexError:
-                myregs = get_regions(view=v, part="last", now=True)
-                bisect_res = bisect(myregs, region)
-                sel_end = myregs[bisect_res]
-            pts.append(sel_end)
+        s = v.sel()
+        global sels
+        global then
+        now = time.time()
 
-        v.sel().clear()
-        [add_point(vi, p) for p in pts]
-        v.show(v.sel()[-1].b, True)
+        bufind = buffer_slice(v, forward, True)
+        bufind.send(None)
+        current_sels = {r.b for r in s}
+        check_lines = (
+            any(r.a != r.b for r in s) or now - then >= 1 or bool(sels - current_sels)
+        )
+
+        if check_lines:
+            if forward:
+                regs = [(r.begin(), v.line(r.b).b, r.b) for r in s]
+            else:
+                regs = []
+                for r in reversed(s):
+                    line = v.line(r.b)
+                    end = bufind.send((line.b, self.backpat))[0] - 1
+                    start = end if end < line.a else max(r.end(), end)
+                    regs.append((start, end, r.b))
+            check_lines = any(b != c for _, b, c in regs)
+
+        if not check_lines:
+            pattern = self.forward if forward else self.backward
+            sel = s if forward else reversed(s)
+            regs = [bufind.send((b - 1, pattern)) for a, b in sel]
+            then = now
+
+        sels = {b for (a, b, *_) in regs}
+        self.add_regs(regs, forward, check_lines)
 
 
-class NavigateByParagraphBackwardCommand(TextCommand):
-    def run(self, _) -> None:
+class ExpandParagraphCommand(NavigateParagraphCommand):
+    forline = re.compile(r"\S\n(?=\n[\t ]*)")
+    shrink_forline = re.compile(r"\n\n(?=[\t ]*\S)")
+    backline = re.compile(r".[\t ]*(?=(([\t ]*\n){2,}))")
+    shrink_backline = re.compile(r"\n(?=\n\S)")
+
+    def run(self, _, forward: bool = True):
         v = self.view
+        s = v.sel()
 
-        vi = v.id()
-        pts = []
-        for r in v.sel():
-            region = r.begin()
-            try:
-                myregs = get_regions(v, "last")
-                bisect_res = bisect(myregs, region - 1)
-                sel_end: int = myregs[bisect_res - 1]
-            except IndexError:
-                myregs = get_regions(view=v, part="last", now=True)
-                bisect_res = bisect(myregs, region - 1)
-                sel_end: int = myregs[bisect_res - 1]
-            pts.append(sel_end)
+        all_empty = all(r.a == r.b for r in s)
+        buffinder_b = buffer_slice(v, forward, True)
+        buffinder_b.send(None)
+        pattern = self.forline if forward else self.backline
+        bregs = []
+        if forward:
+            shrinkpattern = self.shrink_forline
+            growpattern = self.forline
+        else:
+            shrinkpattern = self.shrink_backline
+            growpattern = self.backline
 
-        v.sel().clear()
-        [add_point(vi, p) for p in pts]
-        v.show(v.sel()[0].b, True)
-
-
-class ExtendedExpandSelectionToParagraphForwardCommand(TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
-        regs_dict: Dict[int, int] = {}
-        first = get_regions(buf, "first")
-        for region in buf.sel():
-            if region.b > region.a:
-                bisect_res = bisect(first, region.b - 1)
-                sel_begin = buf.full_line(region.a).a
-                sel_end = first[bisect_res] + 2
-
-            elif region.a > region.b:
-                bisect_res = bisect(first, region.b)
-                sel_end = first[bisect_res] + 2
-                if region.a == sel_end or sel_end - 3 == region.a:
-                    sel_end = region.a
-                    sel_begin = region.b
-                else:
-                    sel_begin = region.a
-                    buf.sel().subtract(region)
-
-            elif region.a == region.b:
-                bisect_res = bisect(first, region.b - 2)
-                sel_begin = first[bisect_res - 1] + 2
-                sel_end = first[bisect_res] + 2
-
+        offset = -1 if forward else 1
+        for a, b in s if forward else reversed(s):
+            if a != b:
+                pattern = shrinkpattern if (a > b) is forward else growpattern
+                pt = buffinder_b.send((b, pattern))[1]
+                if forward and pt > a or not forward and pt < a:
+                    pt = buffinder_b.send((b, growpattern))[1]
             else:
-                return
+                pt = buffinder_b.send((b + offset, growpattern))[1]
 
-            regs_dict[sel_begin] = sel_end
+            bregs.append(pt)
 
-        buf.sel().add_all(Region(begin, end) for begin, end in regs_dict.items())
-        buf.show(buf.sel()[-1].b, False)
+        if all_empty:
+            buffinder_a = buffer_slice(v, not forward, True)
+            buffinder_a.send(None)
+            offset = 1 if forward else -1
 
+            _pattern = self.backline if forward else self.forline
 
-class ExtendedExpandSelectionToParagraphBackwardCommand(TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
-        regs_dict: Dict[int, int] = {}
-        first = get_regions(buf, "first")
-        for region in buf.sel():
-            if region.b > region.a:
-                bisect_end = bisect(first, region.b - 3)
-                sel_end = first[bisect_end - 1] + 2
-                if region.a == sel_end:
-                    sel_begin = region.b
-                else:
-                    sel_begin = buf.full_line(region.a).a
-                    buf.sel().subtract(region)
+            a_regs = [
+                buffinder_a.send((b + offset, _pattern))
+                for a, b in (s if forward else reversed(s))
+            ]
 
-            elif region.a > region.b:
-                sel_begin = region.a
-                bisect_end = bisect(first, region.b - 3)
-                if bisect_end == 0:
-                    sel_end = -1
-                else:
-                    sel_end = first[bisect_end - 1] + 2
+            aregs = [b for a, b in a_regs]
+        else:
+            aregs = [
+                (b if ((x >= a > b) if forward else (x <= a < b)) else a)
+                for (a, b), x in zip(s, bregs)
+            ]
 
-            elif region.b == region.a:
-                bisect_end = bisect(first, region.b - 2)
-                sel_end = first[bisect_end - 1] + 2
-                sel_begin = first[bisect_end] + 2
+        regs = list(zip(aregs, bregs))
 
-            else:
-                return
-
-            regs_dict[sel_begin] = sel_end
-
-        buf.sel().add_all(Region(begin, end) for begin, end in regs_dict.items())
-        buf.show(buf.sel()[0].b, False)
+        self.add_regs(regs, forward, True)
 
 
 class SmartFindWordCommand(sublime_plugin.TextCommand):
@@ -259,13 +189,13 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
         return stop
 
     def run(self, _) -> None:
-        buf = self.view
-        sel = buf.sel()
+        v = self.view
+        sel = v.sel()
         for reg in sel:
-            if not (line := buf.substr(buf.full_line(reg.b))):
+            if not (line := v.substr(v.full_line(reg.b))):
                 continue
 
-            line_no, column = buf.rowcol(reg.b)
+            line_no, column = v.rowcol(reg.b)
 
             left_pos = self.find_pt(line, column, -1, False)
             right_pos = self.find_pt(line, column, len(line), True)
@@ -281,6 +211,7 @@ class SmartFindWordCommand(sublime_plugin.TextCommand):
             else:
                 pos = left_pos + 1
 
-            pos = buf.text_point(line_no, pos)
+            pos = v.text_point(line_no, pos)
             sel.subtract(reg)
             sel.add(Region(pos))
+        v.run_command("find_under_expand")

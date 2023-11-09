@@ -9,19 +9,16 @@ from sublime_api import view_selection_add_point as add_pt  # pyright: ignore
 from sublime_api import view_selection_add_region as add_reg  # pyright: ignore
 from sublime_plugin import WindowCommand
 
-from .base import maybe_rebuild
-
 
 class CommandModeCommand(WindowCommand):
     def run(self) -> None:
         view: Optional[View] = active_window().active_view()
-        active_window().run_command("hide_popup")
         if view is None:
             return
         view.settings().set(key="block_caret", value=True)
         view.settings().set(key="command_mode", value=True)
         view.settings().set(key="needs_char", value=False)
-        maybe_rebuild(view)
+        view.run_command("hide_popup")
 
 
 class DeleteSingleCharCommand(sublime_plugin.TextCommand):
@@ -53,13 +50,10 @@ class SmartDeleteLineCommand(sublime_plugin.TextCommand):
 
 
 class InsertModeCommand(sublime_plugin.TextCommand):
-    def other_action(self) -> bool:
+    def change_case(self) -> bool:
         v = self.view
-        if (set_number := self.view.settings().get("set_number")) is not None:
-            v.settings().erase("set_number")
 
         if (multiplier := self.view.settings().get("multiplier")) is not None:
-            v.settings().erase("multiplier")
             if multiplier == 1:
                 v.run_command("upper_case")
             elif multiplier == 2:
@@ -77,7 +71,18 @@ class InsertModeCommand(sublime_plugin.TextCommand):
         return False
 
     def run(self, edit: Edit, replace=False, before=False) -> None:
-        if self.other_action():
+        v = self.view
+        if v.settings().get("set_number") is not None:
+            v.settings().erase("set_number")
+            if before and not replace:
+                self.change_case()
+            elif not before and replace:
+                if (multiplier := v.settings().get("multiplier")) is not None:
+                    if multiplier == 1:
+                        v.run_command("transpose")
+                    elif multiplier == 2:
+                        v.run_command("toggle_true_false")
+            v.settings().erase("multiplier")
             return
 
         buf = self.view

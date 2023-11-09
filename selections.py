@@ -1,10 +1,10 @@
 import re
 from collections import defaultdict
-from typing import Iterable, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import sublime_api
 import sublime_plugin
-from sublime import Edit, Region, Selection, View, active_window
+from sublime import Edit, Region, View, active_window
 from sublime_api import view_cached_substr as substr  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
@@ -13,6 +13,8 @@ from sublime_api import (
 )
 from sublime_api import view_show_point as show_point  # pyright: ignore
 from sublime_plugin import TextCommand, TextInputHandler
+
+from .base import buffer_slice
 
 # expand to next
 matchers: str = """([{)]}"'"""
@@ -36,84 +38,79 @@ class SmarterSelectLines(TextCommand):
         ]:
             return
 
-        if (s[-1].end() == v.size() and forward) or (s[0].begin() == 0 and not forward):
-            return
-
         vid = v.id()
 
-        # hardbol
-        if all(v.line(r.b).a == r.b for r in s):
-            if forward:
-                for r in list(s):
-                    s.add(v.line(v.line(r.b).b + 1).a)
+        hardeol = True
+        softbol = True
+
+        columns = []
+
+        selections = list(s)
+        for r in selections:
+            row, column = v.rowcol(r.b)
+            columns.append(column)
+
+            line = v.line(r.b)
+            if len(line) == 0:
+                continue  # can't decide if there is only a newline
+
+            if line.b == r.b:
+                softbol = False
             else:
-                for r in list(s):
-                    s.add(v.line(r.b - 1).a)
+                hardeol = False
 
-        # softbol
-        elif all(
-            (mystr := substr(vid, v.line(r.b).a, r.b + 1))[0:-1:].isspace()
-            and not mystr[-1].isspace()
-            or len(mystr) == 1
-            # or mystr.isspace()
-            for r in s
-        ):
-            if forward:
-                for r in list(s):
-                    next_line_reg = v.line(v.line(r.b).b + 1)
-                    if next_line_reg.empty():
-                        s.add(v.line(r.b).b + 1)
-                    else:
-                        mysubstr: str = substr(vid, next_line_reg.a, next_line_reg.b)
-                        idx = len(mysubstr) - len(mysubstr.lstrip())
-                        s.add(v.line(r.b).b + 1 + idx)
-            else:
-                for r in list(s):
-                    prev_line_reg = v.line(v.line(r.b).a - 1)
-                    if prev_line_reg.empty():
-                        s.add(prev_line_reg.a)
-                    else:
-                        mysubstr: str = substr(vid, prev_line_reg.a, prev_line_reg.b)
-                        idx = len(mysubstr) - len(mysubstr.lstrip())
-                        s.add(v.line(prev_line_reg.a).a + idx)
+            if softbol is True:
+                line_str = substr(vid, line.a, r.b + 1)
+                # cursor border check:
+                before_cursor = line_str[0:-1]
+                after_cursor = line_str[-1]
 
-        # hardeol
-        elif all(v.line(r.b).b == r.b for r in s):
-            if forward:
-                for r in list(s):
-                    s.add(v.line(r.b + 1).b)
-            else:
-                for r in list(s):
-                    s.add(v.line(v.line(r.b).a - 1).b)
+                if (
+                    len(before_cursor) > 0 and not before_cursor.isspace()
+                ) or after_cursor.isspace():
+                    softbol = False
 
-        # normal
-        else:
-            current_lines: set[int] = {v.line(r.b).a for r in s}
-            if forward:
-                to_add = [v.line(v.line(region.b).b + 1) for region in s]
-            else:
-                to_add = [v.line(v.line(region.b).a - 1) for region in s]
+        mode = "normal" if softbol == hardeol else "softbol" if softbol else "hardeol"
 
-            for region, next_line in zip(s, to_add):
-                if next_line.a in current_lines:
-                    continue
-
-                col = v.rowcol(region.b)[1]
-                if (next_line.b - next_line.a) > col:
-                    s.add(next_line.a + col)
-                else:
-                    s.add(next_line.b)
-
+        current_lines: set[int] = {v.line(r.b).a for r in selections}
         if forward:
-            v.show(s[-1].b)
+            next_lines = [v.line(v.line(pt).b + 1) for _, pt in selections]
         else:
-            v.show(s[0].b)
+            next_lines = [v.line(v.line(pt).a - 1) for _, pt in selections if pt != 0]
+        folds = v.folded_regions()
+        for i, next_line in enumerate(next_lines):
+            if next_line.a in current_lines:
+                continue
+
+            if f := next((f for f in folds if next_line.intersects(f)), None):
+                [s.add(reg.a) for reg in v.lines(f)]
+
+            elif next_line.empty():
+                s.add(next_line.a)
+
+            elif mode == "hardeol":
+                s.add(next_line.b)
+
+            elif mode == "softbol":
+                mysubstr: str = substr(vid, next_line.a, next_line.b)
+                idx = len(mysubstr) - len(mysubstr.lstrip())
+                s.add(next_line.a + idx)
+            else:
+                col = columns[i]
+                s.add(min((next_line.a + col), next_line.b))
+
+        cursor = s[-1 if forward else 0]
+        for fold in folds:
+            if fold.intersects(cursor):
+                return
+        v.show(cursor.b)
 
 
-def findall(p, length, s):
+def findall(p, s):
     """Yields all the positions of
     the pattern p in the string s."""
     i = s.find(p)
+    length = len(p)
     while i != -1:
         yield i
         i = s.find(p, i + length)
@@ -229,80 +226,61 @@ class RecordSelectionsCommand(sublime_plugin.TextCommand):
             self.recorded_selections[vi] = [(r.a, r.b) for r in sels]
 
 
+class FindNextLolCommand(sublime_plugin.TextCommand):
+    def run(self, edit, forward: bool = True):
+        v: View = self.view
+        v.run_command("clear_selection", args={"forward": True, "after": False})
+        v.run_command("find_under_expand")
+        if forward:
+            v.run_command("find_next")
+        else:
+            v.run_command("find_prev")
+
+
 class SmarterFindUnderExpand(sublime_plugin.TextCommand):
     def run(
-        self,
-        edit,
-        forward: bool = True,
-        skip: bool = False,
-        find_all: bool = False,
+        self, _, forward: bool = True, skip: bool = False, find_all: bool = False
     ) -> None:
-        vi = self.view.id()
-        sels = self.view.sel()
-        size = self.view.size()
+        v = self.view
+        vid = self.view.id()
+        s = self.view.sel()
 
-        if find_all:
-            first = 0
-            last = size
-        else:
-            first = sels[0].begin()
-            last = sels[-1].end()
+        first = max(s[0].begin() - 1, 0)
+        last = min(s[-1].end() + 1, v.size())
 
-        if forward:
-            padding = "\a" if first == 0 else ""
-            buf: str = f"{padding}{substr(vi, first - 1, size)}\a"
-        else:
-            padding = "\a" if last == size else ""
-            buf: str = f"\a{substr(vi, 0, last + 1)}{padding}"[::-1]
+        buf = f"\a{substr(vid, first, last)}\a"
+        middle = set()
+        words: Dict[str, List[Region]] = defaultdict(list)
+        for reg in s if forward else reversed(s):
+            if reg.a != reg.b:
+                surroundings = buf[reg.begin() - first : reg.end() + 2 - first]
+                word = surroundings[1:-1]
+                regex = r"\b" + re.escape(word) + r"\b"
 
-        words = defaultdict(list)
-        for reg in sels:
-            if reg.empty():
-                continue
-            wlen = reg.end() - reg.begin()
-            offset = reg.begin() - first if forward else last - reg.end()
-            word = buf[1 + offset : wlen + 1 + offset]
-            words[word].append(reg)
+                if not forward:
+                    word = word[::-1]
+
+                words[word].append(reg)
+                if not re.search(regex, surroundings):
+                    middle.add(word)
+
+        buffer_iter = buffer_slice(v, forward)
+        buffer_iter.send(None)
 
         for word, regs in words.items():
-            wlen = len(word)
-            regex = r"\W" + re.escape(word) + r"\W"
+            a, b = regs[-1]
+            idx = (0, 0) if find_all else (b, a) if (a > b) is forward else (a, b)
+            rgx = re.escape(word) if word in middle else r"\b" + re.escape(word) + r"\b"
+            revert = all(reg.a > reg.b for reg in regs) is forward
 
-            # imitate find under expand's boundary detection
-            if forward:
-                offsets = [r.begin() - first for r in regs]
-                idx = regs[-1].end() - first
-            else:
-                offsets = [last - r.end() for r in regs]
-                idx = last - regs[0].begin()
+            while idx := buffer_iter.send((*idx, rgx)):
+                add_region(vid, *(idx[::-1] if revert else idx), 0.0)
+                if skip:
+                    subtract_region(vid, a, b)
+                if not find_all:
+                    break
 
-            if find_all:
-                idx = 0
-
-            at_boundary = all(re.match(regex, buf[o : wlen + 2 + o]) for o in offsets)
-
-            while (idx := buf.find(word, idx + 1)) != -1:
-                if not at_boundary or re.match(regex, buf[idx - 1 : idx + wlen + 1]):
-                    if skip:
-                        del_reg = regs[-1 if forward else 0]
-                        subtract_region(vi, del_reg.a, del_reg.b)
-
-                    if forward:
-                        start = first + idx - 1
-                        end = start + wlen
-                    else:
-                        end = last - idx + 1
-                        start = end - wlen
-
-                    reg = (start, end) if any(r.b > r.a for r in regs) else (end, start)
-                    add_region(vi, *reg, 0.0)
-
-                    if not find_all:
-                        break
-            else:
-                continue
-
-        show_point(vi, sels[-1 if forward else 0].b, True, False, True)
+        show_point(vid, s[-1 if forward else 0].b, True, False, True)
 
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
@@ -424,14 +402,11 @@ class SplitSelectionIntoLinesCommand(sublime_plugin.TextCommand):
     whitespace = r"\s+"
     word_n_punctuation = r"[^-\._\w]+"
     word_n_punctuation_ext = r"[^-_\w]+"
-    word = r"[^A-Za-z]+"
 
     regex_order = [
         newline,
         whitespace,
-        word_n_punctuation,
         word_n_punctuation_ext,
-        word,
     ]
 
     def bounds(self, regex: str):

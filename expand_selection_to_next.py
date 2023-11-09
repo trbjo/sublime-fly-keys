@@ -29,6 +29,10 @@ class ExpandSelectionToNextCommand(sublime_plugin.TextCommand):
                 return r"{}", False, False
             elif multiplier == 6:
                 return r"{}", True, False
+            elif multiplier == 7:
+                return r"""''""", False, True
+            elif multiplier == 8:
+                return r"""''""", True, True
         return "([{)]}", False, True
 
     def run(
