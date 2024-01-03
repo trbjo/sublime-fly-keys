@@ -224,7 +224,7 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["s"], "command": "insert_mode", "args": { "before": false  },
+    { "keys": ["s"], "command": "insert_mode", "args": { "after": true  },
         "context": [
             { "key": "setting.command_mode" },
         ]
@@ -398,27 +398,29 @@
         ]
     },
 
-    { "keys": ["D"], "command": "subtract_selection", "args": { "last": true },
+
+    { "keys": ["D"], "command": "smarter_find_under_expand", "args": { "forward": false },
         "context": [
+            { "key": "selection_empty", "operator": "equal", "operand": false },
             { "key": "setting.command_mode" }
         ]
     },
 
-    { "keys": ["ctrl+'"], "command": "smarter_find_under_expand", "args": {"find_all": true },
-        "context": [
-            { "key": "setting.command_mode" }
-        ]
-    },
-    { "keys": ["ctrl+'"], "command": "chain", "args": {
-        "commands": [
-            { "command": "smart_find_word" },
-            {"command": "smarter_find_under_expand", "args": {"find_all": true}}
-        ] },
-        "context": [
-            { "key": "selection_empty", "operator": "equal", "operand": true },
-            { "key": "setting.command_mode" }
-        ]
-    },
+    // { "keys": ["ctrl+'"], "command": "smarter_find_under_expand", "args": {"find_all": true },
+        // "context": [
+            // { "key": "setting.command_mode" }
+        // ]
+    // },
+    // { "keys": ["ctrl+'"], "command": "chain", "args": {
+        // "commands": [
+            // { "command": "smart_find_word" },
+            // {"command": "smarter_find_under_expand", "args": {"find_all": true}}
+        // ] },
+        // "context": [
+            // { "key": "selection_empty", "operator": "equal", "operand": true },
+            // { "key": "setting.command_mode" }
+        // ]
+    // },
 
     { "keys": ["ctrl+shift+d"], "command": "subtract_selection", "args": { "last": false },
         "context": [
@@ -436,9 +438,8 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["ctrl+d"], "command": "smarter_find_under_expand", "args": { "forward": false },
+    { "keys": ["ctrl+d"], "command": "subtract_selection", "args": { "last": true },
         "context": [
-            { "key": "selection_empty", "operator": "equal", "operand": false },
             { "key": "setting.command_mode" }
         ]
     },
@@ -747,14 +748,24 @@
         ]
     },
 
-    { "keys": ["ctrl+h", "<character>"], "command": "insert_single_char", "args": { "after": false },
+    { "keys": ["ctrl+h"], "command": "chain", "args": {
+        "commands": [
+            {"command": "insert_mode", "args": { "after": false, "before": true}},
+            {"command": "callback", "args": {"cmd": "command_mode", "args": {}}},
+    ]
+    },
         "context": [
-            { "key": "setting.command_mode" }
+            { "key": "setting.command_mode" },
         ]
     },
-    { "keys": ["ctrl+s", "<character>"], "command": "insert_single_char", "args": { "after": true },
+    { "keys": ["ctrl+s"], "command": "chain", "args": {
+        "commands": [
+            {"command": "insert_mode", "args": { "after": true, "before": false}},
+            {"command": "callback", "args": {"cmd": "command_mode", "args": {}}},
+    ]
+    },
         "context": [
-            { "key": "setting.command_mode" }
+            { "key": "setting.command_mode" },
         ]
     },
 
@@ -811,42 +822,32 @@
         ]
     },
 
-    { "keys": ["r"], "command": "insert_mode", "args": { "replace": true },
+    { "keys": ["r"], "command": "insert_mode", "args": { "after": true, "before": true},
         "context": [
             { "key": "setting.command_mode" },
         ]
     },
 
-    { "keys": ["ctrl+r", "<character>"], "command": "replace_single_char",
+    { "keys": ["ctrl+r"], "command": "chain", "args": {
+        "commands": [
+            {"command": "insert_mode", "args": { "after": true, "before": true}},
+            {"command": "callback", "args": {"cmd": "command_mode", "args": {}}},
+    ]
+    },
         "context": [
-            { "key": "setting.command_mode" }
+            { "key": "setting.command_mode" },
         ]
     },
 
-    { "keys": ["z", "<character>"], "command": "insert_single_char", "args": { "after": true },
+    { "keys": ["z"], "command": "fold",
         "context": [
-            { "key": "setting.command_mode" }
+            { "key": "setting.command_mode"},
         ]
     },
 
-    // { "keys": ["z"], "command": "fold",
-        // "context": [
-            // { "key": "setting.command_mode"},
-        // ]
-    // },
-//
-    // { "keys": ["ctrl+z"], "command": "unfold",
-        // "context": [
-            // { "key": "setting.command_mode"},
-        // ]
-    // },
-//
-
-    { "keys": ["ctrl+z"], "command": "poor_mans_debugging",
+    { "keys": ["ctrl+z"], "command": "unfold",
         "context": [
-            { "key": "text", "operator": "not_regex_contains", "operand": "\n" },
-            { "key": "selector", "operator": "equal", "operand": "source.python" },
-            { "key": "setting.command_mode" }
+            { "key": "setting.command_mode"},
         ]
     },
 
@@ -1071,9 +1072,21 @@
         ]
     },
 
-    { "keys": ["enter"], "command": "find_all", "args": { "close_panel": true },
+    { "keys": ["enter"], "command": "chain", "args": {
+        "commands": [
+            { "command": "find_all", "args": { "close_panel": true } },
+            { "command": "insert_mode", "args": { "before": false }},
+        ] },
+
         "context": [
             { "key": "panel", "operand": "find" },
+            { "key": "panel_has_focus" },
+            { "key": "search_in_selection", "operator": "equal", "operand": true },
+        ]
+    },
+    { "keys": ["enter"], "command": "replace_all", "args": { "close_panel": true },
+        "context": [
+            { "key": "panel", "operand": "replace" },
             { "key": "panel_has_focus" },
             { "key": "search_in_selection", "operator": "equal", "operand": true },
         ]
@@ -1104,6 +1117,13 @@
             { "key": "setting.command_mode", "operator": "equal", "operand": true }
         ]
     },
+
+    { "keys": ["n"], "command": "search_in_selection",
+        "context": [
+            { "key": "selection_empty", "operator": "equal", "operand": false,"match_all": false },
+            { "key": "setting.command_mode" }
+        ]
+    },
     { "keys": ["N"], "command": "show_panel", "args": { "panel": "replace", "reverse": false },
         "context": [
             { "key": "setting.command_mode", "operator": "equal", "operand": true }
@@ -1114,6 +1134,20 @@
         "context": [
             { "key": "setting.command_mode", "operator": "equal", "operand": true },
             { "key": "selection_empty", "operator": "equal", "operand": true }
+        ]
+    },
+
+    // { "keys": ["'"], "command": "search_in_selection",
+        // "context": [
+            // { "key": "selection_empty", "operator": "equal", "operand": false,"match_all": false },
+            // { "key": "setting.command_mode" }
+        // ]
+    // },
+
+    { "keys": ["ctrl+'"], "command": "search_in_selection", "args": {"panel": "replace"},
+        "context": [
+            { "key": "selection_empty", "operator": "equal", "operand": false,"match_all": false },
+            { "key": "setting.command_mode" }
         ]
     },
 
@@ -1212,7 +1246,7 @@
             { "key": "setting.command_mode" }
         ]
     },
-    { "keys": ["enter"], "command": "output_panel_navigate",
+    { "keys": ["enter"], "command": "goto_search_result",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "text.find-in-files, output.lsp.diagnostics" }
         ]
@@ -1235,7 +1269,7 @@
             { "key": "overlay_has_focus", "operator": "equal", "operand": false }
         ]
     },
-    { "keys": ["ctrl+enter"], "command": "output_panel_navigate", "args": { "new_tab": true },
+    { "keys": ["ctrl+enter"], "command": "goto_search_result", "args": { "new_tab": true },
         "context": [
             { "key": "selector", "operator": "equal", "operand": "text.find-in-files" }
         ]
@@ -1418,16 +1452,12 @@
         "context": [{ "key": "side_bar_visible", "operand": false } ]
     },
 
-    { "keys": ["ctrl+b"], "command": "chain", "args": {
-        "commands": [
-            { "command": "toggle_use_buffer" },
-            { "command": "toggle_show_context" }
-        ] },
+    { "keys": ["ctrl+b"], "command": "toggle_use_buffer", "args": {
         "context": [
             { "key": "panel_has_focus", "operator": "equal", "operand": true },
             { "key": "panel", "operand": "find_in_files" },
             { "key": "setting.is_widget", "operator": "equal", "operand": true }
-        ]},
+        ]}},
 
 
 

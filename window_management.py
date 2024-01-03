@@ -1221,3 +1221,36 @@ class BufferListener(sublime_plugin.ViewEventListener):
             v.settings().erase("multiplier")
             v.settings().erase("set_number")
         pre_command(v, command_name)
+
+
+class CallBackListener(sublime_plugin.ViewEventListener):
+    def _valid_view(self, view):
+        """
+        Determines if we want to track the history for a view
+
+        :param view:
+            A sublime.View object
+
+        :return:
+            A bool if we should track the view
+        """
+
+        return view is not None and not view.settings().get("is_widget")
+
+    def on_modified(self):
+        if not self._valid_view(self.view):
+            return
+
+        v = self.view
+        if (cb := v.settings().get("callback")) is not None:
+            active_window().run_command(**cb)
+            v.settings().erase("callback")
+
+    def on_text_command(self, cmd, args):
+        if not self._valid_view(self.view):
+            return
+
+        v = self.view
+        if (cb := v.settings().get("callback")) is not None:
+            active_window().run_command(**cb)
+            v.settings().erase("callback")

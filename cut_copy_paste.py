@@ -73,7 +73,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
 
         name = "copy_regions"
         regs = [self.view.full_line(r.b) if r.empty() else r for r in sel]
-        color = "light"
+        color = "markup.inserted"
         view_add_regions(vi, name, regs, color, "", DRAW_NO_OUTLINE, [], "", None, None)
         set_timeout_async(lambda: self.view.erase_regions("copy_regions"), 250)
 

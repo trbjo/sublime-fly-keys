@@ -49,6 +49,12 @@ class SmartDeleteLineCommand(sublime_plugin.TextCommand):
             buf.erase(edit, reg)
 
 
+class CallbackCommand(sublime_plugin.TextCommand):
+    def run(self, edit, cmd, args):
+        callback = {"cmd": cmd, "args": args}
+        self.view.settings().set("callback", callback)
+
+
 class InsertModeCommand(sublime_plugin.TextCommand):
     def change_case(self) -> bool:
         v = self.view
@@ -70,13 +76,13 @@ class InsertModeCommand(sublime_plugin.TextCommand):
             return True
         return False
 
-    def run(self, edit: Edit, replace=False, before=False) -> None:
+    def run(self, edit: Edit, after=False, before=False) -> None:
         v = self.view
         if v.settings().get("set_number") is not None:
             v.settings().erase("set_number")
-            if before and not replace:
+            if before and not after:
                 self.change_case()
-            elif not before and replace:
+            elif not before and after:
                 if (multiplier := v.settings().get("multiplier")) is not None:
                     if multiplier == 1:
                         v.run_command("transpose")
@@ -85,49 +91,45 @@ class InsertModeCommand(sublime_plugin.TextCommand):
             v.settings().erase("multiplier")
             return
 
-        buf = self.view
-        if buf.is_read_only():
+        if v.is_read_only():
             sublime.status_message("Buffer is read only")
             return
 
-        for region in reversed(buf.sel()):
-            if region.empty():
-                if replace:
-                    buf.erase(edit, Region(region.a, region.b + 1))
-                else:
-                    if not before:
-                        buf.sel().subtract(region)
-                        buf.sel().add(region.b + 1)
-            else:
-                if replace:
-                    buf.erase(edit, region)
-                else:
-                    buf.sel().subtract(region)
-                    if before:
-                        buf.sel().add(region.begin())
-                    else:
-                        buf.sel().add(region.end())
+        for r in reversed(v.sel()):
+            begin = r.begin()
+            end = r.end()
+            if r.empty():
+                end += 1
 
-        buf.settings().set(key="block_caret", value=False)
-        buf.settings().set(key="command_mode", value=False)
+            start = end if after else begin
+            stop = begin if before else end
+
+            v.sel().subtract(r)
+            new_region = Region(stop, start) if r.a > r.b else Region(start, stop)
+            v.sel().add(new_region)
+            if before and after:
+                v.erase(edit, new_region)
+
+        v.settings().set(key="block_caret", value=False)
+        v.settings().set(key="command_mode", value=False)
 
 
 class DeleteRestOfLineAndInsertModeCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit) -> None:
-        buf = self.view
-        if buf.is_read_only():
+        v = self.view
+        if v.is_read_only():
             sublime.status_message("Buffer is read only")
             return
 
-        sels: Selection = buf.sel()
+        sels: Selection = v.sel()
         for reg in reversed(sels):
             if reg.empty():
-                line = buf.line(reg.begin())
-                buf.erase(edit, Region(reg.begin(), line.end()))
+                line = v.line(reg.begin())
+                v.erase(edit, Region(reg.begin(), line.end()))
             else:
-                buf.erase(edit, reg)
-        buf.settings().set(key="block_caret", value=False)
-        buf.settings().set(key="command_mode", value=False)
+                v.erase(edit, reg)
+        v.settings().set(key="block_caret", value=False)
+        v.settings().set(key="command_mode", value=False)
 
 
 class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
@@ -154,24 +156,6 @@ class InsertBeforeOrAfterCommand(sublime_plugin.TextCommand):
 
         buf.settings().set(key="block_caret", value=False)
         buf.settings().set(key="command_mode", value=False)
-
-
-class InsertSingleCharCommand(sublime_plugin.TextCommand):
-    def run(
-        self,
-        edit: Edit,
-        character,
-        after=False,
-    ):
-        view: View = self.view
-        vi = view.id()
-        for r in view.sel():
-            pt = r.end() if after else r.begin()
-            if after and r.empty():
-                pt += 1
-            view.sel().subtract(r)
-            view.insert(edit, pt, character)
-            add_reg(vi, pt + 1, pt + 1, 0.0)
 
 
 class InsertSpaceCommand(sublime_plugin.TextCommand):

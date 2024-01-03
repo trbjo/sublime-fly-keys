@@ -4,9 +4,9 @@ from typing import Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
-from sublime import NewFileFlags, View, active_window, set_clipboard
-from sublime_api import settings_get_default  # pyright: ignore
+from sublime import NewFileFlags, View, active_window, set_clipboard  # pyright: ignore
 from sublime_api import view_cached_substr as view_substr  # pyright: ignore
+from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_api import view_set_viewport_position as set_vp  # pyright: ignore
 from sublime_plugin import TextCommand, WindowCommand
@@ -31,12 +31,50 @@ class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
 
 class FindInFilesListener(sublime_plugin.EventListener):
     def on_activated(self, view: View):
-        if view.element() == "find_in_files:output":
+        if view.element() == "find_in_files:output" or view.name() == "Find Results":
             views = active_window().views()
             v_n_s = {str(v.id()): [tuple(reg) for reg in v.sel()] for v in views}
             vps = {str(v.id()): v.viewport_position() for v in views}
             active_window().settings().set(key="ViewsBeforeSearch", value=v_n_s)
             active_window().settings().set(key="viewport_positions", value=vps)
+
+
+class CloseFindBufferCommand(WindowCommand):
+    def run(self):
+        w = self.window
+        view = w.active_view()
+        view = w.active_view()
+
+        if view is None:
+            return
+
+        if view.name() != "Find Results":
+            return
+
+        w.run_command("close")
+        group = w.active_group()
+
+        views: Dict[str, List[List[int]]] = w.settings().get(
+            "ViewsBeforeSearch", {}
+        )  # pyright: ignore
+
+        if (transient := w.transient_view_in_group(group)) is not None:
+            if str(transient.id()) not in views.keys():
+                transient.close()
+
+        viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
+            "viewport_positions", {}
+        )  # pyright: ignore
+        prior_vs: List[int] = w.settings().get("views_before_search", [])
+        active_group: int = w.settings().get("active_group", 0)
+        for v in w.views():
+            v.sel().clear()
+            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+            set_vp(v.id(), viewport_pos[str(v.id())], False)
+            if v.id() in prior_vs:
+                self.window.focus_view(v)
+
+        w.focus_group(active_group)
 
 
 class CloseTransientViewCommand(WindowCommand):
@@ -71,11 +109,14 @@ class CloseTransientViewCommand(WindowCommand):
 class OpenFindResultsCommand(WindowCommand):
     def run(self, panel):
         w = self.window
+        own_tab = False
         vs = []
         if (v := w.active_view()) is not None:
-            # do not run the rest if "show in buffer" is set
             if v.name() == "Find Results":
-                return
+                own_tab = True
+                num_groups = w.num_groups()
+                if num_groups == 1:
+                    w.run_command("new_pane")
 
         for num in range(w.num_groups()):
             if (v := w.active_view_in_group(num)) is not None:
@@ -83,120 +124,115 @@ class OpenFindResultsCommand(WindowCommand):
         w.settings().set(key="views_before_search", value=vs)
         w.settings().set(key="active_group", value=w.active_group())
 
-        if panel == "find_results":
+        if panel == "find_results" and not own_tab:
             w.run_command("show_panel", {"panel": f"output.{panel}"})
 
         if view := w.find_output_panel(panel):
-            if panel == "diagnostics":
-                view.settings().set("font_face", "sans-serif")
-                view.settings().set("font_size", 9.5)
             view.set_read_only(True)
             view.settings().set("command_mode", True)
             view.settings().set("block_caret", True)
-            if sublime.ui_info()["theme"]["style"] == "dark":
-                view.settings().set("color_scheme", "dark.sublime-color-scheme")
-            else:
-                view.settings().set("color_scheme", "Light_dim.sublime-color-scheme")
             s = view.sel()
             if len(s) == 0:
                 view.sel().add(0)
             w.focus_view(view)
 
 
-class OutputPanelNavigateCommand(TextCommand):
-    def run(self, _, new_tab=False, show=None) -> None:
+class GotoSearchResultCommand(TextCommand):
+    def run(self, _, new_tab=False) -> None:
         if (view := self.view) is None:
             return
         if (window := view.window()) is None:
             return
 
-        # if view != window.find_output_panel("find_results"):
-        #     return
+        own_buffer = view.name() == "Find Results"
+        files = files_with_loc(view, own_buffer)
 
-        if (next_position := self.get_next_pos(show)) == -1:
-            return None  # no matches were found
-        elif next_position > 0:
-            view.sel().clear()
-            view.sel().add(next_position)
-            view.show(next_position)
-
-        if show and view.name() == "Find Results":
-            # do not run the rest if "show in buffer" is set
-            return
-
-        line_no = self.get_line_no()
-        file_name, target_line = self.get_file()
-
-        if line_no is not None and file_name is not None:
-            caretpos = view.sel()[0].b
-            col = view.rowcol(caretpos)[1] - 6
-            if col < 1:
-                col = 1
-            file_loc = f"{file_name}:{line_no}:{col}"
-        elif file_name is not None:
-            file_loc = f"{file_name}:1:1"
+        if own_buffer:
+            window.run_command("close")
         else:
-            return None
+            window.run_command("hide_panel")
+
+        views: Dict[str, List[List[int]]] = window.settings().get(
+            "ViewsBeforeSearch", {}
+        )  # pyright: ignore
+        viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
+            "viewport_positions", {}
+        )  # pyright: ignore
+
+        for v in window.views():
+            v.sel().clear()
+            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+            set_vp(v.id(), viewport_pos[str(v.id())], False)
 
         params = sublime.ENCODED_POSITION
         if new_tab:
             params += NewFileFlags.FORCE_CLONE
 
-        if show:
-            params += NewFileFlags.TRANSIENT
-
-            target_tp = view.text_to_layout(target_line.a)[1]
-            cursor_tp = view.text_to_layout(view.sel()[0].a)[1]
-            padding = view.line_height()
-            if cursor_tp + padding - target_tp < view.viewport_extent()[1]:
-                target_viewpoint = (0.0, target_tp - VIEWPORT_MARGIN)
-                view.set_viewport_position(target_viewpoint)
-
-        elif not view.name() == "Find Results":
-            views: Dict[str, List[List[int]]] = window.settings().get(
-                "ViewsBeforeSearch", {}
-            )  # pyright: ignore
-            viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
-                "viewport_positions", {}
-            )  # pyright: ignore
-
-            for v in window.views():
-                v.sel().clear()
-                [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-                set_vp(v.id(), viewport_pos[str(v.id())], False)
-            window.run_command("hide_panel")
-
-        window.open_file(fname=file_loc, flags=params)  # pyright: ignore
+        for filewithloc in files:
+            window.open_file(fname=filewithloc, flags=params)  # pyright: ignore
 
         if new_tab:
             window.run_command("new_pane")
 
-    def get_line_no(self):
-        v = self.view
-        line_text = v.substr(v.line(v.sel()[0]))
-        match = re.match(r"\s*(\d+):.+", line_text)
-        if match:
-            return match.group(1)
-        return None
 
-    def get_file(self):
-        v = self.view
-        line = v.line(v.sel()[0])
-        if line.empty() or line.b + 1 == v.size() or line.a == 1:
-            return None, None
-        while line.begin() > 1:
-            line_text = v.substr(line)
-            match = re.match(r"^(\S.+):$", line_text)
-            if match:
-                normalized_path = match.group(1).replace("~", HOME)
-                if path.exists(normalized_path):
-                    return normalized_path, line
-            line = v.line(line.begin() - 1)
-        return None, None
+def files_with_loc(view: sublime.View, full_buffer: bool) -> List[str]:
+    names = []
+    for reg in view.sel():
+        line_no = get_line_no(view, reg)
+        file_name, target_line = get_file(view, reg)
+        if file_name is None or target_line is None:
+            continue
 
-    def get_next_pos(self, show: Optional[str]) -> int:
+        if line_no is not None:
+            col = max(1, view.rowcol(reg.b)[1] - 6)
+            file_loc = f"{file_name}:{line_no}:{col}"
+        else:
+            file_loc = f"{file_name}:1:1"
+        names.append(file_loc)
+        if full_buffer:
+            continue
+
+        target_tp = view.text_to_layout(target_line.a)[1]
+        cursor_tp = view.text_to_layout(reg.b)[1]
+        padding = view.line_height()
+        if cursor_tp + padding - target_tp < view.viewport_extent()[1]:
+            target_viewpoint = (0.0, target_tp - VIEWPORT_MARGIN)
+            view.set_viewport_position(target_viewpoint)
+    return names
+
+
+class OutputPanelNavigateCommand(TextCommand):
+    def run(self, _, show="next_line") -> None:
+        if (view := self.view) is None:
+            return
+        if (window := view.window()) is None:
+            return
+
+        params = sublime.ENCODED_POSITION
+        params += NewFileFlags.TRANSIENT
+
+        carets = []
+        for reg in view.sel():
+            if (new_caret := self.get_next_pos(reg, show)) == -1:
+                return
+            carets.append(new_caret)
+
+        view.sel().clear()
+        vid = view.id()
+        for caret in carets:
+            add_point(vid, caret)
+            view.show(caret)
+
+        own_buffer = view.name() == "Find Results"
+        group = 0 if own_buffer else -1
+        files = files_with_loc(view, own_buffer)
+        for filewithloc in files:
+            window.open_file(
+                fname=filewithloc, flags=params, group=group
+            )  # pyright: ignore
+
+    def get_next_pos(self, reg: sublime.Region, show: Optional[str]) -> int:
         v = self.view
-        reg = v.sel()[0]
         if show == "prev_line":
             line = v.line(v.line(reg.b - 1).a)
             while line.begin() > 1:
@@ -218,7 +254,28 @@ class OutputPanelNavigateCommand(TextCommand):
             buffer = view_substr(v.id(), 0, reg.b)[::-1]
             if match := re.search(r"\n:.+\S\n\n", buffer):
                 return reg.b - match.end() + 2
-        else:
-            return 0
 
         return -1
+
+
+def get_line_no(view: sublime.View, region: sublime.Region):
+    line_text = view.substr(view.line(region))
+    match = re.match(r"\s*(\d+):.+", line_text)
+    if match:
+        return match.group(1)
+    return None
+
+
+def get_file(view: sublime.View, region: sublime.Region):
+    line = view.line(region)
+    if line.empty() or line.b + 1 == view.size() or line.a == 1:
+        return None, None
+    while line.begin() > 1:
+        line_text = view.substr(line)
+        match = re.match(r"^(\S.+):$", line_text)
+        if match:
+            normalized_path = match.group(1).replace("~", HOME)
+            if path.exists(normalized_path):
+                return normalized_path, line
+        line = view.line(line.begin() - 1)
+    return None, None

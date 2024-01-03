@@ -76,7 +76,7 @@ class SmarterSelectLines(TextCommand):
         if forward:
             next_lines = [v.line(v.line(pt).b + 1) for _, pt in selections]
         else:
-            next_lines = [v.line(v.line(pt).a - 1) for _, pt in selections if pt != 0]
+            next_lines = [v.line(v.line(pt).a - 1) for pt in current_lines if pt > 1]
         folds = v.folded_regions()
         for i, next_line in enumerate(next_lines):
             if next_line.a in current_lines:
@@ -354,24 +354,25 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
 
 
 class SearchInSelectionCommand(sublime_plugin.WindowCommand):
-    def run(self) -> None:
+    def run(self, panel="find") -> None:
         w = active_window()
 
         if (view := w.active_view()) is None:
             return
 
         vi = view.id()
-        key = "search_in_selection"
-        w.settings().set(key=key, value=True)
         sel = view.sel()
-        cursors = [(r.a, r.b) for r in sel]
-        w.settings().set(f"{vi}_cursors", cursors)
-        toggle = not any("\n" in substr(vi, r.a, r.b) for r in sel)
-
-        w.run_command(cmd="show_panel", args={"panel": "find", "reverse": False})
-        w.run_command(cmd="left_delete")
+        toggle = any("\n" in substr(vi, r.a, r.b) for r in sel)
         if toggle:
-            w.run_command(cmd="toggle_in_selection")
+            key = "search_in_selection"
+            w.settings().set(key=key, value=True)
+            cursors = [(r.a, r.b) for r in sel]
+            w.settings().set(f"{vi}_cursors", cursors)
+
+        w.run_command(cmd="show_panel", args={"panel": panel, "reverse": False})
+        if toggle:
+            w.run_command(cmd="left_delete")
+            # w.run_command(cmd="toggle_in_selection")
 
 
 class HideSearchInSelectionCommand(sublime_plugin.WindowCommand):
