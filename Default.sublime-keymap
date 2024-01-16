@@ -470,7 +470,6 @@
             { "key": "setting.lsp_active" }
         ]
     },
-    { "keys": ["ctrl"], "command": "show_overlay", "args": { "overlay": "command_palette"}},
     { "keys": ["`"], "command": "insert", "args": { "characters": "`" },
         "context": [
             { "key": "setting.command_mode", "operator": "equal", "operand": false }
