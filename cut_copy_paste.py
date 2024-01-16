@@ -1,5 +1,6 @@
 import itertools
 from typing import List, Tuple
+import subprocess
 
 import sublime_plugin
 from sublime import (
@@ -8,8 +9,6 @@ from sublime import (
     Region,
     Selection,
     View,
-    get_clipboard,
-    set_clipboard,
 )
 from sublime_api import set_timeout_async as set_timeout_async  # pyright: ignore
 from sublime_api import view_add_regions  # pyright: ignore
@@ -22,8 +21,9 @@ from sublime_api import view_selection_subtract_region as subtract  # pyright: i
 
 class CopyBufferCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
-        buf = self.view
-        set_clipboard(buf.substr(Region(0, buf.size())))
+        vi = self.view.id()
+        text = ssubstr(vi, 0, self.view.size())
+        subprocess.run(["wl-copy"], input=text.encode())
 
 
 class SmartCopyCommand(sublime_plugin.TextCommand):
@@ -66,7 +66,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         if clip.isspace():
             return
 
-        set_clipboard(clip)
+        subprocess.run(["wl-copy"], input=clip.encode())
 
         if cut:
             return
@@ -93,7 +93,10 @@ class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
         wschar = " " if v.settings().get("translate_tabs_to_spaces") else "\t"
         sels: Selection = v.sel()
 
-        clips = [c.strip() for c in get_clipboard().splitlines() if c.strip()]
+        result = subprocess.run(["wl-paste", "-n"], stdout=subprocess.PIPE, text=True)
+        clipboard = result.stdout
+
+        clips = [c.strip() for c in clipboard.splitlines() if c.strip()]
         clip_pos: List[Tuple[int, int]] = [(len(clips[-1]), len(clips[-1]) + 1)]
 
         for clip in reversed(clips[:-1]):
@@ -118,13 +121,16 @@ class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):
 class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
         v: View = self.view
-        stripped_clipboard = get_clipboard().strip()
+
+        result = subprocess.run(["wl-paste", "-n"], stdout=subprocess.PIPE, text=True)
+        clipboard = result.stdout
+
+        stripped_clipboard = clipboard.strip()
         s: Selection = v.sel()
         for r in reversed(s):
             v.erase(edit, r)
             v.insert(edit, r.begin(), stripped_clipboard)
 
-        v.show(v.sel()[-1].b, False)
 
 
 def find_indent(
@@ -174,7 +180,10 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
 
         wschar = " " if v.settings().get("translate_tabs_to_spaces") else "\t"
         s: Selection = v.sel()
-        clipboard = get_clipboard()
+
+        result = subprocess.run(["wl-paste", "-n"], stdout=subprocess.PIPE, text=True)
+        clipboard = result.stdout
+
         clips = clipboard.splitlines()
         vi = v.id()
 
