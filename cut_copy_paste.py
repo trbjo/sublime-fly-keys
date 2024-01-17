@@ -174,14 +174,18 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         return len(clips) == len(set(ssubstr(vi, r.a, r.b) for r in s))
 
     def run(
-        self, edit: Edit, before: bool = False, replace=True, indent_same=False
+        self, edit: Edit, before: bool = False, replace=True, indent_same=False, primary=False
     ) -> None:
         v: View = self.view
 
         wschar = " " if v.settings().get("translate_tabs_to_spaces") else "\t"
         s: Selection = v.sel()
+        args = ["wl-paste", "-n"]
 
-        result = subprocess.run(["wl-paste", "-n"], stdout=subprocess.PIPE, text=True)
+        if primary:
+            args.append("--primary")
+        result = subprocess.run(args, stdout=subprocess.PIPE, text=True)
+
         clipboard = result.stdout
 
         clips = clipboard.splitlines()
