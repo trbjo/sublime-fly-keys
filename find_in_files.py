@@ -1,6 +1,6 @@
 import re
 from os import getenv, path
-from typing import Dict, List, Optional, Tuple
+from typing import Counter, Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
@@ -39,71 +39,73 @@ class FindInFilesListener(sublime_plugin.EventListener):
             active_window().settings().set(key="viewport_positions", value=vps)
 
 
+def restore_views(restore_groups: bool):
+    w = sublime.active_window()
+    views: Dict[str, List[List[int]]] = w.settings().get(
+        "ViewsBeforeSearch", {}
+    )  # pyright: ignore
+
+    viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
+        "viewport_positions", {}
+    )  # pyright: ignore
+
+    active_group: int = w.settings().get("active_group", 0)
+
+
+    if restore_groups:
+        prev_groups =w.settings().get("groups_before_search", {})
+        length = len(prev_groups.keys()) - 1
+
+        for i in range(length):
+            w.run_command("new_pane", args={"move": False})
+        for groupnum, groupviews, in prev_groups.items():
+            if (transient := w.transient_view_in_group(int(groupnum))) is not None:
+                if str(transient.id()) not in views.keys():
+                    transient.close()
+
+            for ts in w.sheets():
+                if (thisView:=ts.view()) is None:
+                    continue
+
+                if thisView.name() == "Find Results":
+                    thisView.close()
+                    continue
+
+                if groupnum == '0':
+                    continue
+
+                if str(thisView.id()) in groupviews:
+                    w.move_sheets_to_group([ts],int(groupnum))
+
+    prior_vs: List[int] = w.settings().get("views_before_search", [])
+    for v in w.views():
+        v.sel().clear()
+        [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
+        if v.id() in prior_vs:
+            w.focus_view(v)
+
+    for v in w.views():
+        set_vp(v.id(), viewport_pos[str(v.id())], False)
+
+    w.focus_group(active_group)
+    w.run_command("hide_panel")
+
+
 class CloseFindBufferCommand(WindowCommand):
     def run(self):
-        w = self.window
-        view = w.active_view()
-        view = w.active_view()
-
+        view = self.window.active_view()
         if view is None:
             return
 
-        if view.name() != "Find Results":
-            return
-
-        w.run_command("close")
-        group = w.active_group()
-
-        views: Dict[str, List[List[int]]] = w.settings().get(
-            "ViewsBeforeSearch", {}
-        )  # pyright: ignore
-
-        if (transient := w.transient_view_in_group(group)) is not None:
-            if str(transient.id()) not in views.keys():
-                transient.close()
-
-        viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
-            "viewport_positions", {}
-        )  # pyright: ignore
-        prior_vs: List[int] = w.settings().get("views_before_search", [])
-        active_group: int = w.settings().get("active_group", 0)
-        for v in w.views():
-            v.sel().clear()
-            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-            set_vp(v.id(), viewport_pos[str(v.id())], False)
-            if v.id() in prior_vs:
-                self.window.focus_view(v)
-
-        w.focus_group(active_group)
+        restore_views(view.name()=="Find Results")
 
 
 class CloseTransientViewCommand(WindowCommand):
     def run(self):
-        w = self.window
-        w.run_command("hide_panel", {"cancel": True})
-
-        group = w.active_group()
-        if (transient := w.transient_view_in_group(group)) is None:
+        view = self.window.active_view()
+        if view is None:
             return
-
-        views: Dict[str, List[List[int]]] = w.settings().get(
-            "ViewsBeforeSearch", {}
-        )  # pyright: ignore
-        viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
-            "viewport_positions", {}
-        )  # pyright: ignore
-        if str(transient.id()) not in views.keys():
-            transient.close()
-        prior_vs: List[int] = w.settings().get("views_before_search", [])
-        active_group: int = w.settings().get("active_group", 0)
-        for v in w.views():
-            v.sel().clear()
-            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-            set_vp(v.id(), viewport_pos[str(v.id())], False)
-            if v.id() in prior_vs:
-                self.window.focus_view(v)
-
-        w.focus_group(active_group)
+        restore_views(view.name()=="Find Results")
 
 
 class OpenFindResultsCommand(WindowCommand):
@@ -111,18 +113,32 @@ class OpenFindResultsCommand(WindowCommand):
         w = self.window
         own_tab = False
         vs = []
-        if (v := w.active_view()) is not None:
-            if v.name() == "Find Results":
-                own_tab = True
-                num_groups = w.num_groups()
-                if num_groups == 1:
-                    w.run_command("new_pane")
+
+        gbs = {}
+        for num in range(w.num_groups()):
+            thisgroup = []
+            for thisview in w.views_in_group(num):
+                thisgroup.append(str(thisview.id()))
+            gbs[str(num)] = thisgroup
+
+        active_window().settings().set(key="groups_before_search", value=gbs)
+
+        if (v := w.active_view()) is not None and v.name() == "Find Results":
+            own_tab = True
+
+
 
         for num in range(w.num_groups()):
             if (v := w.active_view_in_group(num)) is not None:
                 vs.append(v.id())
         w.settings().set(key="views_before_search", value=vs)
         w.settings().set(key="active_group", value=w.active_group())
+
+
+        if own_tab:
+            for num in range(w.num_groups()):
+                w.run_command("close_pane")
+            w.run_command("new_pane")
 
         if panel == "find_results" and not own_tab:
             w.run_command("show_panel", {"panel": f"output.{panel}"})
@@ -146,23 +162,7 @@ class GotoSearchResultCommand(TextCommand):
 
         own_buffer = view.name() == "Find Results"
         files = files_with_loc(view, own_buffer)
-
-        if own_buffer:
-            window.run_command("close")
-        else:
-            window.run_command("hide_panel")
-
-        views: Dict[str, List[List[int]]] = window.settings().get(
-            "ViewsBeforeSearch", {}
-        )  # pyright: ignore
-        viewport_pos: Dict[str, Tuple[float, float]] = window.settings().get(
-            "viewport_positions", {}
-        )  # pyright: ignore
-
-        for v in window.views():
-            v.sel().clear()
-            [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-            set_vp(v.id(), viewport_pos[str(v.id())], False)
+        restore_views(own_buffer)
 
         params = sublime.ENCODED_POSITION
         if new_tab:
