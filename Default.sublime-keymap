@@ -261,8 +261,14 @@
         ]
     },
 
-    { "keys": ["q"], "command": "smart_copy", "args": {"whole_line": false, "cut": true},
+    { "keys": ["q"], "command": "smart_copy", "args": {"cut": true},
         "context": [
+            { "key": "setting.command_mode" }
+        ]
+    },
+    { "keys": ["q"], "command": "smart_copy", "args": {"cut": true, "append": true},
+        "context": [
+            { "key": "last_command", "operator": "equal", "operand": "smart_copy" },
             { "key": "setting.command_mode" }
         ]
     },
@@ -1119,6 +1125,7 @@
 
     { "keys": ["n"], "command": "search_in_selection",
         "context": [
+            { "key": "text", "operator": "regex_contains", "operand": "\n" },
             { "key": "selection_empty", "operator": "equal", "operand": false,"match_all": false },
             { "key": "setting.command_mode" }
         ]

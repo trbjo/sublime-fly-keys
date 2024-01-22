@@ -363,16 +363,17 @@ class SearchInSelectionCommand(sublime_plugin.WindowCommand):
         vi = view.id()
         sel = view.sel()
         toggle = any("\n" in substr(vi, r.a, r.b) for r in sel)
-        if toggle:
-            key = "search_in_selection"
-            w.settings().set(key=key, value=True)
-            cursors = [(r.a, r.b) for r in sel]
-            w.settings().set(f"{vi}_cursors", cursors)
+
+        # if toggle:
+        key = "search_in_selection"
+        w.settings().set(key=key, value=True)
+        cursors = [(r.a, r.b) for r in sel]
+        w.settings().set(f"{vi}_cursors", cursors)
 
         w.run_command(cmd="show_panel", args={"panel": panel, "reverse": False})
-        if toggle:
-            w.run_command(cmd="left_delete")
-            # w.run_command(cmd="toggle_in_selection")
+        w.run_command(cmd="left_delete")
+        if not toggle:
+            w.run_command(cmd="toggle_in_selection")
 
 
 class HideSearchInSelectionCommand(sublime_plugin.WindowCommand):

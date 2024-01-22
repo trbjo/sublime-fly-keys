@@ -1,15 +1,9 @@
 import itertools
-from typing import List, Tuple
 import subprocess
+from typing import List, Tuple
 
 import sublime_plugin
-from sublime import (
-    DRAW_NO_OUTLINE,
-    Edit,
-    Region,
-    Selection,
-    View,
-)
+from sublime import DRAW_NO_OUTLINE, Edit, Region, Selection, View
 from sublime_api import set_timeout_async as set_timeout_async  # pyright: ignore
 from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_cached_substr as ssubstr  # pyright: ignore
@@ -17,6 +11,16 @@ from sublime_api import view_erase as erase  # pyright: ignore
 from sublime_api import view_selection_add_point as add_pt  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_api import view_selection_subtract_region as subtract  # pyright: ignore
+
+BUFFER = []
+TIMER = 0
+
+
+def setClipboard():
+    clip = "".join(BUFFER)
+    if clip.isspace():
+        return
+    subprocess.run(["wl-copy"], input=clip.encode())
 
 
 class CopyBufferCommand(sublime_plugin.TextCommand):
@@ -27,7 +31,9 @@ class CopyBufferCommand(sublime_plugin.TextCommand):
 
 
 class SmartCopyCommand(sublime_plugin.TextCommand):
-    def run(self, edit, whole_line: bool = False, cut: bool = False) -> None:
+    def run(
+        self, edit, whole_line: bool = False, cut: bool = False, append: bool = False
+    ) -> None:
         v: View = self.view
         vi = v.id()
         sel = v.sel()
@@ -63,10 +69,22 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
                 v.erase(edit, reg)
 
         v.show(v.sel()[-1].b, False)
-        if clip.isspace():
-            return
 
-        subprocess.run(["wl-copy"], input=clip.encode())
+        global BUFFER
+        if not append:
+            BUFFER = []
+        BUFFER.append(clip)
+
+        global TIMER
+        TIMER += 1
+
+        def copyMaybe():
+            global TIMER
+            TIMER -= 1
+            if TIMER == 0:
+                setClipboard()
+
+        set_timeout_async(copyMaybe, 50)
 
         if cut:
             return
@@ -132,7 +150,6 @@ class SmartPasteCutWhitespaceCommand(sublime_plugin.TextCommand):
             v.insert(edit, r.begin(), stripped_clipboard)
 
 
-
 def find_indent(
     v: View,
     line: Region,
@@ -174,7 +191,12 @@ class SmartPasteCommand(sublime_plugin.TextCommand):
         return len(clips) == len(set(ssubstr(vi, r.a, r.b) for r in s))
 
     def run(
-        self, edit: Edit, before: bool = False, replace=True, indent_same=False, primary=False
+        self,
+        edit: Edit,
+        before: bool = False,
+        replace=True,
+        indent_same=False,
+        primary=False,
     ) -> None:
         v: View = self.view
 
