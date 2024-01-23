@@ -23,6 +23,7 @@ from sublime_api import (
 from sublime_api import window_move_sheets_to_group as mv_shts_grp  # pyright: ignore
 from sublime_api import window_num_groups as win_num_grp  # pyright: ignore
 from sublime_api import window_sheets_in_group as sheets_in_group  # pyright: ignore
+from sublime_api import window_views  # pyright: ignore
 from sublime_plugin import TextCommand, WindowCommand
 
 from .cut_copy_paste import setClipboard
@@ -71,18 +72,20 @@ def restore_views(new_views):
     viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
         "wiewp_pos", {}
     )  # pyright: ignore
-    view_ids = [v.id() for v in new_views]
-    for v in w.views():
-        if v.id() in view_ids:
+
+    new_view_ids = [v.id() for v in new_views]
+    for vid in window_views(wid, False):
+        if vid in new_view_ids:
             continue
 
-        if (key := str(v.id())) not in views.keys():
-            v.close()
+        thisview = sublime.View(vid)
+        if (key := str(vid)) not in views.keys():
+            thisview.close()
             continue
 
-        v.sel().clear()
-        [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[key]]
-        set_vp(v.id(), viewport_pos[key], False)
+        thisview.sel().clear()
+        [add_region(thisview.id(), reg[0], reg[1], 0.0) for reg in views[key]]
+        set_vp(thisview.id(), viewport_pos[key], False)
 
 
 class CloseFindInFilesCommand(WindowCommand):
@@ -97,6 +100,7 @@ class CloseFindInFilesCommand(WindowCommand):
             w.run_command("hide_panel", {"panel": panel})
 
         restore_views([])
+        w.focus_group(w.settings().get("active_group", 0))
 
 
 class RegisterViewsCommand(WindowCommand):
