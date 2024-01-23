@@ -570,12 +570,19 @@
             { "key": "panel_has_focus", "operator": "equal", "operand": false }
         ]
     },
-    { "keys": ["escape"], "command": "close_transient_view",
+
+    { "keys": ["escape"], "command": "close_find_in_files",
         "context": [
             { "key": "panel", "operand": "output.find_results" },
-            { "key": "panel_visible", "operator": "equal", "operand": true }
         ]
     },
+
+    { "keys": ["escape"], "command": "close_find_in_files",
+        "context": [
+          { "key": "selector", "operator": "equal", "operand": "text.find-in-files", "match_all": true },
+      ]
+    },
+
     { "keys": ["escape"], "command": "command_mode",
         "context": [
             { "key": "setting.command_mode", "operator": "equal", "operand": false },
@@ -1062,6 +1069,7 @@
     },
     { "keys": ["enter"], "command": "chain", "args": {
         "commands": [
+            { "command": "register_views"},
             { "command": "find_all" },
             { "command": "open_find_results", "args": { "panel": "find_results"}}
         ] },

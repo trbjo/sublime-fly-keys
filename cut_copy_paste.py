@@ -16,8 +16,8 @@ BUFFER = []
 TIMER = 0
 
 
-def setClipboard():
-    clip = "".join(BUFFER)
+def setClipboard(buffer):
+    clip = "".join(buffer)
     if clip.isspace():
         return
     subprocess.run(["wl-copy"], input=clip.encode())
@@ -82,7 +82,7 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
             global TIMER
             TIMER -= 1
             if TIMER == 0:
-                setClipboard()
+                setClipboard(BUFFER)
 
         set_timeout_async(copyMaybe, 50)
 

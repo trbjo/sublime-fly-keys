@@ -1,18 +1,32 @@
 import re
 from os import getenv, path
-from typing import Counter, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
-from sublime import NewFileFlags, View, active_window, set_clipboard  # pyright: ignore
+from sublime import NewFileFlags, Sheet, View, active_window, windows  # pyright: ignore
 from sublime_api import view_cached_substr as view_substr  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_api import view_set_viewport_position as set_vp  # pyright: ignore
+from sublime_api import (
+    window_active_sheet_in_group as active_sheet_grp,  # pyright: ignore
+)
+from sublime_api import window_move_sheets_to_group as mv_shts_grp  # pyright: ignore
+from sublime_api import window_num_groups as win_num_grp  # pyright: ignore
+from sublime_api import window_sheets_in_group as sheets_in_group  # pyright: ignore
 from sublime_plugin import TextCommand, WindowCommand
+
+from .cut_copy_paste import setClipboard
 
 VIEWPORT_MARGIN = 2
 HOME: str = getenv("HOME")  # pyright: ignore
+
+
+def issearch(v: Optional[View]) -> bool:
+    if v is None:
+        return False
+    return v.name() == "Find Results"
 
 
 class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
@@ -23,122 +37,116 @@ class CopyInFindInFilesCommand(sublime_plugin.TextCommand):
         line_content = v.substr(line)
 
         if not line_content.startswith(" "):
-            set_clipboard(line_content[:-1])
+            setClipboard(line_content[:-1])
         elif line_match := re.match(r"^\s+\d+", line_content):
             offset = line_match.end() + 2
-            set_clipboard(line_content[offset:])
+            setClipboard(line_content[offset:])
 
 
-class FindInFilesListener(sublime_plugin.EventListener):
-    def on_activated(self, view: View):
-        if view.element() == "find_in_files:output" or view.name() == "Find Results":
-            views = active_window().views()
-            v_n_s = {str(v.id()): [tuple(reg) for reg in v.sel()] for v in views}
-            vps = {str(v.id()): v.viewport_position() for v in views}
-            active_window().settings().set(key="ViewsBeforeSearch", value=v_n_s)
-            active_window().settings().set(key="viewport_positions", value=vps)
-
-
-def restore_views(restore_groups: bool):
+def restore_views(new_views):
     w = sublime.active_window()
+    wid = w.id()
     views: Dict[str, List[List[int]]] = w.settings().get(
         "ViewsBeforeSearch", {}
     )  # pyright: ignore
 
+    if (layout := w.settings().get("layout", None)) is not None:
+        w.set_layout(layout)
+
+    prevFocused: Dict[str, int] = w.settings().get("prior_sheets", {})
+    settings = w.settings().get("groups_before_search", {})
+    for groupnum, groupviews in settings.items():
+        mv_shts_grp(wid, groupviews, int(groupnum), -1, False)
+        prvFocused = prevFocused[groupnum]
+        mv_shts_grp(wid, [prvFocused], int(groupnum), -1, True)
+
     viewport_pos: Dict[str, Tuple[float, float]] = w.settings().get(
-        "viewport_positions", {}
+        "wiewp_pos", {}
     )  # pyright: ignore
-
-    active_group: int = w.settings().get("active_group", 0)
-
-
-    if restore_groups:
-        prev_groups =w.settings().get("groups_before_search", {})
-        length = len(prev_groups.keys()) - 1
-
-        for i in range(length):
-            w.run_command("new_pane", args={"move": False})
-        for groupnum, groupviews, in prev_groups.items():
-            if (transient := w.transient_view_in_group(int(groupnum))) is not None:
-                if str(transient.id()) not in views.keys():
-                    transient.close()
-
-            for ts in w.sheets():
-                if (thisView:=ts.view()) is None:
-                    continue
-
-                if thisView.name() == "Find Results":
-                    thisView.close()
-                    continue
-
-                if groupnum == '0':
-                    continue
-
-                if str(thisView.id()) in groupviews:
-                    w.move_sheets_to_group([ts],int(groupnum))
-
-    prior_vs: List[int] = w.settings().get("views_before_search", [])
+    view_ids = [v.id() for v in new_views]
     for v in w.views():
+        if v.id() in view_ids:
+            continue
+
+        if (key := str(v.id())) not in views.keys():
+            v.close()
+            continue
+
         v.sel().clear()
-        [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[str(v.id())]]
-        if v.id() in prior_vs:
-            w.focus_view(v)
-
-    for v in w.views():
-        set_vp(v.id(), viewport_pos[str(v.id())], False)
-
-    w.focus_group(active_group)
-    w.run_command("hide_panel")
+        [add_region(v.id(), reg[0], reg[1], 0.0) for reg in views[key]]
+        set_vp(v.id(), viewport_pos[key], False)
 
 
-class CloseFindBufferCommand(WindowCommand):
+class CloseFindInFilesCommand(WindowCommand):
     def run(self):
-        view = self.window.active_view()
+        w = self.window
+        view = w.active_view()
         if view is None:
             return
+        if issearch(view):
+            view.close()
+        elif (panel := w.active_panel()) == "output.find_results":
+            w.run_command("hide_panel", {"panel": panel})
 
-        restore_views(view.name()=="Find Results")
+        restore_views([])
 
 
-class CloseTransientViewCommand(WindowCommand):
+class RegisterViewsCommand(WindowCommand):
     def run(self):
-        view = self.window.active_view()
-        if view is None:
-            return
-        restore_views(view.name()=="Find Results")
+        w = self.window
+        wid = w.id()
+        shts: Dict[str, int] = {
+            str(num): active_sheet_grp(wid, num) for num in range(win_num_grp(wid))
+        }
+        w.settings().set(key="prior_sheets", value=shts)
+
+        views = [v for v in active_window().views() if not issearch(v)]
+        v_n_s = {str(v.id()): [tuple(reg) for reg in v.sel()] for v in views}
+        vps = {str(v.id()): v.viewport_position() for v in views}
+        active_window().settings().set(key="ViewsBeforeSearch", value=v_n_s)
+        active_window().settings().set(key="wiewp_pos", value=vps)
+        gbs: Dict[str, List[int]] = {}
+        for num in range(w.num_groups()):
+            sheet_ids = []
+            for s in w.sheets_in_group(num):
+                if issearch(s.view()):
+                    continue
+                if s.id() in shts.values():
+                    continue
+                sheet_ids.append(s.id())
+            gbs[str(num)] = sheet_ids
+
+        w.settings().set(key="groups_before_search", value=gbs)
+        w.settings().set(key="active_group", value=w.active_group())
+
+        w.settings().set("layout", w.layout())
 
 
 class OpenFindResultsCommand(WindowCommand):
     def run(self, panel):
         w = self.window
-        own_tab = False
-        vs = []
+        wid = w.id()
+        v = w.active_view()
+        own_tab = issearch(v)
 
-        gbs = {}
-        for num in range(w.num_groups()):
-            thisgroup = []
-            for thisview in w.views_in_group(num):
-                thisgroup.append(str(thisview.id()))
-            gbs[str(num)] = thisgroup
-
-        active_window().settings().set(key="groups_before_search", value=gbs)
-
-        if (v := w.active_view()) is not None and v.name() == "Find Results":
-            own_tab = True
-
-
-
-        for num in range(w.num_groups()):
-            if (v := w.active_view_in_group(num)) is not None:
-                vs.append(v.id())
-        w.settings().set(key="views_before_search", value=vs)
-        w.settings().set(key="active_group", value=w.active_group())
-
-
+        # layout = {"cells": [[0, 0, 1, 1]], "cols": [0.0, 1.0], "rows": [0.0, 1.0]}
         if own_tab:
-            for num in range(w.num_groups()):
-                w.run_command("close_pane")
-            w.run_command("new_pane")
+            sheet: Sheet = v.sheet()  # pyright: ignore
+            sid = sheet.sheet_id
+
+            w.set_layout(
+                {
+                    "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
+                    "cols": [0.0, 0.5, 1.0],
+                    "rows": [0.0, 1.0],
+                }
+            )
+
+            for i in range(1, w.num_groups()):
+                sheet_ids = [s for s in sheets_in_group(wid, i) if s != sid]
+                mv_shts_grp(wid, sheet_ids, 0, -1, False)
+            mv_shts_grp(wid, [sid], 1, -1, True)
+            return
 
         if panel == "find_results" and not own_tab:
             w.run_command("show_panel", {"panel": f"output.{panel}"})
@@ -157,22 +165,26 @@ class GotoSearchResultCommand(TextCommand):
     def run(self, _, new_tab=False) -> None:
         if (view := self.view) is None:
             return
-        if (window := view.window()) is None:
+        if (w := view.window()) is None:
             return
-
-        own_buffer = view.name() == "Find Results"
-        files = files_with_loc(view, own_buffer)
-        restore_views(own_buffer)
 
         params = sublime.ENCODED_POSITION
         if new_tab:
             params += NewFileFlags.FORCE_CLONE
+        files = files_with_loc(view, issearch(view))
 
-        for filewithloc in files:
-            window.open_file(fname=filewithloc, flags=params)  # pyright: ignore
+        if issearch(view):
+            view.close()
+        elif (panel := w.active_panel()) == "output.find_results":
+            w.run_command("hide_panel", {"panel": panel})
+
+        views = [w.open_file(fname=v, flags=params) for v in files]
+        restore_views(views)
 
         if new_tab:
-            window.run_command("new_pane")
+            w.run_command("new_pane")
+
+        [w.focus_view(nw) for nw in views]
 
 
 def files_with_loc(view: sublime.View, full_buffer: bool) -> List[str]:
@@ -223,7 +235,7 @@ class OutputPanelNavigateCommand(TextCommand):
             add_point(vid, caret)
             view.show(caret)
 
-        own_buffer = view.name() == "Find Results"
+        own_buffer = issearch(view)
         group = 0 if own_buffer else -1
         files = files_with_loc(view, own_buffer)
         for filewithloc in files:
