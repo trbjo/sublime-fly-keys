@@ -4,11 +4,19 @@ from typing import Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
-from sublime import NewFileFlags, Sheet, View, active_window, windows  # pyright: ignore
+from sublime import (  # pyright: ignore
+    NewFileFlags,
+    Region,
+    Sheet,
+    View,
+    active_window,
+    windows,
+)
 from sublime_api import view_cached_substr as view_substr  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_api import view_set_viewport_position as set_vp  # pyright: ignore
+from sublime_api import view_show_point as show_point  # pyright: ignore
 from sublime_api import (
     window_active_sheet_in_group as active_sheet_grp,  # pyright: ignore
 )
@@ -184,7 +192,10 @@ class GotoSearchResultCommand(TextCommand):
         if new_tab:
             w.run_command("new_pane")
 
-        [w.focus_view(nw) for nw in views]
+        for new_view in views:
+            regions = list(new_view.sel()) or [Region(0, 0)]
+            w.focus_view(new_view)
+            show_point(new_view.id(), regions[0].b, True, False, False)
 
 
 def files_with_loc(view: sublime.View, full_buffer: bool) -> List[str]:
@@ -235,12 +246,9 @@ class OutputPanelNavigateCommand(TextCommand):
             add_point(vid, caret)
             view.show(caret)
 
-        own_buffer = issearch(view)
-        group = 0 if own_buffer else -1
-        files = files_with_loc(view, own_buffer)
-        for filewithloc in files:
+        for filewithloc in files_with_loc(view, issearch(view)):
             window.open_file(
-                fname=filewithloc, flags=params, group=group
+                fname=filewithloc, flags=params, group=0
             )  # pyright: ignore
 
     def get_next_pos(self, reg: sublime.Region, show: Optional[str]) -> int:
