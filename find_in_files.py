@@ -4,14 +4,7 @@ from typing import Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
-from sublime import (  # pyright: ignore
-    NewFileFlags,
-    Region,
-    Sheet,
-    View,
-    active_window,
-    windows,
-)
+from sublime import NewFileFlags, Region, Sheet, View, active_window  # pyright: ignore
 from sublime_api import view_cached_substr as view_substr  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore

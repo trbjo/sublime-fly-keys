@@ -251,18 +251,24 @@ class SmarterFindUnderExpand(sublime_plugin.TextCommand):
         buf = f"\a{substr(vid, first, last)}\a"
         middle = set()
         words: Dict[str, List[Region]] = defaultdict(list)
+        compiled_regexes = {}
         for reg in s if forward else reversed(s):
-            if reg.a != reg.b:
-                surroundings = buf[reg.begin() - first : reg.end() + 2 - first]
-                word = surroundings[1:-1]
-                regex = r"\b" + re.escape(word) + r"\b"
+            if reg.a == reg.b:
+                continue
 
-                if not forward:
-                    word = word[::-1]
+            surroundings = buf[reg.begin() - first : reg.end() + 2 - first]
+            if not forward:
+                surroundings = surroundings[::-1]
 
-                words[word].append(reg)
-                if not re.search(regex, surroundings):
-                    middle.add(word)
+            word = surroundings[1:-1]
+            words[word].append(reg)
+
+            if word not in compiled_regexes:
+                compiled_regexes[word] = re.compile(r"\b" + re.escape(word) + r"\b")
+            regex = compiled_regexes[word]
+
+            if not word.isalnum() or not regex.search(surroundings):
+                middle.add(word)
 
         buffer_iter = buffer_slice(v, forward)
         buffer_iter.send(None)
@@ -270,7 +276,7 @@ class SmarterFindUnderExpand(sublime_plugin.TextCommand):
         for word, regs in words.items():
             a, b = regs[-1]
             idx = (0, 0) if find_all else (b, a) if (a > b) is forward else (a, b)
-            rgx = re.escape(word) if word in middle else r"\b" + re.escape(word) + r"\b"
+            rgx = re.escape(word) if word in middle else compiled_regexes[word]
             revert = all(reg.a > reg.b for reg in regs) is forward
 
             while idx := buffer_iter.send((*idx, rgx)):
