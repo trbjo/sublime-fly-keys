@@ -3,14 +3,8 @@ import time
 
 import sublime_plugin
 from sublime import Region
-from sublime_api import view_add_regions  # pyright: ignore
-from sublime_api import view_cached_substr as substr  # pyright: ignore
-from sublime_api import view_find as vfind  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
-from sublime_api import (
-    view_selection_subtract_region as subtract_region,  # pyright: ignore
-)
 from sublime_api import view_show_point as show_point  # pyright: ignore
 from sublime_plugin import TextCommand
 

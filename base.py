@@ -3,13 +3,9 @@ from re import Pattern
 from typing import Any, Generator, Tuple, Union
 
 from sublime import View
-from sublime_api import view_add_regions  # pyright: ignore
 from sublime_api import view_cached_substr as substr  # pyright: ignore
-from sublime_api import view_find as vfind  # pyright: ignore
-from sublime_api import view_selection_add_point as add_point  # pyright: ignore
-from sublime_api import view_selection_add_region as add_region  # pyright: ignore
-from sublime_api import view_show_point as show_point  # pyright: ignore
 
+CHUNKSIZE = 10_000
 
 def buffer_slice(
     v: View, forward: bool, default_yield_border: bool = False
@@ -31,14 +27,12 @@ def buffer_slice(
         first = fold_end
     unfolded.append((first, last))
 
-    # chunking
-    CHUNKSIZE = 10_000
-    final = []
+    regions = []
     pt = -1
     for a, b in unfolded:
         while pt < b:
             pt = min((index if index > a else last), b, v.line(a + CHUNKSIZE).b)
-            final.append((a, pt))
+            regions.append((a, pt))
             a = pt
 
     buffers = {}
@@ -46,7 +40,7 @@ def buffer_slice(
         while True:
             while index >= last:
                 *_, index, new_pattern = yield default_yield
-            _s, _e = next((_s, _e) for _s, _e in final if index < _e)
+            _s, _e = next((_s, _e) for _s, _e in regions if index < _e)
             offset = max(index - _s, 0)
             piece = buffers.setdefault(_s, substr(vid, _s, _e))
             for m in re.finditer(pattern, piece[offset:]):
@@ -59,11 +53,11 @@ def buffer_slice(
             else:
                 index = _e + 1
     else:
-        final = final[::-1]
+        regions = regions[::-1]
         while True:
             while index <= 0:
                 *_, index, new_pattern = yield default_yield
-            _e, _s = next((_s, _e) for _s, _e in final if index > _s)
+            _e, _s = next((_s, _e) for _s, _e in regions if index > _s)
             offset = max(_s - index, 0)
             piece = buffers.setdefault(_s, substr(vid, _s, _e)[::-1])
             for m in re.finditer(pattern, piece[offset:]):

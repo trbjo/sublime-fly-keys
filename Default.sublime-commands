@@ -1,27 +1,26 @@
 [
     {
-      "caption": "Enable Save After Number Change",
-      "command": "enable_save_after_number_change"
+        "caption": "Enable Save After Number Change",
+        "command": "enable_save_after_number_change"
     },
-
     {
-      "caption": "Copy Whole File",
-      "command": "copy_buffer",
+        "caption": "Copy Whole File",
+        "command": "copy_buffer"
     },
-
     {
-      "caption": "Disable Save After Number Change",
-      "command": "disable_save_after_number_change"
+        "caption": "Disable Save After Number Change",
+        "command": "disable_save_after_number_change"
     },
-
     {
-      "caption": "Split Selection By Delitimer",
-      "command": "select_only_delimiter_in_selection"
+        "caption": "Split Selection By Delitimer",
+        "command": "select_only_delimiter_in_selection"
     },
-
+    { "caption": "Sublime Fly Key Bindings",  "command": "open_file", "args": {"file": "${packages}/sublime-fly-keys/Default.sublime-keymap"} },
     {
-      "caption": "Select Only Delimiter In Selection",
-      "command": "select_only_delimiter_in_selection", "args": {"include": true}
-    },
-
+        "args": {
+            "include": true
+        },
+        "caption": "Select Only Delimiter In Selection",
+        "command": "select_only_delimiter_in_selection"
+    }
 ]

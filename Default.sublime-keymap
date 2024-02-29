@@ -470,10 +470,10 @@
             { "key": "setting.lsp_active" }
         ]
     },
-    { "keys": ["shift"], "command": "lsp_code_actions",
+    { "keys": ["shift"], "command": "foo_bar",
         "context": [
             { "key": "setting.command_mode" },
-            { "key": "setting.lsp_active" }
+            // { "key": "setting.lsp_active" }
         ]
     },
     { "keys": ["`"], "command": "insert", "args": { "characters": "`" },
@@ -1165,7 +1165,7 @@
         ]
     },
 
-    { "keys": ["ctrl+n"], "command": "show_panel", "args": { "panel": "find_in_files", "reverse": false },
+    { "keys": ["N"], "command": "show_panel", "args": { "panel": "find_in_files", "reverse": false },
         "context": [
             { "key": "setting.command_mode", "operator": "equal", "operand": true }
         ]

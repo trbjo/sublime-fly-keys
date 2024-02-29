@@ -2,7 +2,6 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
-import sublime_api
 import sublime_plugin
 from sublime import Edit, Region, View, active_window
 from sublime_api import view_cached_substr as substr  # pyright: ignore
@@ -311,7 +310,7 @@ class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
         v = self.view
         vi = v.id()
         first = v.sel()[0].begin()
-        buffer = sublime_api.view_cached_substr(v.id(), first, v.sel()[-1].end())
+        buffer = substr(v.id(), first, v.sel()[-1].end())
         for r in v.sel():
             v.sel().subtract(r)
             line = v.line(r.begin())
@@ -329,11 +328,11 @@ class RevertSelectionCommand(sublime_plugin.TextCommand):
         buf = self.view
         sel = buf.sel()
         if all(r.a == r.b for r in sel):
-            viewport_x, viewport_y = buf.viewport_extent()
-            view_x_begin, view_y_begin = buf.viewport_position()
+            _, viewport_y = buf.viewport_extent()
+            _, view_y_begin = buf.viewport_position()
             view_y_end = view_y_begin + viewport_y
 
-            first_cur_x, first_cur_y = buf.text_to_layout(sel[0].b)
+            _, first_cur_y = buf.text_to_layout(sel[0].b)
             if view_y_begin < first_cur_y < view_y_end:
                 buf.show(sel[-1].b, True)
             else:
