@@ -1,23 +1,21 @@
-from typing import Optional, Union
+from typing import Union
 
 import sublime_plugin
-from sublime import Edit, FindFlags, Region, View, active_window
+from sublime import Edit, FindFlags, Region, View, Window, active_window
 from sublime_api import view_cached_substr as substr  # pyright: ignore
 from sublime_api import view_find  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
-from sublime_plugin import TextCommand, TextInputHandler, WindowCommand
+from sublime_plugin import WindowCommand
 
 
 class ClearSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _, forward: Optional[bool] = None, after=True) -> None:
+    def run(self, _, forward: bool = True) -> None:
         buf = self.view
         for region in buf.sel():
+            pt = region.b if forward else region.a
             buf.sel().subtract(region)
-            reg = region.end() if forward else region.begin()
-            if not after:
-                reg -= 1
-            buf.sel().add(reg)
-            buf.show(reg, False)
+            buf.sel().add(pt)
+            buf.show(pt, False)
 
 
 class CreateRegionFromSelectionsCommand(sublime_plugin.TextCommand):
@@ -78,28 +76,11 @@ class RemoveBuildOutputCommand(WindowCommand):
         view.settings().set(key="needs_char", value=False)
 
 
-class SetNumberCommand(sublime_plugin.TextCommand):
-    def run(self, _, value=None):
-        lines = self.view.rowcol(self.view.size())[0]
-        if value is None:
-            self.view.settings().erase("set_number")
-            if (multiplier := self.view.settings().get("multiplier")) is not None:
-                self.view.settings().erase("multiplier")
-                multiplier -= 1
-                if lines < multiplier:
-                    multiplier = lines
-                elif multiplier == -1:
-                    multiplier = lines
-                tp = self.view.text_point_utf8(multiplier, 0)
-                next_res, _ = self.view.find(r"\S|^$|^\s+$", tp)
-                self.view.sel().clear()
-                self.view.sel().add(next_res)
-                self.view.show(next_res)
-        else:
-            if (multiplier := self.view.settings().get("multiplier")) is not None:
-                multiplier = int(f"{str(multiplier)}{str(value)}")
-            else:
-                multiplier = value
-
-            self.view.settings().set("multiplier", min(multiplier, min(lines, 9999)))
-            self.view.settings().set("set_number", True)
+class EofCommand(WindowCommand):
+    def run(self):
+        w = self.window
+        view: Union[View, None] = w.active_view()
+        if view is None:
+            return
+        w.focus_view(view)
+        view.run_command(cmd="move_to", args={"to": "eof", "extend": False} )

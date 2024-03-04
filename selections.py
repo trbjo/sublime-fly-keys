@@ -7,6 +7,8 @@ from sublime import Edit, Region, View, active_window
 from sublime_api import view_cached_substr as substr  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
+from sublime_api import view_selection_size as selection_length  # pyright: ignore
+from sublime_api import view_selection_get as ith_selection  # pyright: ignore
 from sublime_api import (
     view_selection_subtract_region as subtract_region,  # pyright: ignore
 )
@@ -22,6 +24,22 @@ PositionAndType = Tuple[int, int]
 
 pattern_cache = {}
 
+
+
+
+class AlignCursors(sublime_plugin.TextCommand):
+
+    def run(self, edit: Edit):
+        max_point = 0
+        for cursor in self.view.sel():
+            _, point = self.view.rowcol(cursor.b)
+            if max_point < point:
+                max_point = point
+
+        for cursor in reversed(self.view.sel()):
+            _, point = self.view.rowcol(cursor.b)
+            if point < max_point:
+                self.view.insert(edit, cursor.b, ' ' * (max_point - point))
 
 class SmarterSelectLines(TextCommand):
     def run(self, edit, forward: bool):
@@ -115,92 +133,6 @@ def findall(p, s):
         i = s.find(p, i + length)
 
 
-class SelectOnlyDelimiterInSelection(TextCommand):
-    def input(self, args):
-        if "characters" not in args:
-            include = args.get("include", False)
-            return PatternInputHandler(pattern_cache.get(include, " "))
-
-    def input_description(self) -> str:
-        return "Pattern"
-
-    def run(self, _, pattern, include=False):
-        if not pattern:
-            return
-
-        pattern_cache[include] = pattern
-        raw_pattern = pattern
-        pattern = ""
-        counter = 0
-        while counter < len(raw_pattern):
-            char = raw_pattern[counter]
-            if ord(char) == 92:
-                counter += 1
-                if raw_pattern[counter] == "n":
-                    pattern += "\n"
-                elif raw_pattern[counter] == "r":
-                    pattern += "\r"
-                elif raw_pattern[counter] == "t":
-                    pattern += "\t"
-                elif raw_pattern[counter] == "\\":
-                    pattern += "\\"
-            else:
-                pattern += char
-            counter += 1
-
-        v = self.view
-        vid = v.id()
-        length = len(pattern)
-
-        if all(r.a == r.b for r in self.view.sel()):
-            reg = Region(0, v.size())
-            idx = list(findall(pattern, length, v.substr(reg)))
-            if not idx:
-                return
-            if include:
-                subtract_region(vid, reg.a, reg.b)
-                [
-                    add_region(vid, reg.begin() + i, reg.begin() + i + length, 0.0)
-                    for i in idx
-                ]
-            else:
-                add_region(vid, 0, v.size(), 0.0)
-                [
-                    subtract_region(vid, reg.begin() + i, reg.begin() + i + length)
-                    for i in idx
-                ]
-            return
-
-        for reg in list(v.sel()):
-            if reg.empty():
-                v.sel().subtract(reg)
-                continue
-            idx = list(findall(pattern, length, v.substr(reg)))
-            if not idx:
-                v.sel().subtract(reg)
-                continue
-            if include:
-                subtract_region(vid, reg.a, reg.b)
-                [
-                    add_region(vid, reg.begin() + i, reg.begin() + i + length, 0.0)
-                    for i in idx
-                ]
-            else:
-                [
-                    subtract_region(vid, reg.begin() + i, reg.begin() + i + length)
-                    for i in idx
-                ]
-
-
-class PatternInputHandler(TextInputHandler):
-    def __init__(self, initial_text):
-        self._initial_text = initial_text
-
-    def initial_text(self):
-        return self._initial_text
-
-    def validate(self, name):
-        return len(name) > 0
 
 
 class SubtractSelectionCommand(sublime_plugin.TextCommand):
@@ -228,7 +160,7 @@ class RecordSelectionsCommand(sublime_plugin.TextCommand):
 class FindNextLolCommand(sublime_plugin.TextCommand):
     def run(self, edit, forward: bool = True):
         v: View = self.view
-        v.run_command("clear_selection", args={"forward": True, "after": False})
+        v.run_command("clear_selection", args={"forward": True})
         v.run_command("find_under_expand")
         if forward:
             v.run_command("find_next")
@@ -289,38 +221,22 @@ class SmarterFindUnderExpand(sublime_plugin.TextCommand):
 
 
 class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
-    def run(self, _) -> None:
-        buf = self.view
-        reg_list: List[Region] = []
-        for region in buf.sel():
-            reg_begin = region.begin() - 1
-            buffer = buf.substr(Region(reg_begin, region.end()))
-            if reg_begin <= 1:
-                reg_begin += 1
-                reg_list.append(Region(-2))
-            reg_list += [
-                Region(m.start() + reg_begin) for m in re.finditer(r"\S.*\n", buffer)
-            ]
-        buf.sel().clear()
-        buf.sel().add_all(reg_list)
-
-
-class MultipleCursorsFromSelectionCommand(sublime_plugin.TextCommand):
     def run(self, _, after: bool = False) -> None:
         v = self.view
         vi = v.id()
-        first = v.sel()[0].begin()
-        buffer = substr(v.id(), first, v.sel()[-1].end())
-        for r in v.sel():
-            v.sel().subtract(r)
+        selections = [ith_selection(vi, i) for i in range(0, selection_length(vi))]
+        if all(r.a == r.b for r in selections):
+            return
+        pts = []
+        for r in selections:
             line = v.line(r.begin())
-            line = Region(max(r.begin(), line.a), line.b)
             while line.a < r.end() and line.b <= v.size():
-                if after:
-                    add_point(vi, line.b)
-                elif x := re.search(r"\S", buffer[line.a - first : line.b - first]):
-                    add_point(vi, line.a + x.start())
+                pts.append(line.b if after else line.a)
                 line = v.line(line.b + 1)
+
+        v.sel().clear()
+        for pt in pts:
+            add_point(vi, pt)
 
 
 class RevertSelectionCommand(sublime_plugin.TextCommand):
@@ -358,8 +274,9 @@ class SingleSelectionLastCommand(sublime_plugin.TextCommand):
         buf.show(reg.b, True)
 
 
-class SearchInSelectionCommand(sublime_plugin.WindowCommand):
-    def run(self, panel="find") -> None:
+class SmarterSearchCommand(sublime_plugin.WindowCommand):
+    """remember to disable auto_find_in_selection"""
+    def run(self, panel: str="find", reverse: bool = False) -> None:
         w = active_window()
 
         if (view := w.active_view()) is None:
@@ -367,17 +284,15 @@ class SearchInSelectionCommand(sublime_plugin.WindowCommand):
 
         vi = view.id()
         sel = view.sel()
-        toggle = any("\n" in substr(vi, r.a, r.b) for r in sel)
+        toggle = any(" " in substr(vi, r.a, r.b) for r in sel)
 
-        # if toggle:
-        key = "search_in_selection"
-        w.settings().set(key=key, value=True)
+        key = f"{vi}_cursors"
         cursors = [(r.a, r.b) for r in sel]
-        w.settings().set(f"{vi}_cursors", cursors)
+        w.settings().set(key, cursors)
 
-        w.run_command(cmd="show_panel", args={"panel": panel, "reverse": False})
-        w.run_command(cmd="left_delete")
-        if not toggle:
+        w.run_command(cmd="show_panel", args={"panel": panel, "reverse": reverse})
+        # w.run_command(cmd="left_delete")
+        if toggle:
             w.run_command(cmd="toggle_in_selection")
 
 
@@ -389,13 +304,10 @@ class HideSearchInSelectionCommand(sublime_plugin.WindowCommand):
 
         vi = view.id()
         w.run_command(cmd="hide_panel", args={"cancel": True})
-        key = f"search_in_selection"
-
-        if not w.settings().get(key):
-            return
 
         vi = view.id()
-        if not (cursors := w.settings().get(f"{vi}_cursors")):
+        key=f"{vi}_cursors"
+        if not (cursors := w.settings().get(key)):
             return
 
         view.sel().clear()

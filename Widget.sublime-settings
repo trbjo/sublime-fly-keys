@@ -1,4 +1,6 @@
 {
-    "command_mode": false,
-    "block_caret": false,
+    "draw_white_space":
+    [
+        "all"
+    ]
 }

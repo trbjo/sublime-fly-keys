@@ -1,4 +1,4 @@
 {
-    "block_caret": true,
-    "command_mode": true,
+    "block_caret": false,
+    "command_mode": false,
 }

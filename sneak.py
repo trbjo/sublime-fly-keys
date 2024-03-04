@@ -3,7 +3,7 @@ from re import IGNORECASE
 from typing import List, Optional
 
 import sublime_plugin
-from sublime import DRAW_NO_OUTLINE, Edit, Region, Selection, View
+from sublime import DRAW_NO_OUTLINE, Edit, PopupFlags, Region, Selection, View
 from sublime_api import view_add_phantom, view_add_regions  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_plugin import TextCommand
@@ -139,14 +139,13 @@ class GoToNthMatchCommand(TextCommand):
         v.show(sels[0].b, True)
 
 
-class ListenForCharacterCommand(TextCommand):
+class SneakListenCommand(TextCommand):
     def run(self, _, forward: bool, extend: bool = False) -> None:
         """
         Sets the buffer ready for search
         """
         set_chars("", forward, extend)
         arrow: str = "_❯" if forward else " ❮_"
-        self.view.settings().set(key="block_caret", value=False)
         self.view.settings().set(key="needs_char", value=True)
         format_search_arrow(arrow, self.view)
 
@@ -154,6 +153,7 @@ class ListenForCharacterCommand(TextCommand):
 def format_search_arrow(arrow, view: View, blue: bool = True) -> None:
     view.show_popup(
         get_html(view, blue=blue).format(char=arrow),
+        flags=PopupFlags.HIDE_ON_CHARACTER_EVENT,
         location=view.sel()[-1].b,
     )
 
@@ -178,7 +178,7 @@ def get_html(view: View, blue=True) -> str:
     )
 
 
-class NextCharacterCommand(NextCharacterBaseCommand):
+class SneakCommand(NextCharacterBaseCommand):
     def run(self, edit: Edit, character: str) -> None:
         global matches
         search_string = _search_string + character
@@ -209,8 +209,6 @@ class NextCharacterCommand(NextCharacterBaseCommand):
             return
 
         set_chars(search_string)
-        self.view.settings().set(key="block_caret", value=True)
-        self.view.settings().set(key="has_stored_search", value=True)
 
         val = self.execute(
             search_string=search_string,
@@ -218,6 +216,8 @@ class NextCharacterCommand(NextCharacterBaseCommand):
             extend=_extend,
             special=len(search_string) == 2,
         )
+
+        self.view.settings().set(key="has_stored_search", value=val)
 
         if len(search_string) == 2 or character in only_single_chars or not val:
             self.view.settings().set(key="needs_char", value=False)
@@ -228,14 +228,15 @@ class NextCharacterCommand(NextCharacterBaseCommand):
         format_search_arrow(arrow, self.view, val)
 
 
-class RepeatNextCharacterCommand(NextCharacterBaseCommand):
-    def run(self, _, forward: bool, extend: bool = False) -> None:
+class SneakRepeatCommand(NextCharacterBaseCommand):
+    def run(self, _, forward: bool) -> None:
         if not _search_string:
             return
 
         val = self.execute(
-            _search_string, forward=forward, extend=extend, special=False
+            _search_string, forward=forward, extend=_extend, special=False
         )
+        self.view.settings().set(key="has_stored_search", value=val)
 
         if len(_search_string) == 2 or _search_string in only_single_chars:
             arrow = f"{_search_string}❯" if forward else f"❮{_search_string}"

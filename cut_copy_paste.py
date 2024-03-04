@@ -23,11 +23,28 @@ def setClipboard(buffer):
     subprocess.run(["wl-copy"], input=clip.encode())
 
 
+
+def copyMaybe():
+    global TIMER
+    TIMER -= 1
+    if TIMER == 0:
+        setClipboard(BUFFER)
+
+
 class CopyBufferCommand(sublime_plugin.TextCommand):
     def run(self, edit: Edit):
         vi = self.view.id()
         text = ssubstr(vi, 0, self.view.size())
         subprocess.run(["wl-copy"], input=text.encode())
+
+
+class SmartDuplicateLineCommand(sublime_plugin.TextCommand):
+    def run(self, edit: Edit):
+        sels= self.view.sel()
+        lines = {line.a: line.b for r in sels if (line := self.view.full_line(r.b))}
+        vid= self.view.id()
+        for pt in sorted(lines.keys(), reverse=True):
+            self.view.insert(edit, pt,ssubstr(vid, pt,lines[pt]))
 
 
 class SmartCopyCommand(sublime_plugin.TextCommand):
@@ -39,11 +56,9 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         sel = v.sel()
 
         if whole_line:
-            regs = [r.b if l.contains(r.b) else l.a for r in sel for l in v.lines(r)]
+            regs = [r.b if l.a <= r.b <= l.b else l.a for r in sel for l in v.lines(r)]
             sel.clear()
             sel.add_all(regs)
-
-        pointer_after_action = int(v.sel()[0 if cut else -1].b)
 
         lines = set()
         content: List[Region] = []
@@ -78,12 +93,6 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         global TIMER
         TIMER += 1
 
-        def copyMaybe():
-            global TIMER
-            TIMER -= 1
-            if TIMER == 0:
-                setClipboard(BUFFER)
-
         set_timeout_async(copyMaybe, 50)
 
         if cut:
@@ -100,8 +109,9 @@ class SmartCopyCommand(sublime_plugin.TextCommand):
         )
 
         if only_empty_selections and contiguous_regions:
+            keep_pointer = int(v.sel()[-1].b)
             sel.clear()
-            add_pt(vi, pointer_after_action)
+            add_pt(vi, keep_pointer)
 
 
 class SmartPasteCutNewlinesAndWhitespaceCommand(sublime_plugin.TextCommand):

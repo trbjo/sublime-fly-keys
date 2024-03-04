@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple
 
 import sublime
 import sublime_plugin
-from sublime import NewFileFlags, Region, Sheet, View, active_window  # pyright: ignore
+from sublime import NewFileFlags, Region, Sheet, View, active_window, Edit  # pyright: ignore
 from sublime_api import view_cached_substr as view_substr  # pyright: ignore
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
@@ -81,15 +81,17 @@ def restore_views(new_views):
         set_vp(thisview.id(), viewport_pos[key], False)
 
 
-class CloseFindInFilesCommand(WindowCommand):
-    def run(self):
-        w = self.window
-        view = w.active_view()
-        if view is None:
+class CloseFindInFilesCommand(TextCommand):
+    def run(self, edit: Edit):
+        w = self.view.window()
+        if w is None:
             return
+        view = self.view
         if issearch(view):
             view.close()
         elif (panel := w.active_panel()) == "output.find_results":
+            view.set_read_only(False)
+            view.erase(edit, Region(0, view.size()))
             w.run_command("hide_panel", {"panel": panel})
 
         restore_views([])
@@ -128,7 +130,7 @@ class RegisterViewsCommand(WindowCommand):
 
 
 class OpenFindResultsCommand(WindowCommand):
-    def run(self, panel):
+    def run(self):
         w = self.window
         wid = w.id()
         v = w.active_view()
@@ -153,13 +155,11 @@ class OpenFindResultsCommand(WindowCommand):
             mv_shts_grp(wid, [sid], 1, -1, True)
             return
 
-        if panel == "find_results" and not own_tab:
-            w.run_command("show_panel", {"panel": f"output.{panel}"})
+        else:
+            w.run_command("show_panel", {"panel": f"output.find_results"})
 
-        if view := w.find_output_panel(panel):
+        if view := w.find_output_panel("find_results"):
             view.set_read_only(True)
-            view.settings().set("command_mode", True)
-            view.settings().set("block_caret", True)
             s = view.sel()
             if len(s) == 0:
                 view.sel().add(0)
@@ -175,7 +175,7 @@ class GotoSearchResultCommand(TextCommand):
 
         params = sublime.ENCODED_POSITION
         if new_tab:
-            params += NewFileFlags.FORCE_CLONE
+            params |= sublime.ADD_TO_SELECTION
         files = files_with_loc(view, issearch(view))
 
         if issearch(view):
@@ -183,11 +183,7 @@ class GotoSearchResultCommand(TextCommand):
         elif (panel := w.active_panel()) == "output.find_results":
             w.run_command("hide_panel", {"panel": panel})
 
-        views = [w.open_file(fname=v, flags=params) for v in files]
-        restore_views(views)
-
-        if new_tab:
-            w.run_command("new_pane")
+        views = [w.open_file(fname=v, flags=params, group=-1) for v in files]
 
         for new_view in views:
             regions = list(new_view.sel()) or [Region(0, 0)]

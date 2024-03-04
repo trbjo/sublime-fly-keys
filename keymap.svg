@@ -35,7 +35,6 @@
             <path d="m 630.5,60.5 60,0 0,60 -60,0 0,-60 z"/>
             <path d="m 690.5,60.5 60,0 0,60 -60,0 0,-60 z"/>
             <path d="m 750.5,60.5 60,0 0,60 -60,0 0,-60 z"/>
-            <path d="m 810.5,60.5 90,0 0,60 -90,0 0,-60 z"/>
             <path d="m 345.5,120.5 60,0 0,60 -60,0 0,-60 z"/>
             <path d="m 405.5,120.5 60,0 0,60 -60,0 0,-60 z"/>
             <path d="m 705.5,120.5 60,0 0,60 -60,0 0,-60 z"/>
@@ -52,6 +51,8 @@
             <path d="m 240.5,240.5 360,0 0,60 -360,0 0,-60 z"/>
         </g>
         <g style="fill:#EBEDEF">
+
+            <path d="m 810.5,60.5 90,0 0,60 -90,0 0,-60 z"/>
             <path d="m 90.5,240.5 60,0 0,60 -60,0 0,-60 z"/>
             <path d="m 690.5,240.5 60,0 0,60 -60,0 0,-60 z"/>
             <path d="m 750.5,240.5 60,0 0,60 -60,0 0,-60 z"/>
@@ -68,18 +69,31 @@
         </g>
     </g>
 
+    <g style="fill:#909090">
+        <text>
+            <tspan x="665" y="48">Deindent</tspan>
+            <tspan x="726" y="48">Indent</tspan>
+            <tspan x="651" y="167">Save</tspan>
+            <tspan x="693" y="107">Comment</tspan>
+            <tspan x="275" y="102">Goto</tspan>
+            <tspan x="683" y="228">Undo</tspan>
+            <tspan x="560" y="228">Close W.</tspan>
+            <tspan x="275" y="115">Anything</tspan>
+            <tspan x="410" y="161">Select</tspan>
+            <tspan x="410" y="174">Under C.</tspan>
+        </text>
+
+    </g>
+
     <g style="fill:#FF9800">
         <text>
             <tspan x="111" y="167">|← ↖&#xFE0E;</tspan>
-            <tspan x="177" y="167">←</tspan>
+            <tspan x="169" y="167">|← Word</tspan>
+            <tspan x="472" y="167">Search</tspan>
             <tspan x="537" y="167">↓</tspan>
-            <tspan x="591" y="167">Search</tspan>
-            <tspan x="472" y="161">Insert</tspan>
-            <tspan x="472" y="174">Before</tspan>
-            <tspan x="651" y="161">Insert</tspan>
-            <tspan x="651" y="174">After</tspan>
+            <tspan x="591" y="167">Next</tspan>
             <tspan x="237" y="167">⌦</tspan>
-            <tspan x="293" y="167">→</tspan>
+            <tspan x="290" y="167">Word →|</tspan>
         </text>
 
         <text style="font-weight:bold;font-size:20px">
@@ -95,59 +109,43 @@
     </g>
 
     <text>
-        <tspan x="137" y="228">Comment</tspan>
-        <tspan x="153" y="107">|← Word</tspan>
-        <tspan x="66" y="41">Goto</tspan>
-        <tspan x="66" y="54">def</tspan>
-        <tspan x="126" y="41">Save</tspan>
-        <tspan x="126" y="54">buffer</tspan>
-        <tspan x="186" y="41">Next</tspan>
-        <tspan x="186" y="54">Mark</tspan>
         <tspan x="201" y="228">Cut</tspan>
         <tspan x="214" y="107">Newline</tspan>
-        <tspan x="246" y="41">Set</tspan>
-        <tspan x="246" y="54">Mark</tspan>
+        <tspan x="456" y="107">Prev</tspan>
+        <tspan x="8" y="107">Forward char</tspan>
+        <tspan x="336" y="102">Select</tspan>
+        <tspan x="336" y="115">Line</tspan>
         <tspan x="263" y="228">Copy</tspan>
-        <tspan x="275" y="107">Word →|</tspan>
-        <tspan x="306" y="41">Unsplit</tspan>
-        <tspan x="306" y="54">window</tspan>
         <tspan x="323" y="228">Paste</tspan>
-        <tspan x="337" y="107">Undo</tspan>
         <tspan x="349" y="167"></tspan>
-        <tspan x="365" y="41">Split</tspan>
-        <tspan x="365" y="54">window</tspan>
-        <tspan x="378" y="228">Paste</tspan>
-        <tspan x="397" y="102">Smart</tspan>
-        <tspan x="397" y="115">Select</tspan>
+        <tspan x="378" y="228">Duplicate</tspan>
         <tspan x="355" y="167">→| ↘&#xFE0E;</tspan>
-        <tspan x="410" y="161">Select</tspan>
-        <tspan x="410" y="174">Under C.</tspan>
+        <tspan x="4" y="41">Toggle</tspan>
+        <tspan x="4" y="54">Sidebar</tspan>
         <tspan x="426" y="41">Revert</tspan>
         <tspan x="426" y="54">Hunk</tspan>
-        <tspan x="443" y="228">Duplicate</tspan>
-        <tspan x="457" y="107">Sneak ←</tspan>
+        <tspan x="443" y="221">Add C.</tspan>
+        <tspan x="443" y="234">Below</tspan>
         <tspan x="486" y="41">Next</tspan>
         <tspan x="486" y="54">mod</tspan>
-        <tspan x="503" y="228">Sneak →</tspan>
         <tspan x="531" y="107">↑</tspan>
         <tspan x="544" y="41">Toggle</tspan>
         <tspan x="544" y="54">inline diff</tspan>
-        <tspan x="562" y="221">Add C.</tspan>
-        <tspan x="562" y="234">Below</tspan>
-        <tspan x="577" y="107">Word→|</tspan>
+        <tspan x="637" y="107">Jump</tspan>
+        <tspan x="709" y="161">Goto</tspan>
+        <tspan x="709" y="174">Definition</tspan>
         <tspan x="637" y="107"></tspan>
         <tspan x="606" y="41">Git add</tspan>
         <tspan x="606" y="54">hunk</tspan>
         <tspan x="621" y="221">Next</tspan>
         <tspan x="621" y="233">Window</tspan>
-        <tspan x="710" y="167">␣insert</tspan>
-        <tspan x="772" y="167">Find next</tspan>
+        <tspan x="772" y="167">Sneak →</tspan>
         <tspan x="95" y="280">LSP</tspan>
         <tspan x="95" y="293">Help</tspan>
-        <tspan x="156" y="280">Cmd</tspan>
-        <tspan x="156" y="293">Palette</tspan>
-        <tspan x="8" y="161">Normal mode/</tspan>
-        <tspan x="8" y="174">Center text</tspan>
+        <tspan x="156" y="293">Center</tspan>
+        <tspan x="156" y="280">Single Sel./</tspan>
+        <tspan x="8" y="167">Sneak ←</tspan>
+        <tspan x="814" y="107">Backward char</tspan>
     </text>
 
     <text style="font-size:20px">
@@ -164,11 +162,11 @@
         <tspan x="8" y="90">↹</tspan>
         <tspan x="155" y="263">Ctrl</tspan>
         <tspan x="95" y="263">Alt</tspan>
-        <tspan x="360" y="277">Show Overlay</tspan>
     </text>
 
     <text style="font-weight:bold;font-size:20px">
         <tspan x="8" y="210">⇧</tspan>
+        <tspan x="8" y="26">`</tspan>
         <tspan x="66" y="21">1</tspan>
         <tspan x="97" y="81">'</tspan>
         <tspan x="126" y="21">2</tspan>
@@ -201,15 +199,13 @@
         <tspan x="621" y="201">V</tspan>
         <tspan x="637" y="81">L</tspan>
         <tspan x="666" y="21">[</tspan>
+        <tspan x="726" y="21">]</tspan>
         <tspan x="683" y="201">Z</tspan>
-        <tspan x="704" y="111">/</tspan>
-        <tspan x="704" y="85">?</tspan>
-        <!-- <tspan x="720" y="146">_</tspan> -->
+        <tspan x="698" y="81">/</tspan>
         <tspan x="712" y="140">–</tspan>
         <tspan x="761" y="111">=</tspan>
         <tspan x="761" y="85">+</tspan>
-        <tspan x="822" y="112">\</tspan>
-        <tspan x="822" y="85">|</tspan>
+        <tspan x="822" y="85">\</tspan>
         <tspan x="870" y="210">⇧</tspan>
     </text>
 

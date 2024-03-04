@@ -2,7 +2,7 @@ import re
 import time
 
 import sublime_plugin
-from sublime import Region
+from sublime import FindFlags, Region
 from sublime_api import view_selection_add_point as add_point  # pyright: ignore
 from sublime_api import view_selection_add_region as add_region  # pyright: ignore
 from sublime_api import view_show_point as show_point  # pyright: ignore
@@ -12,7 +12,8 @@ from .base import buffer_slice
 
 then = time.time()
 
-normrgx = re.compile(r"[-\w]+")
+normwd=r"[-\w]+"
+normrgx = re.compile(normwd)
 wholergx = re.compile(r"\S+")
 
 
@@ -176,36 +177,38 @@ class ExpandParagraphCommand(NavigateParagraphCommand):
 
 
 class SmartFindWordCommand(sublime_plugin.TextCommand):
-    def find_pt(self, line: str, start: int, stop: int, forward: bool) -> int:
-        for i in range(start, stop, 1 if forward else -1):
-            if line[i].isalnum() or line[i] == "_":
-                return i
-        return stop
-
     def run(self, _) -> None:
         v = self.view
-        sel = v.sel()
-        for reg in sel:
-            if not (line := v.substr(v.full_line(reg.b))):
+        for reg in self.view.sel():
+            caret = reg.b
+
+            candidatef_priority = 0
+            candidateb_priority = 0
+
+            candidatef = self.view.find(pattern=r"\w", start_pt=caret, flags=FindFlags.NONE).b
+            candidateb = self.view.find(pattern=r"\w", start_pt=caret, flags=FindFlags.REVERSE).a
+
+            # -1 means no match, we skip this region
+            if candidatef == -1 and candidateb == -1:
                 continue
 
-            line_no, column = v.rowcol(reg.b)
+            current_line_end = v.full_line(caret).b
 
-            left_pos = self.find_pt(line, column, -1, False)
-            right_pos = self.find_pt(line, column, len(line), True)
+            if candidatef != -1 and current_line_end == v.full_line(candidatef).b:
+                candidatef_priority+=1
 
-            if left_pos == right_pos:
-                continue
-            elif right_pos != len(line) and left_pos == -1:
-                pos = right_pos
-            elif right_pos == len(line) and left_pos != -1:
-                pos = left_pos + 1
-            elif right_pos - column < column - left_pos:
-                pos = right_pos
+            if candidateb != -1 and current_line_end == v.full_line(candidateb).b:
+                candidateb_priority+=1
+
+
+            if candidateb_priority == candidatef_priority:
+                # with equal priority, we pick the nearest match
+                candidate = candidateb if (caret - candidateb) < (candidatef - caret) else candidatef
             else:
-                pos = left_pos + 1
+                candidate = candidateb if candidateb_priority > candidatef_priority else candidatef
 
-            pos = v.text_point(line_no, pos)
-            sel.subtract(reg)
-            sel.add(Region(pos))
-        v.run_command("find_under_expand")
+
+            self.view.sel().subtract(reg)
+            add_point(self.view.id(), candidate)
+
+        self.view.run_command("find_under_expand")

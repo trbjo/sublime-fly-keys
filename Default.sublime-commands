@@ -8,6 +8,10 @@
         "command": "copy_buffer"
     },
     {
+        "caption": "AlignCursors: Align",
+        "command": "align_cursors"
+    },
+    {
         "caption": "Disable Save After Number Change",
         "command": "disable_save_after_number_change"
     },
@@ -15,9 +19,17 @@
         "caption": "Split Selection By Delitimer",
         "command": "select_only_delimiter_in_selection"
     },
-    { "caption": "Sublime Fly Key Bindings",  "command": "open_file", "args": {"file": "${packages}/sublime-fly-keys/Default.sublime-keymap"} },
     {
-        "args": {
+        "caption": "Sublime Fly Key Bindings",
+        "command": "open_file",
+        "args":
+        {
+            "file": "${packages}/sublime-fly-keys/Default.sublime-keymap"
+        }
+    },
+    {
+        "args":
+        {
             "include": true
         },
         "caption": "Select Only Delimiter In Selection",
